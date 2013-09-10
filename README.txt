@@ -1,5 +1,4 @@
 GRAPH ANALYSIS LIBRARY (v0.0 beta)
-(A preliminary manual)
 by Dr. Gorka Zamora-López
 
 
