@@ -23,7 +23,7 @@ ScaleFreeGraph
 
 NETWORK REWIRING/RANDOMIZATION ALGORITHMS
 =========================================
-RewiredNetwork
+RewireNetwork
     Returns a network with links rewired with same degrees as net.
 
 HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
@@ -456,7 +456,7 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
 
 #######################################################################
 """NETWORK REWIRING ALGORITHMS"""
-def RewiredNetwork(adjmatrix, prewire, directed=False, weighted=False):
+def RewireNetwork(adjmatrix, prewire, directed=False, weighted=False):
     """Returns a network with links rewired with same degrees as net.
     
     The function uses the link switching method to rewire networks while
