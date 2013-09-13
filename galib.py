@@ -52,7 +52,7 @@ K_Shells
 """
 
 from numpy import*
-from gatools import*
+#from gatools import*
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
