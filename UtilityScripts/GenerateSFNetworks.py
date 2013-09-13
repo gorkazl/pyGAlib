@@ -58,7 +58,7 @@ realiz = 10
 
 #### OUTPUT OPTIONS
 # Path where networks will be saved. The folder must already exist.
-outpath = '/Work/Data/temp/'
+outpath = '/yourpath/temp/'
 
 # Base name for the files. Final name will be 'basename_reX', where X is
 # the realization number

@@ -15,7 +15,7 @@ from gamodels import RewireNetwork
 
 
 # 0) READ THE DATA
-datapath = '/Dropbox/MyPythonLibraries/GAlib/Data/'
+datapath = '/yourpath/GAlib/Data/'
 net = loadtxt(join(datapath,'Cat53_cortex.txt'), uint8)
 N = len(net)
 

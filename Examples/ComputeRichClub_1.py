@@ -13,7 +13,7 @@ from gamodels import RewireNetwork
 
 
 # 0) READ THE DATA
-datapath = '/Dropbox/MyPythonLibraries/GAlib/Data/'
+datapath = '/yourpath/GAlib/Data/'
 net = loadtxt(join(datapath,'Zachary.txt'), uint8)
 N = len(net)
 

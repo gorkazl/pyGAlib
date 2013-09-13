@@ -81,7 +81,7 @@ checkresult = True
 
 #### OUTPUT OPTIONS
 # Path where networks will be saved. The folder must already exist.
-outpath = '/Work/Data/temp/'
+outpath = '/yourpath/temp/'
 
 # Base name for the files. Final name will be 'basename_PrewX_reY', where 
 # X is value of prew and Y is the realization number.
