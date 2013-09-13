@@ -83,24 +83,16 @@ def Degree(adjmatrix, directed=False):
     ReciprocalDegree : Reciprocity of every node and excess degrees.
     """
     N = len(adjmatrix)
-
-    # Directed networks, compute input and output degrees of nodes
+    adjmatrix = adjmatrix.astype('bool')
+    
     if directed:
-        indegarray = np.zeros(N, np.int)
-        outdegarray = np.zeros(N, np.int)
-        for i in xrange(N):
-            indegarray[i] = len(adjmatrix[:,i].nonzero()[0])
-            outdegarray[i] = len(adjmatrix[i].nonzero()[0])
+        indegree = adjmatrix.sum(axis=0)
+        outdegree = adjmatrix.sum(axis=1)
+        return indegree, outdegree
 
-        return indegarray, outdegarray
-
-    # Undirected networks, compute the degrees of nodes
     else:
-        degarray = np.zeros(N, np.int)
-        for i in xrange(N):
-            degarray[i] = len(adjmatrix[i].nonzero()[0])
-
-        return degarray
+        degree= adjmatrix.sum(axis=0)
+        return degree
 
 def Intensity(adjmatrix, directed=False):
     """Computes the total strength of a node in a weighted network.
