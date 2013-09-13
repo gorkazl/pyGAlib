@@ -59,8 +59,8 @@ AllBipartitions
 """
 
 import itertools
-from numpy import*
-from galib import Reciprocity
+import numpy as np
+import galib
 
 
 ## I/O AND DATA CONVERSIONS ################################################
@@ -147,7 +147,7 @@ def LoadPartition(filepath):
     partition = []
     for i in xrange(Ncoms):
         newcom = lines[i].split()
-        newcom = array(newcom, int).tolist()
+        newcom = np.array(newcom, int).tolist()
         partition.append(newcom)
 
     return partition
@@ -227,10 +227,6 @@ def LoadFromPajek(filepath, getlabels=False):
         labels = []
         for i in xrange(N):
             line = pajekfile.readline()
-            #lowindx = line.index('"') + 1
-            #highindx = line[lowindx:].index('"')
-            #name = line[lowindx:lowindx+highindx]
-            #labels.append(name)
             label = line.split()[1]
             labels.append(label)
 
@@ -254,18 +250,19 @@ def LoadFromPajek(filepath, getlabels=False):
     line = pajekfile.readline()
     i, j, aij = line.split()
     
-    outdtype = int
+    outdtype = np.int
     try:
         outdtype(aij)
     except ValueError:
-        outdtype = float
+        outdtype = np.float
 
     # 2.3) Declare the adjacency matrix and include the first link
-    adjmatrix = zeros((N,N),outdtype)
+    adjmatrix = np.zeros((N,N),outdtype)
     i = int(i) - 1
     j = int(j) - 1
     adjmatrix[i,j] = outdtype(aij)
-    adjmatrix[j,i] = outdtype(aij)    
+    if not directed:
+        adjmatrix[j,i] = outdtype(aij)    
     
     # 2.4) Read the rest of the file and fill-in the adjacency matrix
     for line in pajekfile:
@@ -327,9 +324,9 @@ def Save2Pajek(filepath, adjmatrix, labels=[], directed=True):
             print >> outfile, line
 
     # 3) SAVE THE LINKS
-    if adjmatrix[0,0].dtype in [uint8,uint,int8,int]:
+    if adjmatrix[0,0].dtype in [np.uint8,np.uint,np.int8,np.int]:
         formatstring = '%d %d %d'
-    elif adjmatrix[0,0].dtype in [float32,float,float64]:
+    elif adjmatrix[0,0].dtype in [np.float32,np.float,np.float64]:
         formatstring = '%d %d %f'
         
     # 3.1) Save the ARCS if directed
@@ -387,12 +384,12 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
     
     """
     # 0) CHECK WHETHER LISTS OF NODES ARE GIVEN AS ARRAYS
-    if type(nodelist1) == ndarray:
+    if type(nodelist1) == np.ndarray:
         nodelist1 = list(nodelist1)
     if nodelist2 == None:
         nodelist2 = nodelist1
     else:
-        if type(nodelist2) == ndarray:
+        if type(nodelist2) == np.ndarray:
             nodelist2 = list(nodelist2)
     
     # 1) CREATE LISTS OF INDICES FOR SLICING
@@ -420,7 +417,7 @@ def SymmetriseMatrix(adjmatrix):
     An adjacency matrix of the same shape, of dype=float, with values 
     """
     
-    if Reciprocity(adjmatrix) == 1:
+    if galib.Reciprocity(adjmatrix) == 1:
         return adjmatrix
     else:
         return 0.5*(adjmatrix + adjmatrix.T)
@@ -450,7 +447,7 @@ def LaplacianMatrix(adjmatrix):
     """
     N = len(adjmatrix)
 
-    laplacianmatrix = identity(N,dtype=adjmatrix.dtype) * adjmatrix.sum(axis=1)
+    laplacianmatrix = np.identity(N,dtype=adjmatrix.dtype) * adjmatrix.sum(axis=1)
     laplacianmatrix -= adjmatrix
     
     return laplacianmatrix
@@ -546,7 +543,7 @@ def ArrayCompare(a1, a2):
     """
     
     # 0) SECURITY CHECK
-    assert shape(a1) == shape(a2), 'Arrays are not alligned.'
+    assert np.shape(a1) == np.shape(a2), 'Arrays are not alligned.'
     
     # 1) COMPARE THE ARRAYS
     test = (a1==a2)
@@ -634,10 +631,10 @@ def NonZeroMin(data):
     
     # 1) Convert lists and tuples into arrays
     if type(data) != 'numpy.ndarray':
-        data = array(data)
+        data = np.array(data)
     
     # 2) Find the minimal non-zero value and return.
-    idx = where(data)
+    idx = np.where(data)
     return data[idx].min()
     
 
@@ -677,7 +674,7 @@ def CumulativeDistribution(data, nbins, range=None, normed=True):
     """
     
     # 1) COMPUTE THE DISTRIBUTION OF THE DATA
-    ydata, xdata = histogram(data, nbins, range, normed)
+    ydata, xdata = np.histogram(data, nbins, range, normed)
 
     # 1.1) Compute the cumulative sum of the probability
     ydata = ydata.cumsum()
@@ -718,17 +715,17 @@ def BinomialCoefficient(n,m):
     for i in xrange(ma+1,n+1):
         enum *= i
         
-    return enum/factorial(mi)
+    return enum/Factorial(mi)
 
 def StdDeviation(data):
     """Returns the mean value and the standard deviation of an array of data.
     It is a simple wrapper using the numpy ufuncs a.mean() and a.dev().
     """
-    if type(data) == ndarray:
+    if type(data) == np.ndarray:
         return data.mean(), data.std()
     else:
         #print 'Converting data...'
-        data = array(data)
+        data = np.array(data)
         return data.mean(), data.std()
 
 def Quartiles(data):
@@ -753,7 +750,7 @@ def Quartiles(data):
     # 0) ORDER THE DATA BOTH IN ASCENDING ORDER
     Ndata = len(data)
 
-    if type(data) != ndarray: data = array(data)
+    if type(data) != np.ndarray: data = np.array(data)
     
     minmaxdata = data.copy()
     minmaxdata.sort()

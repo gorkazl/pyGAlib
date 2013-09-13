@@ -51,8 +51,9 @@ K_Shells
     Returns the K-shells of a network for all k from kmin to kmax.
 """
 
-from numpy import*
-#from gatools import*
+import numpy as np
+import gatools
+
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
@@ -85,8 +86,8 @@ def Degree(adjmatrix, directed=False):
 
     # Directed networks, compute input and output degrees of nodes
     if directed:
-        indegarray = zeros(N,int)
-        outdegarray = zeros(N,int)
+        indegarray = np.zeros(N, np.int)
+        outdegarray = np.zeros(N, np.int)
         for i in xrange(N):
             indegarray[i] = len(adjmatrix[:,i].nonzero()[0])
             outdegarray[i] = len(adjmatrix[i].nonzero()[0])
@@ -95,7 +96,7 @@ def Degree(adjmatrix, directed=False):
 
     # Undirected networks, compute the degrees of nodes
     else:
-        degarray = zeros(N,int)
+        degarray = np.zeros(N, np.int)
         for i in xrange(N):
             degarray[i] = len(adjmatrix[i].nonzero()[0])
 
@@ -159,10 +160,10 @@ def Reciprocity(adjmatrix, weighted=False):
     # 0) PREPARE FOR COMPUTATIONS
     # 0.1) Binarize the network if needed
     if weighted:
-        adjmatrix = where(adjmatrix != 0, 1, 0)
+        adjmatrix = np.where(adjmatrix != 0, 1, 0)
     # 0.2) Convert to int64 if needed to avoid downcasting issues
     if adjmatrix.dtype == 'uint8' or adjmatrix.dtype == 'uint16':
-        adjmatrix = adjmatrix.astype(int)
+        adjmatrix = adjmatrix.astype(np.int)
 
     # 1) COMPUTE THE RECIPROCITY
     # 1.1) The number of links
@@ -212,7 +213,7 @@ def ReciprocalDegree(adjmatrix, normed=False):
     """
     # Check whether the matrix is binary of weighted
     if adjmatrix.max() != 1:
-        adjmatrix = where(adjmatrix != 0, 1, 0)
+        adjmatrix = np.where(adjmatrix != 0, 1, 0)
 
     # Compute the input and output degrees
     indegree, outdegree = Degree(adjmatrix, True)
@@ -224,17 +225,17 @@ def ReciprocalDegree(adjmatrix, normed=False):
 
     if normed:
         # Normalize the reciprocal degrees of the nodes
-        recipdegree = add.reduce(recipadjmatrix)
+        recipdegree = np.add.reduce(recipadjmatrix)
         degminus = indegree - recipdegree
         degplus = outdegree - recipdegree
     
-        return 2.0 * recipdegree.astype(float) / (indegree+outdegree), \
-               degminus.astype(float)/indegree, \
-               degplus.astype(float)/outdegree
+        return 2.0 * recipdegree.astype(np.float) / (indegree+outdegree), \
+               degminus.astype(np.float)/indegree, \
+               degplus.astype(np.float)/outdegree
     
     else:
         # The reciprocal degree of the nodes
-        recipdegree = add.reduce(recipadjmatrix)
+        recipdegree = np.add.reduce(recipadjmatrix)
         degminus = indegree - recipdegree
         degplus = outdegree - recipdegree
     
@@ -333,11 +334,11 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
             kdict[kout].append(kinneigh)
         
     # 2) Compute the av. degree for all neighbours of nodes with degree k'
-    klist = sort(kdict.keys())
-    AvKnn = zeros((3,len(klist)),float)
+    klist = np.sort(kdict.keys())
+    AvKnn = np.zeros((3,len(klist)), np.float)
     for count in xrange(len(kdict)):
         k = klist[count]
-        avk, devk = StdDeviation(array(kdict[k]))
+        avk, devk = gatools.StdDeviation(np.array(kdict[k]))
         AvKnn[0,count] = k
         AvKnn[1,count] = avk
         AvKnn[2,count] = devk
@@ -345,8 +346,8 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     if fulloutput:
         L = indegree.sum()
         # Convert the kdict into a 2D array for plotting purposes
-        if knntype == 'Mixed': neighkarray = zeros((2,L),float)
-        else: neighkarray = zeros((2,L),int)
+        if knntype == 'Mixed': neighkarray = np.zeros((2,L),np.float)
+        else: neighkarray = np.zeros((2,L),np.int)
         
         counter = 0
         for k in kdict:
@@ -390,7 +391,7 @@ def Clustering(adjmatrix):
         'Please introduce an undirected graph.'
 
     # 1) COMPUTE THE NUMBER OF TRIANGLES EACH NODE PARTICIPATES IN
-    ntriangles = diag(linalg.matrix_power(adjmatrix,3))
+    ntriangles = np.diag(np.linalg.matrix_power(adjmatrix,3))
     
     # 2) COMPUTE THE NUMBER OF DIADS EACH NODE PARTICIPATES IN
     deg = Degree(adjmatrix)
@@ -401,8 +402,8 @@ def Clustering(adjmatrix):
     # the matrix power A**3, we have already included it.
     coefficient = float(ntriangles.sum()) / ndiads.sum()
     if 0 in ndiads:
-        ndiads = where(ndiads==0,1,ndiads)
-    cnodes = ntriangles.astype(float) / ndiads
+        ndiads = np.where(ndiads==0,1,ndiads)
+    cnodes = ntriangles.astype(np.float) / ndiads
     
     return coefficient, cnodes
 
@@ -448,7 +449,7 @@ def RichClub(adjmatrix, weightednet=False, rctype='undirected'):
 
     # Convert the network in binary if needed
     if weightednet:
-        adjmatrix = where(adjmatrix == 0, 0, 1)
+        adjmatrix = np.where(adjmatrix == 0, 0, 1)
 
     # Select the proper data
     if rctype == 'undirected':
@@ -468,23 +469,23 @@ def RichClub(adjmatrix, weightednet=False, rctype='undirected'):
     adjmatrix = adjmatrix.copy()
     N = len(adjmatrix)
     
-    kmax = int(degree.max())
-    kdensity = zeros(kmax, float)
+    kmax = np.int(degree.max())
+    kdensity = np.zeros(kmax, np.float)
 
     # Density of the original network
     initialL = len(adjmatrix.nonzero()[0])
     kdensity[0] = float(initialL) / (N*(N-1))
 
     # 2) Compute the k-density of all degrees
-    klist = unique(degree)
+    klist = np.unique(degree)
     for k in xrange(1,kmax):
         # Avoid unnecessary iterations
         if k in klist:
             # 2.1) Remove the links of all nodes with degree = k
             if rctype == 'average':
-                indices = where(degree<=k)[0]
+                indices = np.where(degree<=k)[0]
             else:
-                indices = where(degree==k)[0]
+                indices = np.where(degree==k)[0]
             adjmatrix[indices] = 0
             adjmatrix[:,indices] = 0
             degree[indices] = 0
@@ -538,8 +539,8 @@ def MatchingIndex(adjmatrix, normed=True):
     """
     N = len(adjmatrix)
     
-    if normed: MImatrix = identity(N,float)
-    else: MImatrix = identity(N,int)
+    if normed: MImatrix = np.identity(N, np.float)
+    else: MImatrix = np.identity(N, np.int)
 
     for i in xrange(N):
         ineighbours = set(adjmatrix[i].nonzero()[0])
@@ -590,9 +591,9 @@ def FloydWarshall(adjmatrix, weighted = False):
     """
     # Prepare for computations
     if weighted:
-        distmatrix = where(adjmatrix == 0, inf, adjmatrix)
+        distmatrix = np.where(adjmatrix == 0, np.inf, adjmatrix)
     else:
-        distmatrix = where(adjmatrix == 0, inf, 1)
+        distmatrix = np.where(adjmatrix == 0, np.inf, 1)
 
     # Check whether the network is directed or undirected
     recip = Reciprocity(adjmatrix)
@@ -674,8 +675,8 @@ def PathsAllinOne(adjmatrix):
     """
     # 0) PREPARE FOR THE CALCULATIONS
     N = len(adjmatrix)
-    distmatrix = where(adjmatrix, 1, inf)
-    betweenness = zeros(N,int)
+    distmatrix = np.where(adjmatrix, 1, np.inf)
+    betweenness = np.zeros(N, np.int)
     allpaths = {}
     allcycles = {}
 
@@ -708,7 +709,7 @@ def PathsAllinOne(adjmatrix):
                 
                 # 2.2) If new path + [j] is a cycle, treat separately
                 if j == start:
-                    idx = argmin(path)
+                    idx = np.argmin(path)
                     cyc = path[idx:] + path[:idx]
                     if length in allcycles:
                         if cyc in allcycles[length]:
@@ -742,7 +743,7 @@ def PathsAllinOne(adjmatrix):
     # also all undirected paths that run inversely and are duplicated.
     recip = Reciprocity(adjmatrix)
     if recip == 1:
-        betweenness = (0.5*betweenness).astype(int)
+        betweenness = (0.5*betweenness).astype(np.int)
 
     
     # 4) CLEAN TRASH AND FINISH
@@ -799,7 +800,7 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
         if len(queue) > length: continue
 
         queue.append(j)
-        AllShortestPaths(adjmatrix, j, end, length, queue, paths)
+        ShortestPaths(adjmatrix, j, end, length, queue, paths)
 
         # 2) Check if current queue is a path of desired characteristics
         if (len(queue)-1 == length and j == end):
@@ -846,7 +847,7 @@ def ConnectedComponents(distmatrix, directed=False, showall=True):
     N = len(distmatrix)
 
     # 1) Detect nodes that are connected in both directions
-    newmatrix = where(distmatrix < N, 1, 0)
+    newmatrix = np.where(distmatrix < N, 1, 0)
 
     # If network is directed, consider only pairs with a reciprocal path
     if directed:
@@ -921,14 +922,14 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     Ncoms = len(partition)
 
     # Calculate the assortativity matrix
-    assortmatrix = zeros((Ncoms,Ncoms), float)
+    assortmatrix = np.zeros((Ncoms,Ncoms), np.float)
     
     if norm == 'linkprobability':
         for c1 in xrange(Ncoms):
             com1 = partition[c1]
             for c2 in xrange(Ncoms):
                 com2 = partition[c2]
-                submat = ExtractSubmatrix(adjmatrix, com1, com2)
+                submat = gatools.ExtractSubmatrix(adjmatrix, com1, com2)
                 assortmatrix[c1,c2] = submat.sum()
                 # Normalise, avoiding self-loops
                 if c1 == c2:
@@ -940,7 +941,8 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     else:
         for c1 in xrange(Ncoms):
             for c2 in xrange(Ncoms):
-                submat = ExtractSubmatrix(adjmatrix, partition[c1], partition[c2])
+                submat = gatools.ExtractSubmatrix(adjmatrix, partition[c1], \
+                                                  partition[c2])
                 assortmatrix[c1,c2] = submat.sum()
 
         if norm == 'linkfraction' and maxweight == 1.0:
@@ -1003,11 +1005,11 @@ def Modularity(adjmatrix, partition, degree=None):
     L_norm = 1./L
     for s in xrange(Ncoms):
         community = partition[s]
-        submat = ExtractSubmatrix(adjmatrix, community)
+        submat = gatools.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
         Q += float(submat.sum()) * L_norm
         # Minus the expected fraction of links
-        productsubmat = outer(outdegree[community], indegree[community])
+        productsubmat = np.outer(outdegree[community], indegree[community])
         Q -= productsubmat.sum() * L_norm**2
 
     return Q
@@ -1045,14 +1047,14 @@ def K_Core(adjmatrix, kmin):
     # Prepare for calculations
     adjmatrix = adjmatrix.copy()
     N = len(adjmatrix)
-    nodelist = set(arange(N))
+    nodelist = set(np.arange(N))
     degree = Degree(adjmatrix)
 
     # Start detecting the kmin-core
     done = False
     while not done:
         # 1) Select nodes with degree <= kmin and include them in the shell
-        nodes = where(degree < kmin)[0]
+        nodes = np.where(degree < kmin)[0]
         nodes = list(set(nodes) & nodelist)
         
         # 2) Remove the selected nodes from the network and from 'nodelist'
@@ -1066,7 +1068,7 @@ def K_Core(adjmatrix, kmin):
         # 'nodelist' is already empty before end of loop.
         degree = Degree(adjmatrix)
         try:
-            newkmin = NonzeroMin(degree)
+            newkmin = gatools.NonZeroMin(degree)
         except ValueError:
             #print "ValueError of 'NonzeroMin()' catched and passed"
             done = True
@@ -1112,11 +1114,11 @@ def K_Shells(adjmatrix):
     # 0) Prepare for calculations
     adjmatrix = adjmatrix.copy()
     N = len(adjmatrix)
-    nodelist = set(arange(N))
+    nodelist = set(np.arange(N))
 
     # Find the smallest non-zero degree to start from
     degree = Degree(adjmatrix)
-    kmin = NonzeroMin(degree)
+    kmin = gatools.NonZeroMin(degree)
 
     # 1) Start computing the k-shells
     kshells = {}
@@ -1126,7 +1128,7 @@ def K_Shells(adjmatrix):
         # Find the next shell
         while not done:
             # 1.1) Select nodes with degree <= kmin and include them in shell
-            nodes = where(degree<=kmin)[0]
+            nodes = np.where(degree<=kmin)[0]
             nodes = list(set(nodes) & nodelist)
             shell += list(nodes)
             
@@ -1141,7 +1143,7 @@ def K_Shells(adjmatrix):
             # 'nodelist' is already empty before end of loop
             degree = Degree(adjmatrix)
             try:
-                newkmin = NonzeroMin(degree)
+                newkmin = gatools.NonZeroMin(degree)
             except ValueError:
                 #print "ValueError of 'NonzeroMin()' catched and passed"
                 kshells[kmin] = shell

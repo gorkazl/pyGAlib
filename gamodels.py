@@ -36,7 +36,7 @@ RavaszBarabasiModel
     Returns a hierarchical/modular network of the Ravasz & Barabasi model.
 """
 
-from numpy import*
+import numpy as np
 import numpy.random
 import random
 
@@ -63,10 +63,10 @@ def Lattice1D(N,z):
     assert z <= int(N/2), 'Largest possible z in N/2: %d' %(N/2)
     
     if z == 0:
-        return zeros((N,N),uint8)
+        return np.zeros((N,N), np.uint8)
 
     # 1) CREATE THE LATTICE
-    adjmatrix = zeros((N,N),int)
+    adjmatrix = np.zeros((N,N), np.int)
     
     # 1.1) Create the first row according to the number of neighbours
     adjmatrix[0,1:z+1] = 1
@@ -74,7 +74,7 @@ def Lattice1D(N,z):
     
     # 1.2) Use numpy.roll() to copy rotated version of the first row
     for i in xrange(1,N):
-        adjmatrix[i] = roll(adjmatrix[0],i)
+        adjmatrix[i] = np.roll(adjmatrix[0],i)
 
     return adjmatrix
 
@@ -174,7 +174,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
 
     return adjmatrix
 
-def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=uint8):
+def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
     """Returns a random graphs following the Erdos & Renyi model.
     
     In an Erdos-Renyi graph a link happens with probability p. Therefore,
@@ -212,16 +212,16 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=uint8):
     # 1.1) Create a random matrix with normally distributed values
     adjmatrix = numpy.random.rand(N,N)
     # 1.2 Select the entries with value <= p
-    adjmatrix = where(adjmatrix <= p, 1, 0).astype(outdtype)
+    adjmatrix = np.where(adjmatrix <= p, 1, 0).astype(outdtype)
 
     # 2) FOR UNDIRECTED GRAPHS
     if not directed:
-        adjmatrix[tril_indices(N)] = 0
+        adjmatrix[np.tril_indices(N)] = 0
         adjmatrix += adjmatrix.T
 
     # 3) Remove the diagonal if no self-loops are desired
     if not selfloops:
-        adjmatrix[diag_indices(N)] = 0
+        adjmatrix[np.diag_indices(N)] = 0
 
     return adjmatrix
 
@@ -283,8 +283,8 @@ def RandomGraph(N, L, directed=False, selfloops=False):
                 'L out of bounds. For the options given, max(L) = 1/2*N*(N-1) = %d' %maxL
 
     # 1) INITIATE THE MATRIX AND HELPERS    
-    adjmatrix = zeros((N,N), int)
-    nodelist = arange(N)
+    adjmatrix = np.zeros((N,N), int)
+    nodelist = np.arange(N)
     counter = 0
 
     # 2) GENERATE THE MATRIX
@@ -306,7 +306,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
 
     return adjmatrix
 
-def BarabasiAlbertGraph(N, m0, m, outdtype=uint8):
+def BarabasiAlbertGraph(N, m0, m, outdtype=np.uint8):
     """Returns a scale-free network after the Barabasi & Albert model.
     
     The Barabasi and Albert model (Science 286, 1999) creates networks with
@@ -343,7 +343,7 @@ def BarabasiAlbertGraph(N, m0, m, outdtype=uint8):
     assert m <= m0, 'Value not accepted. m can only take values m <= m0.'
 
     # 1) INITIATE THE NETWORK AS A RANDOM GRAPH OF m0 NODES AND MEAN k = m
-    adjmatrix = zeros((N,N),outdtype)
+    adjmatrix = np.zeros((N,N),outdtype)
     L0 = 0.5*m0*m
     initialnet = RandomGraph(m0,L0)
     adjmatrix[:m0,:m0] = initialnet
@@ -416,7 +416,7 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
         'Density value out of bounds. Values between 0 and 1 accepted.'
 
     # 1) GENERATE AN EMPTY NETWORK
-    adjmatrix = zeros((N,N), uint8)
+    adjmatrix = np.zeros((N,N), np.uint8)
     if directed:
         L = round(density*N*(N-1))
     else:
@@ -424,7 +424,7 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
 
     # 2) CREATE DEGREE SEQUENCE
     alpha = 1./(exponent - 1.0)
-    nodeweights = (arange(N) +1)**-alpha
+    nodeweights = (np.arange(N) +1)**-alpha
     nodeweights /= nodeweights.sum()    # Probability of a node to be chosen
     nodecumprobability = nodeweights.cumsum()
     del nodeweights
@@ -435,11 +435,11 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
 
         # 3.1) Choose two nodes to connect
         xhead = numpy.random.rand()     # A random number between 0 and 1
-        xsum = sum(sign(nodecumprobability-xhead))
+        xsum = sum(np.sign(nodecumprobability-xhead))
         head = int(0.5*(N-xsum))        
 
         xtail = numpy.random.rand()
-        xsum = sum(sign(nodecumprobability-xtail))
+        xsum = sum(np.sign(nodecumprobability-xtail))
         tail = int(0.5*(N-xsum))
 
         # 3.2) Do not allow self loops and multiple edges
@@ -502,15 +502,15 @@ def RewireNetwork(adjmatrix, prewire, directed=False, weighted=False):
     is not possible, at least one of the four constraints must be broken to
     conserve the other three.
     """
-    rewmatrix = where(adjmatrix,1,0)
+    rewmatrix = np.where(adjmatrix,1,0)
     
     N = len(rewmatrix)
     # 0) GENERATE LIST OF LINKS IF NOT GIVEN.
     if directed:
-        linklist = array(rewmatrix.nonzero())
+        linklist = np.array(rewmatrix.nonzero())
     else:
         # Apply nonzero only to the upper triangular part of the matrix
-        linklist = array(triu(rewmatrix).nonzero())
+        linklist = np.array(np.triu(rewmatrix).nonzero())
 
     L = len(linklist[0])
     iterations = int(round(0.5*prewire*L))
@@ -599,7 +599,7 @@ def HMpartition(HMshape):
     --------
     HMRNetwork : Generato of random modular and hierarchical networks.
     """
-    N = multiply.reduce(HMshape)
+    N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
     
     partitions = []
@@ -607,8 +607,8 @@ def HMpartition(HMshape):
         # 2.1.1) Find the number of blocks per hierarchical level
         if level == 0: continue
         
-        nblocks = int(multiply.reduce(HMshape[:level]))
-        partitionmatrix = zeros((N,nblocks),uint8)
+        nblocks = int(np.multiply.reduce(HMshape[:level]))
+        partitionmatrix = np.zeros((N,nblocks), np.uint8)
         
         # 2.2) For each block in the hierarchical level
         for b in xrange(nblocks):
@@ -624,7 +624,7 @@ def HMpartition(HMshape):
     return partitions
 
 def HMRandomNetwork(HMshape, avklist, directed=False, \
-                               outdtype=uint8):
+                               outdtype=np.uint8):
     """Returns a random hierarchical/modular network of given shape.
     
     This function generalizes the benchmark hierarchical and modular network
@@ -727,9 +727,9 @@ def HMRandomNetwork(HMshape, avklist, directed=False, \
     # 0.2) assert that klist[0] <= n0, klist[1] <= xx, etc.
     
     # 1) PREPARE TO CREATE THE NETWORK
-    N = multiply.reduce(HMshape)
+    N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
-    adjmatrix = zeros((N,N), outdtype)
+    adjmatrix = np.zeros((N,N), outdtype)
     
     # 2) CREATE THE HM NETWORK BY SEEDING LINKS AT DIFFERENT SCALES
     # 2.1) For each hierarchical level
@@ -738,7 +738,7 @@ def HMRandomNetwork(HMshape, avklist, directed=False, \
         if HMshape[level] == 1: continue
         
         if level == 0: nblocks = 1
-        else: nblocks = int(multiply.reduce(HMshape[:level]))
+        else: nblocks = int(np.multiply.reduce(HMshape[:level]))
         
         # 2.2) For each block in the hierarchical level
         for b in xrange(nblocks):
@@ -765,11 +765,4 @@ def HMRandomNetwork(HMshape, avklist, directed=False, \
             SeedLinks(adjmatrix, Ls, partition, directed)
     
     return adjmatrix
-
-
-
-
-
-
-
 
