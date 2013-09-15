@@ -2,7 +2,7 @@ TODO list for GAlib
 ===================
 
 
-HIGH PRIORITY...
+High priority...
 ----------------
 
 #. Improve / re-write Floyd-Warshall function. By far the slowest function of all.
@@ -11,8 +11,8 @@ HIGH PRIORITY...
 #. Suggest your own.
 
 
-WOULD BE NICE...
-----------------
+Would be nice to ...
+--------------------
 
 * Finish documentation and use Sphinx for that.
 * Check compatibility with scipy.sparse module.
