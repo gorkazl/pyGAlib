@@ -16,5 +16,4 @@ Would be nice to ...
 
 * Finish documentation and use Sphinx for that.
 * Check compatibility with scipy.sparse module.
-* Include functions for roles of nodes in modular networks.
 * Suggest you own.
