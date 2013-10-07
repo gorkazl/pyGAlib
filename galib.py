@@ -1153,5 +1153,203 @@ def K_Shells(adjmatrix):
 
 ######################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
+def ParticipationMatrix(adjmatrix, partition):
+    """Given a partition of the network, it returns the participation matrix.
+    
+    A matrix of shape N x n, where N is the number of nodes and n is the
+    number of communities. Elements a(i,s) of the matrix are the number of
+    neighbours (internal degree) that node i has in community s.
+    
+    Parameters
+    ----------
+    adjmatrix : ndarray
+        The adjacency matrix of the network.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+        
+    Returns
+    -------
+    pmatrix : ndarray of rank-2 and shape N x n.
+    
+    See Also
+    --------
+    ParticipationIndex_GA : Returns the participation index (based on Guimera
+        & Amaral's definiton) of all nodes given a partition.
+    ParticipationIndex : Returns the participation index of all nodes given 
+        a partition.
+    """
+    N = len(adjmatrix)
+    npart = len(partition)
+    partitionmatrix = np.zeros((N,npart), np.uint8)
 
+    # 1) CONSTRUCT THE PARTITION MATRIX, S (1 if node in module c, 0 otherwise)
+    for c in xrange(npart):
+        partitionmatrix[partition[c],c] = 1
+    
+    # 2) COMPUTE THE PARTICIPATION MATRIX
+    # 2.1) Security check
+    if adjmatrix.dtype == 'uint8' and N >= 255:
+        adjmatrix = adjmatrix.astype(np.uint32)
+
+    # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
+    pmatrix = np.dot(adjmatrix.astype(bool), partitionmatrix)
+
+    return pmatrix
+
+def LocalHubness_GA(participmatrix, partition):
+    """Returns the within-module degree defined by Guimera & Amaral.
+    
+    The within-module degree is a measure of local hubness. Given a network
+    and a partition of it nodes into communities, the within-module degree
+    is the z-score of the number of neighbours that a node has, compared with
+    the degree of the other nodes in the community. See Guimera & Amaral,
+    J. Stat. Mech. P02001 (2011).
+    
+    Parameters
+    ----------
+    participmatrix : ndarray of rank-2
+        Elements a(i,s) of the matrix are the number of neighbours (internal
+        degree) that node i has in community s. Is the output of function
+        ParticipationMatrix().
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+        
+    Returns
+    -------
+    zscore : ndarray of rank-1
+        The within-module degree of every node in the network.
+
+    See Also
+    --------
+    ParticipationMatrix : The number of neighbours of a node in all communities.
+    ParticipationIndex_GA : Returns the participation index (based on Guimera
+        & Amaral's definiton) of all nodes given a partition.
+    ParticipationIndex : Returns the participation index of all nodes given 
+        a partition.
+    """
+    N, ncoms = np.shape(participmatrix)
+
+    zscore = np.zeros(N, np.float)
+    for s in xrange(ncoms):
+        community = partition[s]
+        klist = participmatrix[community,s]
+        avklist = klist.mean()
+        devklist = klist.std()
+        
+        zscore[community] = (participmatrix[community,s] - avklist) / devklist
+
+    return zscore
+
+def ParticipationIndex_GA(participmatrix):
+    """Returns the participation index as defined by Guimera & Amaral.
+    
+    Given a partition of the network into communities, the participation 
+    index quantifies how much are the links of a node distributed along
+    all the communities of the network. This function computes the definition
+    given by Guimera & Amaral, J. Stat. Mech. P02001 (2011).
+    
+    Parameters
+    ----------
+    participmatrix : ndarray
+        A matrix of shape N x n, where N is the number of nodes and n is the
+        number of communities. Elements, a_is, of the matrix are the number of
+        neighbours (degree) that node i has in community s.
+    
+    Returns
+    -------
+    participindex : ndarray of rank-1 and size N
+        Participation index of every node.
+        
+    Notes
+    -----
+    The participation index, as originally defined in Guimera & Amaral,
+    J. Stat. Mech. P02001 (2011), is misleading. Use only for comparative
+    reasons. The index is defined to be between 0 and 1, taking value 0 when
+    a node has only connections in its own community (peripheral node), 
+    and 1 when its links are equivalently distributed among, so the node is 
+    unclassifiable in the partition (kinless). However, the true range of this
+    participation index depends on the number of communities in the partition.
+
+    See Also
+    --------
+    ParticipationMatrix : The number of neighbours of a node in all communities.
+    ParticipationIndex : Returns the participation index of all nodes.
+    LocalHubness_GA : Returns the z-score of node's local degree.
+    """
+    N, npart = np.shape(participmatrix)
+    participindex = np.zeros(N, np.float)
+
+    for i in xrange(N):
+        a = participmatrix[i].sum()
+        if a > 0: norm_i = 1./a
+        else: norm_i = 0.
+        for c in xrange(npart):
+            participindex[i] += (norm_i*participmatrix[i][c])**2
+
+    participindex = 1. - participindex
+    return participindex
+
+def ParticipationIndex(participmatrix, partition):
+    """Returns the participation index of all nodes given a partition.
+    
+    Given a partition of the network into communities, the participation 
+    index quantifies how much are the links of a node distributed along
+    all the communities of the network. It is 0 if the node is linked only to
+    nodes in one community, and it is 1 when the node spreads its links
+    homogeneously among all the communities. Find complete details in
+    Zamora-Lopez, C.S. Zhou & J. Kurths, Front. Neurosci. 5:83 (2011).
+    
+    Parameters
+    ----------
+    participmatrix : ndarray
+        A matrix of shape N x n, where N is the number of nodes and n is the
+        number of communities. Elements, a_is, of the matrix are the number of
+        neighbours (degree) that node i has in community s.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+    
+    Returns
+    -------
+    participindex : ndarray of rank-1 and size N
+        Participation index of every node.
+
+    See Also
+    --------
+    ParticipationMatrix : The number of neighbours of a node in all communities.
+    ParticipationIndex_GA : Returns the participation index of all nodes 
+        computed as given by Guimera & Amaral, J. Stat. Mech. P02001 (2011).
+    LocalHubness_GA : Returns the z-score of node's local degree.
+    """
+    participmatrix = participmatrix.astype(np.float)
+    
+    # 0) Security check
+    N, ncoms = np.shape(participmatrix)
+    assert len(partition) == ncoms, 'Participation matrix and partition not aligned'
+
+    # 1) Find the size of each community
+    Ncoms = np.zeros(ncoms, np.float)
+    for s in xrange(ncoms):
+        Ncoms[s] = len(partition[s])
+
+    # 2) COMPUTE AND NORMALIZE THE PARTICIPATION VECTORS
+    # 2.1) Probability of node to connect to each community
+    for s in xrange(ncoms):
+        community = partition[s]
+        newNcoms = Ncoms.copy()
+        newNcoms[s] -= 1
+        participmatrix[community] /= newNcoms
+    
+    # 2.2) Nromalize participation vectors such that sum of probability is 1
+    participmatrix_t = participmatrix.T / participmatrix.sum(axis=1)
+    participmatrix = participmatrix_t.T
+    del participmatrix_t
+
+    # 3) REDUCE THE PARTICIPATION VECTORS INTO THE PARTICIPATION INDICES
+    stdnorm = float(ncoms) / np.sqrt(ncoms-1)
+    participindex = 1. - stdnorm * participmatrix.std(axis=1)
+    
+    return participindex
 

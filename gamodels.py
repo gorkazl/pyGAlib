@@ -593,7 +593,6 @@ def HMpartition(HMshape):
     partitions : list
         Contains the partition matrices for each of the nlevel-1 hierarchical
         levels of a network created with given parameter 'HMshape'.
-        If HMshape = [2,4,20]
     
     See Also
     --------
