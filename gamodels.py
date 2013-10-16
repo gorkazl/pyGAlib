@@ -306,28 +306,23 @@ def RandomGraph(N, L, directed=False, selfloops=False):
 
     return adjmatrix
 
-def BarabasiAlbertGraph(N, m0, m, outdtype=np.uint8):
+def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
     """Returns a scale-free network after the Barabasi & Albert model.
     
-    The Barabasi and Albert model (Science 286, 1999) creates networks with
+    The Barabasi and Albert model (Science 286 (1999)) creates networks with
     a scale-free degree distribution of exponent gamma = -3 by a growth 
-    process with preferential attachment. Given an initial small connected 
-    network of m0 nodes, at each iteration a new node is included that 
-    connects to the existing nodes with probability proportional to their
-    degree. 
-    The configuration of the initial network is arbitrary. Here, we use
-    a random graph with mean-degree <k> = m as a seed graph.
+    process with preferential attachment. At each iteration a new node is 
+    included that connects to the existing nodes with probability proportional 
+    to their degree.
+    In our implementation the network is initialized by a complete graph of
+    size m + 1 nodes.
     
     Parameters
     ----------
     N : integer
         Number of nodes of the final network.
-    m0 : integer
-        Size of the seed random graph that initiates the network.
-        Must be 2 or larger.
     m : integer
         Number of links that each new node makes during the growing process.
-        The condition m <= m0 must hold.
     outdtype : numpy compatible data type, optional.
         The data type of the resulting adjacency matrix of the scale-free
         network.
@@ -338,26 +333,17 @@ def BarabasiAlbertGraph(N, m0, m, outdtype=np.uint8):
         The adjacency matrix of the generated scale-free network.
     """
     
-    # 0) SECURITY CHECKS
-    assert m0 >= 2, 'Value not accepted. m0 must be 2 or larger.'
-    assert m <= m0, 'Value not accepted. m can only take values m <= m0.'
-
-    # 1) INITIATE THE NETWORK AS A RANDOM GRAPH OF m0 NODES AND MEAN k = m
+    # 1) INITIATE THE NETWORK AS A COMPLETE GRAPH OF SIZE m
     adjmatrix = np.zeros((N,N),outdtype)
-    L0 = 0.5*m0*m
-    initialnet = RandomGraph(m0,L0)
-    adjmatrix[:m0,:m0] = initialnet
+    adjmatrix[:m+1,:m+1] = np.ones((m+1,m+1),outdtype)
+    adjmatrix[np.diag_indices(m+1)] = 0
     
     # 2) PERFORM THE PREFERENTIAL ATTACHMENT GROWTH
     # 2.0) Create a list initially containing the hubs ki times
-    nodelist = []
-    degree = initialnet.sum(axis=1)
-    for i in xrange(m0):
-        nodelist += [i]*degree[i]
-    del degree, initialnet
+    nodelist = range(m+1)*m
     
     # 2.1) Incude a new node
-    for i in xrange(m0,N):
+    for i in xrange(m+1,N):
         counter = 0
         neighbours = []
         while counter < m:
