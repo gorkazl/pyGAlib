@@ -47,7 +47,7 @@ RUNNING THE SCRIPT
 After personalizing the script and saving the changes, open a terminal
 window and move to the folder containing the script, e.g.:
 
-> cd ~/GraphAnalysisLibrary/HelperScripts
+> cd ~/GraphAnalysisLibrary/UtilityScripts
 
 then type the following command:
 
@@ -59,7 +59,7 @@ from os.path import join
 from numpy import*
 from gatools import Save2Pajek, LoadFromPajek
 from galib import Degree, Reciprocity
-from gamodels import    Network
+from gamodels import RewireNetwork
 
 ### PARAMETERS TO BE MODIFIED BY THE USER ##################################
 ### NETWORK OPTIONS
@@ -100,11 +100,11 @@ filetype = 'binary'
 # 0) READ THE ORIGINAL NETWORK AND PREPARE BASIC PARAMETERS
 name,extension = inputfile.split('.')
 if extension == 'net':
-    net = LoadFromPajek(join(inputpath,inputfile))
+    net = LoadFromPajek(inputfile)
 elif extension == 'npy':
-    net = load(join(inputpath,inputfile))
+    net = load(join(inputfile)
 else:
-    net = loadtxt(join(inputpath,inputfile), uint8)
+    net = loadtxt(inputfile, uint8)
 N = len(net)
 
 
@@ -139,7 +139,7 @@ for re in xrange(realiz):
             print re
             
     # 1.1) Rewire the network
-    rewnet = RewiredNetwork(net, prew, directed)
+    rewnet = RewireNetwork(net, prew, directed)
 
     # 1.2) Check that the rewired network is correct
     if checkresult:
