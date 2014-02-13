@@ -306,28 +306,23 @@ def RandomGraph(N, L, directed=False, selfloops=False):
 
     return adjmatrix
 
-def BarabasiAlbertGraph(N, m0, m, outdtype=np.uint8):
+def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
     """Returns a scale-free network after the Barabasi & Albert model.
     
-    The Barabasi and Albert model (Science 286, 1999) creates networks with
+    The Barabasi and Albert model (Science 286 (1999)) creates networks with
     a scale-free degree distribution of exponent gamma = -3 by a growth 
-    process with preferential attachment. Given an initial small connected 
-    network of m0 nodes, at each iteration a new node is included that 
-    connects to the existing nodes with probability proportional to their
-    degree. 
-    The configuration of the initial network is arbitrary. Here, we use
-    a random graph with mean-degree <k> = m as a seed graph.
+    process with preferential attachment. At each iteration a new node is 
+    included that connects to the existing nodes with probability proportional 
+    to their degree.
+    In our implementation the network is initialized by a complete graph of
+    size m + 1 nodes.
     
     Parameters
     ----------
     N : integer
         Number of nodes of the final network.
-    m0 : integer
-        Size of the seed random graph that initiates the network.
-        Must be 2 or larger.
     m : integer
         Number of links that each new node makes during the growing process.
-        The condition m <= m0 must hold.
     outdtype : numpy compatible data type, optional.
         The data type of the resulting adjacency matrix of the scale-free
         network.
@@ -338,26 +333,17 @@ def BarabasiAlbertGraph(N, m0, m, outdtype=np.uint8):
         The adjacency matrix of the generated scale-free network.
     """
     
-    # 0) SECURITY CHECKS
-    assert m0 >= 2, 'Value not accepted. m0 must be 2 or larger.'
-    assert m <= m0, 'Value not accepted. m can only take values m <= m0.'
-
-    # 1) INITIATE THE NETWORK AS A RANDOM GRAPH OF m0 NODES AND MEAN k = m
+    # 1) INITIATE THE NETWORK AS A COMPLETE GRAPH OF SIZE m
     adjmatrix = np.zeros((N,N),outdtype)
-    L0 = 0.5*m0*m
-    initialnet = RandomGraph(m0,L0)
-    adjmatrix[:m0,:m0] = initialnet
+    adjmatrix[:m+1,:m+1] = np.ones((m+1,m+1),outdtype)
+    adjmatrix[np.diag_indices(m+1)] = 0
     
     # 2) PERFORM THE PREFERENTIAL ATTACHMENT GROWTH
     # 2.0) Create a list initially containing the hubs ki times
-    nodelist = []
-    degree = initialnet.sum(axis=1)
-    for i in xrange(m0):
-        nodelist += [i]*degree[i]
-    del degree, initialnet
+    nodelist = range(m+1)*m
     
     # 2.1) Incude a new node
-    for i in xrange(m0,N):
+    for i in xrange(m+1,N):
         counter = 0
         neighbours = []
         while counter < m:
@@ -456,7 +442,7 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
 
 #######################################################################
 """NETWORK REWIRING ALGORITHMS"""
-def RewireNetwork(adjmatrix, prewire, directed=False, weighted=False):
+def RewireNetwork(adjmatrix, prewire=10, directed=False, weighted=False):
     """Returns a network with links rewired with same degrees as net.
     
     The function uses the link switching method to rewire networks while
@@ -469,12 +455,20 @@ def RewireNetwork(adjmatrix, prewire, directed=False, weighted=False):
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network to be rewired.
     prewire : float
-        Fraction of links to be rewired. Can be larger than one.
+        Fraction of links to be rewired. See Usage.
     directed : Boolean, optional
         Specify whether the rewiring gives rise to a directed graph or not.
+        If adjmatrix is a directed graph, then set 'directed=True', if
+        adjmatrix is undirected graph 'directed' allows to choose whether
+        the resulting network will be directed or undirected. The function
+        does not automatically check the directedness of the input matrix.
     weighted : Boolean, optional
-        Specify whether the rewiring should only consider binary or weighted
-        links. See Usage for more details.
+        Specify whether the links are rewired conserving their weight.
+        If weighted=False, a binary network of dtype=uint8 is returned
+        regardless the input network. If weighted=True, links are switched 
+        conserving their weights. Notice, however, that the total weight 
+        (intensity) of each node cannot be conserved. In case of directed 
+        networks their input intensity is conserved but not their output one.
         
     Returns
     -------
@@ -482,27 +476,18 @@ def RewireNetwork(adjmatrix, prewire, directed=False, weighted=False):
     
     Usage
     -----
-    1) The parameter 'prewire' is not a probability, but a parameter that
+    The parameter 'prewire' is not a probability, but a parameter that
     controls the number of iterations the link swithching will happen. At
-    each iteration two links are switched, therefore for a given value, 
-    the function will rewire prewire*L links in 1/2*prewire*L iterations,
-    where L in the number of links in the network.
-    2) If your aim is to create an ensemble of rewired networks for comparison
-    of the ensemble properties to those of an empirical network, use some
-    value of prewire > 2. We strongly recommend to use prewire = 5 or larger 
-    (Zamora-Lopez et al. Structural characterization of networks using the 
-    cat cortex as an example. In Lectures in supercomputational
-    neuroscience, Springer-Verlag, 2008).
-    3) The function creates a list of all the links, requiring more memory.
-    The aim of that linklist is to select links with equal probability and
-    avoid biases introduced in algorithms that first choose a node at random
-    and then one of its links.
-    4) If weighted=True, the function will conserve the total input strength
-    of the nodes. Conserving both the degrees and the intensities of the nodes
-    is not possible, at least one of the four constraints must be broken to
-    conserve the other three.
+    each iteration two links are switched, therefore for a given value of
+    prewire, the function will rewire prewire*L links in 1/2*prewire*L 
+    iterations, where L in the number of links in the network.
+    To obtain completely randomized networks (degrees are conserved) 
+    use prewire > 2, but prewire = 5 or larger is strongly recommended.
     """
-    rewmatrix = np.where(adjmatrix,1,0)
+    if weighted:
+        rewmatrix = adjmatrix.copy()
+    else:
+        rewmatrix = np.where(adjmatrix,1,0).astype(np.uint8)
     
     N = len(rewmatrix)
     # 0) GENERATE LIST OF LINKS IF NOT GIVEN.
@@ -562,8 +547,8 @@ def RewireNetwork(adjmatrix, prewire, directed=False, weighted=False):
                 rewmatrix[h2,t1] = 1; rewmatrix[t1,h2] = 1
 
             # Remove the old links
-            rewmatrix[h1,t1] = 0; rewmatrix[t1,h1] = 0
-            rewmatrix[h2,t2] = 0; rewmatrix[t2,h2] = 0
+            rewmatrix[h1,t1] = 0.0; rewmatrix[t1,h1] = 0.0
+            rewmatrix[h2,t2] = 0.0; rewmatrix[t2,h2] = 0.0
 
         # 3.2) update linklist
         linklist[1,linkid1] = t2
@@ -573,6 +558,7 @@ def RewireNetwork(adjmatrix, prewire, directed=False, weighted=False):
         count += 1
         
     return rewmatrix
+
 
 ######################################################################
 """MODULAR AND HIERARCHICAL NETWORK MODELS"""
@@ -593,7 +579,6 @@ def HMpartition(HMshape):
     partitions : list
         Contains the partition matrices for each of the nlevel-1 hierarchical
         levels of a network created with given parameter 'HMshape'.
-        If HMshape = [2,4,20]
     
     See Also
     --------
