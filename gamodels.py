@@ -559,6 +559,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=False, weighted=False):
         
     return rewmatrix
 
+
 ######################################################################
 """MODULAR AND HIERARCHICAL NETWORK MODELS"""
 def HMpartition(HMshape):
