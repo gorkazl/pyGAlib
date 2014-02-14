@@ -141,19 +141,16 @@ def Intensity(adjmatrix, directed=False):
         intensity = adjmatrix.sum(axis=0)
         return intensity
 
-def Reciprocity(adjmatrix, weighted=False):
+def Reciprocity(adjmatrix):
     """Computes the fraction of reciprocal links to total number of links.
     
-    Both weighted and unweighted adjacency matrices are permitted, but the 
-    computation ignores the weights of the arcs in the case of weighted 
-    adjacency matrices.
+    Both weighted and unweighted input matrices are permitted. Weights
+    are ignored for the calculation.
 
     Parameters
     ----------
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network.
-    weighted: Boolean, optional
-        True if the network is weighted, False otherwise.
     
     Returns
     -------
