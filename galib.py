@@ -161,12 +161,7 @@ def Reciprocity(adjmatrix, weighted=False):
     reciprocal).
     """
     # 0) PREPARE FOR COMPUTATIONS
-    # 0.1) Binarize the network if needed
-    if weighted:
-        adjmatrix = np.where(adjmatrix != 0, 1, 0)
-    # 0.2) Convert to int64 if needed to avoid downcasting issues
-    if adjmatrix.dtype == 'uint8' or adjmatrix.dtype == 'uint16':
-        adjmatrix = adjmatrix.astype(np.int)
+    adjmatrix = adjmatrix.astype('bool')
 
     # 1) COMPUTE THE RECIPROCITY
     # 1.1) The number of links
