@@ -24,7 +24,7 @@ ScaleFreeGraph
 NETWORK REWIRING/RANDOMIZATION ALGORITHMS
 =========================================
 RewireNetwork
-    Returns a network with links rewired with same degrees as net.
+    Returns a network with links rewired conserving degrees of the nodes.
 
 HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
 ============================================
@@ -442,55 +442,72 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
 
 #######################################################################
 """NETWORK REWIRING ALGORITHMS"""
-def RewireNetwork(adjmatrix, prewire=10, directed=False, weighted=False):
-    """Returns a network with links rewired with same degrees as net.
+def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
+    """Returns a network with links rewired conserving degrees of the nodes.
     
-    The function uses the link switching method to rewire networks while
-    conserving the input and output degree of the nodes. See references:
-    A.R. Rao & S. Bandyopadhyay, Sankhya, Ser. A 58, 225 (1996),
+    It uses the link switching method to rewire networks while conserving 
+    both the input and the output degrees of the nodes. See references:
+    A.R. Rao & S. Bandyopadhyay, Sankhya, Ser. A 58, 225 (1996), and
     J.M. Roberts, Soc. Networks 22, 273 (2000).
     
     Parameters
     ----------
     adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network to be rewired.
-    prewire : float
-        Fraction of links to be rewired. See Usage.
+        The adjacency matrix of the network to be rewired. 'adjmatrix' itself
+        won't be rewired but a new matrix is returned.
+    prewire : float, optional
+        Fraction of links to be rewired. See Usage for further instructions.
     directed : Boolean, optional
-        Specify whether the rewiring gives rise to a directed graph or not.
-        If adjmatrix is a directed graph, then set 'directed=True', if
-        adjmatrix is undirected graph 'directed' allows to choose whether
-        the resulting network will be directed or undirected. The function
-        does not automatically check the directedness of the input matrix.
+        Specifies the directedness of the returned network. If 'directed' is
+        None (default), the function checks the directedness of the input 
+        network and performs the rewiring accordingly. To save computational
+        time the parameter can be manually specified.
+        If 'directed' is True, a directed network is returned regardless 
+        'adjmatrix' is directed or undirected. Input and output degrees are
+        conserved.
+        If 'directed' is False, an undirected network is returned. Only valid
+        when 'adjmatrix' is undirected. DO NOT set 'directed = False' when 
+        'adjmatrix' is a directed network, degress won't be conserved and the
+        function won't raise an error.
     weighted : Boolean, optional
-        Specify whether the links are rewired conserving their weight.
-        If weighted=False, a binary network of dtype=uint8 is returned
-        regardless the input network. If weighted=True, links are switched 
-        conserving their weights. Notice, however, that the total weight 
-        (intensity) of each node cannot be conserved. In case of directed 
-        networks their input intensity is conserved but not their output one.
+        Specifies whether the weights of the links are conserved.
+        If 'weighted' is False, a binary network is returned.
+        If 'weighted' is True, links are switched conserving their weights.
+        Notice, however, that it is impossible to conserve simultaneously 
+        both the degrees and the strength of all nodes. Hence, the weights of
+        the links are conserved but only the input strength of the nodes
+        are conserved. The output strength of nodes are not conserved.
         
     Returns
     -------
     rewmatrix : ndarray of rank-2
+        The dtype of 'rewmatrix' depends on the option 'weighted'. If
+        'weighted' is True, 'rewmatrix' is of same dtype as 'adjmatrix'. 
+        If 'weighted' is False, 'rewmatrix' has dtype uint8. 
     
     Usage
     -----
     The parameter 'prewire' is not a probability, but a parameter that
-    controls the number of iterations the link swithching will happen. At
-    each iteration two links are switched, therefore for a given value of
-    prewire, the function will rewire prewire*L links in 1/2*prewire*L 
-    iterations, where L in the number of links in the network.
-    To obtain completely randomized networks (degrees are conserved) 
-    use prewire > 2, but prewire = 5 or larger is strongly recommended.
+    controls the number of iterations the link swithching procedure happens.
+    At each iteration two links are switched, therefore for a given value of
+    'prewire', prewire*L links are rewired in 1/2*prewire*L iterations, where
+    L in the number of links. To make sure that all structure of the network
+    has been completely randomized (appart from the degrees), values of 
+    prewire >= 5 are recommended.
     """
+    # 0) PREPARE FOR THE CALCULATIONS
+    # 0.1) Check the conditions for the rewiring process
+    if directed==None:
+        recip = Reciprocity(adjmatrix)
+        if recip == 1.0: directed = False
+        else: directed = True
     if weighted:
         rewmatrix = adjmatrix.copy()
     else:
         rewmatrix = np.where(adjmatrix,1,0).astype(np.uint8)
     
     N = len(rewmatrix)
-    # 0) GENERATE LIST OF LINKS IF NOT GIVEN.
+    # 0.2) Generate the list of links
     if directed:
         linklist = np.array(rewmatrix.nonzero())
     else:
@@ -500,9 +517,10 @@ def RewireNetwork(adjmatrix, prewire=10, directed=False, weighted=False):
     L = len(linklist[0])
     iterations = int(round(0.5*prewire*L))
     
+    # DO THE REWIRING
     count = 0
     while count < iterations:
-        # 1) SELECT TWO LINKS:
+        # 1) SELECT TWO LINKS AT RANDOM:
         linkid1 = int(L*numpy.random.rand())
         linkid2 = int(L*numpy.random.rand())
         # Security check. If the two links are the same, discard the iteration 
@@ -511,7 +529,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=False, weighted=False):
         h1 = linklist[0,linkid1]; t1 = linklist[1,linkid1]
         h2 = linklist[0,linkid2]; t2 = linklist[1,linkid2]
 
-        # 2) SECURITY CHECKS
+        # 2) SECURITY CHECKS TO AVOID INTRODUCING UNDESIRED LINKS
         # Avoid formation of self-loops
         if h1 == t2: continue
         if h2 == t1: continue
@@ -540,8 +558,10 @@ def RewireNetwork(adjmatrix, prewire=10, directed=False, weighted=False):
         else:
             # Put the new links
             if weighted:
-                rewmatrix[h1,t2] = rewmatrix[h2,t2]; rewmatrix[t2,h1] = rewmatrix[h2,t2]
-                rewmatrix[h2,t1] = rewmatrix[h1,t1]; rewmatrix[t1,h2] = rewmatrix[h1,t1]
+                rewmatrix[h1,t2] = rewmatrix[h2,t2]
+                rewmatrix[t2,h1] = rewmatrix[t1,h1]
+                rewmatrix[h2,t1] = rewmatrix[h1,t1]
+                rewmatrix[t1,h2] = rewmatrix[t2,h2]
             else:
                 rewmatrix[h1,t2] = 1; rewmatrix[t2,h1] = 1
                 rewmatrix[h2,t1] = 1; rewmatrix[t1,h2] = 1
@@ -550,7 +570,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=False, weighted=False):
             rewmatrix[h1,t1] = 0.0; rewmatrix[t1,h1] = 0.0
             rewmatrix[h2,t2] = 0.0; rewmatrix[t2,h2] = 0.0
 
-        # 3.2) update linklist
+        # 3.2) Update the linklist
         linklist[1,linkid1] = t2
         linklist[1,linkid2] = t1
 
