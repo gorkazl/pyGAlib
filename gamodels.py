@@ -39,6 +39,7 @@ RavaszBarabasiModel
 import numpy as np
 import numpy.random
 import random
+from galib import Reciprocity
 
 ######################################################################
 """RANDOM NETWORK GENERATORS"""
