@@ -9,11 +9,11 @@ High priority...
 #. Identify the slowest functions which could significantly be accelarated using Numba package and create Numba-based duplicates.
 #. Write a function for the Dijkstra algorithm.
 #. I/O support to more graph formats: graphML (.xml), DOT (.dot), etc. 
-#. Suggest your own.
+#. *Suggest your own.*
 
 Would be nice to ...
 --------------------
 
 * Finish documentation (use Sphinx for that).
 * Check compatibility with scipy.sparse module.
-* Suggest you own.
+* *Suggest you own.*
