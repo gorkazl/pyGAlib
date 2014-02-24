@@ -16,4 +16,4 @@ Would be nice to ...
 
 * Finish documentation (use Sphinx for that).
 * Check compatibility with scipy.sparse module.
-* *Suggest you own.*
+* *Suggest your own.*
