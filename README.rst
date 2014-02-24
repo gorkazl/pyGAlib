@@ -73,7 +73,7 @@ The current version includes core functionalities for graph analysis. Future rel
 
 
 HISTORY OF CHANGES
-------------------
+^^^^^^^^^^^^^^^^^^
 
 February 24\ :sup:`th`, 2014
 """"""""""""""""""""""""""""
