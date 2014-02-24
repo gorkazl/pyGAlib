@@ -5,13 +5,13 @@ TODO list for GAlib
 High priority...
 ----------------
 
-#. Identify and modify all functions whose unweighted version could be improved using Boolean operators:
+1. Identify and modify all functions whose unweighted version could be improved using Boolean operators:
     ``ReciprocalDegree()``, ``RichClub()``, ``MatchingIndex()``, ``ConnectedComponents()``, ``K_Core()``, ``K_Shells()``, ``Modularity()``.
-#. Identify the slowest functions which could significantly be accelarated
+2. Identify the slowest functions which could significantly be accelarated
 using Numba package and create Numba-based duplicates.
-#. Write a function for the Dijkstra algorithm.
-#. I/O support to more graph formats: graphML (.xml), DOT (.dot), etc. 
-#. Suggest your own.
+3. Write a function for the Dijkstra algorithm.
+4. I/O support to more graph formats: graphML (.xml), DOT (.dot), etc. 
+5. Suggest your own.
 
 Would be nice to ...
 --------------------
