@@ -1,5 +1,5 @@
-GAlib -- Graph Analysis library in Python / NumPy
-=================================================
+GAlib – Graph Analysis library in Python / NumPy
+------------------------------------------------
 
 GAlib is a library for the analysis of graphs and complex networks in Python/NumPy. The library is very easy to install, use, modify and extend.
 
@@ -18,13 +18,13 @@ It's main features are...
 
 
 INSTALLATION
-------------
+^^^^^^^^^^^^
 
-GAlib does not require installation but requires to have NumPy installed. The library can be downloaded from its GitHub repository:
+GAlib does not require installation but requires to have NumPy installed. In order to use some accelerated functions that were too slow, the package Numba is an optional requirement. The library can be downloaded from its GitHub repository:
 
 https://github.com/gorkazl/pyGAlib
 
-At the bottom of the right-hand menu click on the "*Download ZIP*" button. Unzip the file and copy the modules into the standard "*Site-Packages*" folder of the current Python distribution. GAlib is composed of three files: *galib.py*, *gamodels.py* and *gatools.py*. Import them as usual to start using them, e.g.: ::
+At the bottom of the right-hand menu click on the "*Download ZIP*" button. Unzip the file and copy the modules into the standard "*Site-Packages*" folder of your current Python distribution. GAlib is composed of three files: *galib.py*, *gamodels.py* and *gatools.py*. The optional module *galib_numba.py* includes faster functions thanks to use of the Numba package. Import the modules as usual to start using them, e.g.: ::
 
 >>> from galib import*
 >>> from gamodels import*
@@ -34,7 +34,7 @@ For more details see the User Guide in the */Docs* folder.
 
 
 HOW TO FIND FURTHER DOCUMENTATION
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 While working in an interactive session and having imported the modules, use the ``help()`` function to obtain information of the library files: ::
 
@@ -51,15 +51,15 @@ For IPython users, the help command is replaced by a question mark after the mod
 
 
 CONTACT INFORMATION
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 GAlib will have soon its own webpage and domain. For the moment, contact me at <galibrary@yahoo.com> for any questions, bug reports, etc.
 
 
 FUTURE DEVELOPMENTS
--------------------
+^^^^^^^^^^^^^^^^^^^
 
-The current version includes core functionalities for graph analysis. Future releases will include further functionalities, for example:
+The current version includes core functionalities for graph analysis. Future releases will include:
 
 * accelaration of slowest functions using the Numba package,
 * further measures for weighted and/or directed networks,
@@ -73,13 +73,12 @@ The current version includes core functionalities for graph analysis. Future rel
 
 
 HISTORY OF CHANGES
-------------------
+^^^^^^^^^^^^^^^^^^
 
+February 24\ :sup:`th`, 2014
+""""""""""""""""""""""""""""
 
-February 24th, 2014
-^^^^^^^^^^^^^^^^^^^
-
-Since the official release on September 10th 2013 I have performed a few changes, some of them thanks to the feedback from a few colleagues. Thanks in particular to Miguel Lechón and to Nikos Kouvaris. Here the list of changes:
+Since the official release on September 10\ :sup:`th` 2013 I have performed several changes, some of them thanks to the feedback from a few colleagues. Thanks in particular to Miguel Lechón and to Nikos Kouvaris. Here the list of changes:
 
 - Issues with recurrent imports solved. Only absolute imports are allowed in the modules.
 - ``Degree()`` function in *galib*.py module modified to exploit properties of boolean ndarrays.
