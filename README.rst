@@ -18,7 +18,7 @@ It's main features are...
 
 
 INSTALLATION
-^^^^^^^^^^^^
+------------
 
 GAlib does not require installation but requires to have NumPy installed. In order to use some accelerated functions that were too slow, the package Numba is an optional requirement. The library can be downloaded from its GitHub repository:
 
@@ -34,7 +34,7 @@ For more details see the User Guide in the */Docs* folder.
 
 
 HOW TO FIND FURTHER DOCUMENTATION
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 
 While working in an interactive session and having imported the modules, use the ``help()`` function to obtain information of the library files: ::
 
@@ -51,13 +51,13 @@ For IPython users, the help command is replaced by a question mark after the mod
 
 
 CONTACT INFORMATION
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 GAlib will have soon its own webpage and domain. For the moment, contact me at <galibrary@yahoo.com> for any questions, bug reports, etc.
 
 
 FUTURE DEVELOPMENTS
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 The current version includes core functionalities for graph analysis. Future releases will include:
 
@@ -73,10 +73,10 @@ The current version includes core functionalities for graph analysis. Future rel
 
 
 HISTORY OF CHANGES
-^^^^^^^^^^^^^^^^^^
+------------------
 
 February 24\ :sup:`th`, 2014
-""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Since the official release on September 10\ :sup:`th` 2013, I have performed several changes, some of them thanks to the feedback from a few colleagues. Thanks in particular to Miguel Lechón and to Nikos Kouvaris. Here the list of changes:
 
