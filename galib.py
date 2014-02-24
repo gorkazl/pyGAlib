@@ -31,7 +31,7 @@ MatchingIndex
 PATHS AND GRAPH DISTANCE FUNCTIONS
 ==================================
 FloydWarshall
-    Returns the pathlength between all pairs of nodes in a NxN matrix.
+    Computes the pathlength between all pairs of nodes in a network.
 PathsAllinOne
     Returns pathlength and betweenness. Finds all shortest paths and cycles.
 AllShortestPaths
@@ -565,14 +565,14 @@ def MatchingIndex(adjmatrix, normed=True):
 
 ###############################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
-def FloydWarshall(adjmatrix, weighted = False):
-    """Returns the pathlength between all pairs of nodes in a NxN matrix.
+def FloydWarshall(adjmatrix, weighted_dist = False):
+    """Computes the pathlength between all pairs of nodes in a network..
     
     Parameters
     ----------
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network.
-    weighted : boolean, optional
+    weighted_dist : boolean, optional
         True if the path distance shall be computed considering the weights
         of the links, False, otherwise. If the adjmatrix is a weighted
         network but'weighted = False', the unweighted graph distance is
@@ -585,7 +585,7 @@ def FloydWarshall(adjmatrix, weighted = False):
         nodes i and j.
     """
     # Prepare for computations
-    if weighted:
+    if weighted_dist:
         distmatrix = np.where(adjmatrix == 0, np.inf, adjmatrix)
     else:
         distmatrix = np.where(adjmatrix == 0, np.inf, 1)
