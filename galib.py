@@ -381,6 +381,8 @@ def Clustering(adjmatrix):
     is provided because it costs no additional resources and the data is
     useful for an further statistical analysis.
     """
+    adjmatrix = np.where(adjmatrix,1,0).astype(np.float32)
+    
     # 0) SECURITY CHECK
     assert Reciprocity(adjmatrix) == 1, \
         'Please introduce an undirected graph.'
