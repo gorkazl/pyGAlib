@@ -445,7 +445,7 @@ def RichClub(adjmatrix, weightednet=False, rctype='undirected'):
            "Please enter a proper 'rctype': 'undirected', 'outdegree', 'indegree' or 'average'."
 
     # Convert the network in binary if needed
-    if not weightednet:
+    if weightednet:
         adjmatrix = np.where(adjmatrix == 0, 0, 1)
 
     # Select the proper data
