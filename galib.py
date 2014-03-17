@@ -404,7 +404,7 @@ def Clustering(adjmatrix):
     
     return coefficient, cnodes
 
-def RichClub(adjmatrix, weightednet=False, rctype='undirected'):
+def RichClub(adjmatrix, rctype='undirected'):
     """Computes the density of subnetworks with degree > k', for k' = 0 to kmax.
     
     The k-density (phi(k)) is the density of the network for all nodes with
@@ -416,10 +416,6 @@ def RichClub(adjmatrix, weightednet=False, rctype='undirected'):
     ----------
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network.
-    weighted : boolean, optional
-        The function accepts both binary and weighted adjacency matrices but
-        it converts weigthed links into binary to improve performance.
-        Input of binary adjacency matrices is recommended.
     rctype : string, optional
         Defines how to make use of the degrees depending on whether the
         network is directed or undirected.
@@ -444,23 +440,20 @@ def RichClub(adjmatrix, weightednet=False, rctype='undirected'):
     assert rctype in('undirected', 'outdegree', 'indegree', 'average'), \
            "Please enter a proper 'rctype': 'undirected', 'outdegree', 'indegree' or 'average'."
 
-    # Convert the network in binary if needed
-    if weightednet:
-        adjmatrix = np.where(adjmatrix == 0, 0, 1)
+    # Convert the network in binary
+    adjmatrix = adjmatrix.astype('bool')
 
     # Select the proper data
+    indegree, outdegree = Degree(adjmatrix, True)
     if rctype == 'undirected':
         assert Reciprocity(adjmatrix) == 1, "Directed network, incompatible with rctype='undirected' option"
-        degree = Degree(adjmatrix)
+        degree = outdegree
     elif rctype == 'outdegree':
-        degree = Degree(adjmatrix)
+        degree = outdegree
     elif rctype == 'indegree':
-        adjmatrix = adjmatrix.T
-        degree = Degree(adjmatrix)
+        degree = indegree
     elif rctype == 'average':
-        indegree, outdegree = Degree(adjmatrix,True)
         degree = 0.5 * (indegree + outdegree)
-        #degree = (degree.round()).astype(int)
 
     # 1) Prepare for calculations
     adjmatrix = adjmatrix.copy()
