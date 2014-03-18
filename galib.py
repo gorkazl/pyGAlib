@@ -11,6 +11,8 @@ measures will be added to GAlib in future releases.
 
 BASIC CONNECTIVITY DESCRIPTORS
 ==============================
+Density
+    Returns the density of links in a network.
 Degree
     Computes the number of neighbours of every node.
 Intensity
@@ -68,6 +70,26 @@ import gatools
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
+def Density(adjmatrix):
+    """Returns the density of links in a network.
+    
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+        
+    Returns
+    -------
+    A scalar value between 0 and 1.
+    """
+    N = len(adjmatrix)
+    L = adjmatrix.astype('bool').sum()
+    
+    if adjmatrix.trace():
+        return float(L) / N**2
+    else:
+        return float(L) / (N*(N-1))
+
 def Degree(adjmatrix, directed=False):
     """Computes the number of neighbours of every node.
     
