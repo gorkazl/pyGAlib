@@ -728,9 +728,10 @@ def HMRandomNetwork(HMshape, avklist, directed=False, \
                 counter += 1
 
     # 0) SECURITY CHECKS
-    #assert that len(klist) == nlevels
-    # 0.2) assert that klist[0] <= n0, klist[1] <= xx, etc.
-    
+    assert len(HMshape) == len(avklist), 'HMshape and plist not aligned.'
+    assert HMshape[0] > 1, \
+        'HMshape[0] <= 1. Fisrt hierarchical level must contain more than one module.'    
+        
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
