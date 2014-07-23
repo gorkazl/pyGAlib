@@ -124,7 +124,7 @@ def Degree(adjmatrix, directed=False):
         return indegree, outdegree
 
     else:
-        degree= adjmatrix.sum(axis=0)
+        degree= adjmatrix.sum(axis=1)
         return degree
 
 def Intensity(adjmatrix, directed=False):
