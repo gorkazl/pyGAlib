@@ -96,6 +96,6 @@ Following publication of Klimm et al. “*Individual node’s contribution to th
 
 - ``GlobalHubness()``, ``LocalHubness()``, ``NodeParticipation()``, ``NodeDispersion()``.
 - Additionally, the function ``NodeRoles()`` returns all the four measures at once.
-- Functions to compute the participation matrix and the participation vectors of every node have been included.
+- Functions to compute the *participation matrix* and the *participation vectors* of every node have been included.
 
 
