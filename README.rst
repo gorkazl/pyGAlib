@@ -94,8 +94,8 @@ December 23\ :sup:`rd`, 2014
 
 Following publication of Klimm et al. “*Individual node’s contribution to the mesoscale of complex networks*” New J. Phys. 16:125006 (2014), functions to compute the roles of nodes have been included into the main library *galib.py*. Individual functions for each of the four new measures  are available:
 
-- ``GlobalHubness()’’, ``LocalHubness()’’, ``NodeParticipation()’’, ``NodeDispersion()’’.
-- Additionally, the function ``NodeRoles()’’ returns all the four measures at once.
+- ``GlobalHubness()``, ``LocalHubness()``, ``NodeParticipation()``, ``NodeDispersion()``.
+- Additionally, the function ``NodeRoles()`` returns all the four measures at once.
 - Functions to compute the participation matrix and the participation vectors of every node have been included.
 
 
