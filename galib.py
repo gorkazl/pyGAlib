@@ -54,13 +54,23 @@ K_Shells
 
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
 ====================================================
+GlobalHubness
+    Computes the global hubness of all nodes in a network.
+LocalHubness
+    Given a partition, computes the local hubness of all nodes.
 ParticipationMatrix
     Given a partition of the network, it returns the participation matrix.
-ParticipationIndex
-    Returns the participation index of all nodes given a partition.
+ParticipationVectors
+    Computes the probability of nodes to belong to every community.
+NodeParticipation
+    Participation index of every node given a partition of the network.
+NodeDispersion
+    Dispersion index of every node given a partition of the network.
+NodeRoles
+    Computes all four parameters to characterise the roles of nodes.
 ParticipationIndex_GA
    Returns the participation index as defined by Guimera & Amaral.
-LocalHubness_GA
+Hubness_GA
     Returns the within-module degree defined by Guimera & Amaral.
 """
 
@@ -249,7 +259,7 @@ def ReciprocalDegree(adjmatrix, normed=False):
         return 2.0 * recipdegree.astype(np.float) / (indegree+outdegree), \
                degminus.astype(np.float)/indegree, \
                degplus.astype(np.float)/outdegree
-    
+
     else:
         # The reciprocal degree of the nodes
         recipdegree = np.add.reduce(recipadjmatrix)
@@ -1173,6 +1183,94 @@ def K_Shells(adjmatrix):
 
 ######################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
+def GlobalHubness(adjmatrix):
+    """Computes the global hubness of all nodes in a network.
+    
+    Hubness is the degree of a node weighted by the expected degree
+    distribution in random graphs of same size and density. See Equation (4) 
+    of Klim et al. "Individual node's contribution to the mesoscale of
+    complex networks" New J. Phys. 16:125006 (2014).
+    
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    
+    Returns
+    -------
+    globalhubness : ndarray (float64)
+        Global hubness of every node.
+    
+    See Also
+    --------
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    NodeParticipation : Participation index of every node given a partition of the network.
+    NodeDispersion : Dispersion index of every node given a partition of the network.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    NodeRoles :
+    """
+    N = len(adjmatrix)
+    
+    dens = Density(adjmatrix)
+    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
+    degree = Degree(adjmatrix)
+    
+    globalhubness = invnorm * (degree - (N-1)*dens)
+    return globalhubness
+
+def LocalHubness(adjmatrix, partition):
+    """Given a partition, computes the local hubness of all nodes.
+    
+    Hubness is the degree of a node weighted by the expected degree
+    distribution in random graphs of same size and density. e Equation (4) 
+    of Klim et al. "Individual node's contribution to the mesoscale of
+    complex networks" New J. Phys. 16:125006 (2014).
+    Local hubness is the hubness applied to the subgraph formed by the
+    community the node belongs to.
+    
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays). 
+
+    Returns
+    -------
+    localhubness : ndarray (float64)
+        Local hubness of every node.
+    
+    See Also
+    --------
+    GlobalHubness : Hubness of nodes within their community.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    NodeParticipation : Participation index of every node given a partition of the network.
+    NodeDispersion : Dispersion index of every node given a partition of the network. 
+    NodeRoles :
+    """
+    N = len(adjmatrix)
+    ncoms = len(partition)
+    
+    localhubness = np.zeros(N,np.float64)
+    for n in xrange(ncoms):
+        com = partition[n]
+        
+        # Skip nodes of only one node
+        if len(com) == 1: continue
+        
+        # Compute the hubness of nodes in the isolated community
+        subnet = gatools.ExtractSubmatrix(adjmatrix,com)
+        hubness = GlobalHubness(subnet)
+        
+        if np.isnan(hubness.min()): continue
+        
+        localhubness[com] = hubness
+
+    return localhubness
+
 def ParticipationMatrix(adjmatrix, partition):
     """Given a partition of the network, it returns the participation matrix.
     
@@ -1194,91 +1292,272 @@ def ParticipationMatrix(adjmatrix, partition):
     
     See Also
     --------
-    ParticipationIndex_GA : Returns the participation index (based on Guimera
-        & Amaral's definiton) of all nodes given a partition.
-    ParticipationIndex : Returns the participation index of all nodes given 
-        a partition.
+    GlobalHubness : Computes the global hubness of all nodes in a network.
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    PArticipationVectors : Computes the probability of nodes to belong to every community.
+    NodeParticipation : Participation index of every node given a partition of the network.
+    NodeDispersion : Dispersion index of every node given a partition of the network.
+    RolesNode : 
     """
     N = len(adjmatrix)
-    npart = len(partition)
-    partitionmatrix = np.zeros((N,npart), np.uint8)
+    ncomms = len(partition)
+    partitionmatrix = np.zeros((N,ncomms), np.uint)
 
     # 1) CONSTRUCT THE PARTITION MATRIX, S (1 if node in module c, 0 otherwise)
-    for c in xrange(npart):
+    for c in xrange(ncomms):
         partitionmatrix[partition[c],c] = 1
     
     # 2) COMPUTE THE PARTICIPATION MATRIX
-    # 2.1) Security check
-    if adjmatrix.dtype == 'uint8' and N >= 255:
-        adjmatrix = adjmatrix.astype(np.uint32)
-
     # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
     pmatrix = np.dot(adjmatrix.astype(bool), partitionmatrix)
-
+        
     return pmatrix
 
-def ParticipationIndex(participmatrix, partition):
-    """Returns the participation index of all nodes given a partition.
+def ParticipationVectors(adjmatrix, partition):
+    """Computes the probability of nodes to belong to every community.
     
-    Given a partition of the network into communities, the participation 
-    index quantifies how much are the links of a node distributed along
-    all the communities of the network. It is 0 if the node is linked only to
-    nodes in one community, and it is 1 when the node spreads its links
-    homogeneously among all the communities. Find complete details in
-    Zamora-Lopez, C.S. Zhou & J. Kurths, Front. Neurosci. 5:83 (2011).
+    The probability of node i to belong to community c is estimated as the
+    fraction of nodes in c with which i is connected to: k_ic / N_c, where 
+    k_ic is the degree of i in c and N_c is the size of the community.
+    If i belongs to community c, then the norm is (N_c -1). Finally, the
+    fractions are normalised such that their sum is 1. 
     
     Parameters
     ----------
-    participmatrix : ndarray
-        A matrix of shape N x n, where N is the number of nodes and n is the
-        number of communities. Elements, a_is, of the matrix are the number of
-        neighbours (degree) that node i has in community s.
+    adjmatrix : ndarray
+        The adjacency matrix of the network.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
-    
+        
     Returns
     -------
-    participindex : ndarray of rank-1 and size N
-        Participation index of every node.
-
+    pmatrix : ndarray of rank-2 and shape N x n.
+        Every row contains the likelihood of the node to belong to each
+        of the communities.
+    
     See Also
     --------
-    ParticipationMatrix : The number of neighbours of a node in all communities.
-    ParticipationIndex_GA : Returns the participation index of all nodes 
-        computed as given by Guimera & Amaral, J. Stat. Mech. P02001 (2011).
-    LocalHubness_GA : Returns the z-score of node's local degree.
+    GlobalHubness : Computes the global hubness of all nodes in a network.
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    NodeParticipation : Participation index of every node given a partition of the network.
+    NodeDispersion : Dispersion index of every node given a partition of the network.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    RolesNode : 
     """
-    participmatrix = participmatrix.astype(np.float)
+    N = len(adjmatrix)
+    ncomms = len(partition)
+    commsizes = np.zeros(ncomms, np.float64)
+    partitionmatrix = np.zeros((N,ncomms), np.uint8)
+
+    # 1) COMPUTE FIRST THE PARTICIPATION MATRIX
+    # 1.1) Construct the partition matrix
+    for c in xrange(ncomms):
+        partitionmatrix[partition[c],c] = 1
+        commsizes[c] = len(partition[c])
     
-    # 0) Security check
-    N, ncoms = np.shape(participmatrix)
-    assert len(partition) == ncoms, 'Participation matrix and partition not aligned'
-
-    # 1) Find the size of each community
-    Ncoms = np.zeros(ncoms, np.float)
-    for s in xrange(ncoms):
-        Ncoms[s] = len(partition[s])
-
-    # 2) COMPUTE AND NORMALIZE THE PARTICIPATION VECTORS
-    # 2.1) Probability of node to connect to each community
-    for s in xrange(ncoms):
-        community = partition[s]
-        newNcoms = Ncoms.copy()
-        newNcoms[s] -= 1
-        participmatrix[community] /= newNcoms
+    # 1.2) Compute the participation matrix
+    # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
+    pmatrix = np.dot(adjmatrix.astype(bool), partitionmatrix)
     
-    # 2.2) Nromalize participation vectors such that sum of probability is 1
-    participmatrix_t = participmatrix.T / participmatrix.sum(axis=1)
-    participmatrix = participmatrix_t.T
-    del participmatrix_t
-
-    # 3) REDUCE THE PARTICIPATION VECTORS INTO THE PARTICIPATION INDICES
-    stdnorm = float(ncoms) / np.sqrt(ncoms-1)
-    participindex = 1. - stdnorm * participmatrix.std(axis=1)
+    # 2) NOW COMPUTE THE PARTICIPATION VECTORS
+    pmatrix = pmatrix.astype(np.float64)
+    for i in xrange(N):
+        # 2.1) The fraction of neighbours node i connects with,
+        # in every module
+        for c in xrange(ncomms):
+            if partitionmatrix[i,c]:
+                pmatrix[i,c] /= (commsizes[c] - 1.0)
+            else:
+                pmatrix[i,c] /= commsizes[c]
     
-    return participindex
+        # 2.2) Finally, normalize the vector to sum 1
+        pmatrix[i] /= pmatrix[i].sum()
+    
+    return pmatrix
 
+def NodeParticipation(adjmatrix, partition):
+    """Participation index of every node given a partition of the network.
+    
+    Computes the participation index of every node. If a node is only 
+    connected to other nodes of the same community, then pi = 0. If the 
+    node is equally likely connected with ALL the communities, then pi = 1.
+    For a detailed definition see Equation (7) of Klimm et al. "Individual 
+    node's contribution to the mesoscale of complex networks" New J. Phys. 
+    16:125006 (2014).
+    
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays). 
+
+    Returns
+    -------
+    nodeparticip : ndarray of dtype=Float64 and rank-N
+        The participation index of each node.
+        
+    See Also
+    --------
+    GlobalHubness : Computes the global hubness of all nodes in a network.
+    LocaHubness : Given a partition, computes the local hubness of all nodes.
+    NodeDispersion : Dispersion index of every node given a partition of the network.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    """
+    # 1) Compute first the participation vectors
+    particvectors = ParticipationVectors(adjmatrix,partition)
+    
+    # 2) Reduce the vector of each node into a single normalised scalar
+    ncomms = np.float64(len(partition))
+    nodeparticip = 1. - ncomms / np.sqrt(ncomms - 1) * particvectors.std(axis=1)
+    
+    return nodeparticip
+
+def NodeDispersion(adjmatrix, partition):
+    """Dispersion index of every node given a partition of the network.
+    
+    Computes the dispersion index of every node. Dispersion is a measure to
+    quantify whether a node is well classified within the partition, or it
+    is missaclassified. If a node is only connected to nodes in the same 
+    community, then di = 0. If the node is equally likely connected with two
+    of more communities, then pi = 1.
+    For a detailed definition see Equation (7) of Klimm et al. "Individual
+    node's contribution to the mesoscale of complex networks" New J. Phys. 
+    16:125006 (2014).
+    
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays). 
+
+    Returns
+    -------
+    nodedispersion : ndarray of dtype=Float64 and rank-N
+        The participation index of each node.
+        
+    See Also
+    --------
+    GlobalHubness : Computes the global hubness of all nodes in a network.
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    NodeParticipation : Participation index of every node given a partition of the network.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    """
+    N = len(adjmatrix)
+    # 1) Compute first the participation vectors
+    particvectors = ParticipationVectors(adjmatrix,partition)
+    
+    # 2) Reduce the vector of each node into a single normalised scalar
+    nodedispersion = np.zeros(N, np.float64)
+    for i in xrange(N):
+        idx = particvectors[i].nonzero()[0]
+        vector = particvectors[i,idx]
+        ncomms = np.float64(len(vector))
+        if ncomms > 1:
+            nodedispersion[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
+    
+    return nodedispersion
+
+def RolesNodes(adjmatrix, partition):
+    """Computes all four parameters to characterise the roles of nodes.
+    
+    Following the definitions in Klimm et al. "Individual node's 
+    contribution to the mesoscale of complex networks" New J. Phys. 
+    16:125006 (2014), it computes the four parameters that characterise
+    the roles that nodes take in a network given a partition of its nodes
+    into communites, classes or any predefined categories.
+    
+        Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays). 
+
+    Returns
+    -------
+    globalhubness : ndarray (float64)
+        Global hubness of every node.
+    localhubness : ndarray (float64)
+        Local hubness of every node.
+    nodeparticip : ndarray of dtype=Float64 and rank-N
+        The participation index of each node.
+    nodedispersion : ndarray of dtype=Float64 and rank-N
+        The participation index of each node.
+        
+    See Also
+    --------
+    GlobalHubness : Computes the global hubness of all nodes in a network.
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    NodeParticipation : Participation index of every node given a partition of the network.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    """
+    N = len(adjmatrix)
+    ncomms = len(partition)
+    
+    # 1) COMPUTE THE GLOBAL HUBNESS
+    dens = Density(adjmatrix)
+    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
+    degree = Degree(adjmatrix)
+    
+    globalhubness = invnorm * (degree - (N-1)*dens)
+
+    # 2) COMPUTE THE LOCAL HUBNESS AND CREATE THE PARTITION MATRIX
+    localhubness = np.zeros(N,np.float64)
+    commsizes = np.zeros(ncomms,np.float64)
+    partitionmatrix = np.zeros((N,ncomms), np.uint)
+    for c in xrange(ncomms):
+        com = partition[c]
+        commsizes[c] = len(partition[c])
+        partitionmatrix[com,c] = 1
+        
+        # Skip nodes of only one node
+        if len(com) == 1: continue
+        
+        # Compute the hubness of nodes in the isolated community
+        subnet = gatools.ExtractSubmatrix(adjmatrix,com)
+        hubness = GlobalHubness(subnet)
+        
+        if np.isnan(hubness.min()): continue
+        localhubness[com] = hubness
+
+    # 3) COMPUTE THE PARTICIPATION VECTORS
+    particvectors = np.dot(adjmatrix.astype(bool), partitionmatrix)
+    particvectors = particvectors.astype(np.float64)
+    for i in xrange(N):
+        for c in xrange(ncomms):
+            if partitionmatrix[i,c]:
+                particvectors[i,c] /= (commsizes[c] - 1.0)
+            else:
+                particvectors[i,c] /= commsizes[c]
+    
+        # Finally, normalize the vector to sum 1
+        particvectors[i] /= particvectors[i].sum()
+        
+    # 4) COMPUTE THE PARTICIPATION AND DISPERSION INDICES
+    # The participation index
+    norm = np.float64(ncomms) / np.sqrt(ncomms - 1.0)
+    nodeparticip = 1. - norm * particvectors.std(axis=1)
+    
+    # The dispersion index
+    nodedispersion = np.zeros(N, np.float64)
+    for i in xrange(N):
+        idx = particvectors[i].nonzero()[0]
+        vector = particvectors[i,idx]
+        ncomms = np.float64(len(vector))
+        if ncomms > 1:
+            nodedispersion[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
+    
+    return globalhubness, localhubness, nodeparticip, nodedispersion
+    
 def ParticipationIndex_GA(participmatrix):
     """Returns the participation index as defined by Guimera & Amaral.
     
@@ -1328,7 +1607,7 @@ def ParticipationIndex_GA(participmatrix):
     participindex = 1. - participindex
     return participindex
 
-def LocalHubness_GA(participmatrix, partition):
+def Hubness_GA(participmatrix, partition):
     """Returns the within-module degree defined by Guimera & Amaral.
     
     The within-module degree is a measure of local hubness. Given a network
