@@ -2,6 +2,12 @@
 In this script we show how to convert datasets
 """
 
+__author__ = "Gorka Zamora-Lopez" 
+__email__ = "Gorka.zamora@ymail.com"
+__copyright__ = "Copyright 2013-2015"
+__license__ = "GPL"
+__update__="07/01/2015"
+
 from os.path import join
 from numpy import*
 from gatools import LoadFromPajek, Save2Pajek, LoadLabels, SaveLabels

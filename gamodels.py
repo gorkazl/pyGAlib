@@ -36,6 +36,12 @@ RavaszBarabasiModel
     Returns a hierarchical/modular network of the Ravasz & Barabasi model.
 """
 
+__author__ = "Gorka Zamora-Lopez" 
+__email__ = "Gorka.zamora@ymail.com"
+__copyright__ = "Copyright 2013-2015"
+__license__ = "GPL"
+__update__="07/01/2015"
+
 import numpy as np
 import numpy.random
 import random
@@ -730,8 +736,8 @@ def HMRandomNetwork(HMshape, avklist, directed=False, \
     # 0) SECURITY CHECKS
     assert len(HMshape) == len(avklist), 'HMshape and plist not aligned.'
     assert HMshape[0] > 1, \
-        'HMshape[0] <= 1. Fisrt hierarchical level must contain more than one module.'    
-        
+        'HMshape[0] <= 1. First hierarchical level must contain more than one module.'
+
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
@@ -771,4 +777,3 @@ def HMRandomNetwork(HMshape, avklist, directed=False, \
             SeedLinks(adjmatrix, Ls, partition, directed)
     
     return adjmatrix
-

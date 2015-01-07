@@ -1,17 +1,37 @@
 """
-In this script we show an example of how to compute the roles of nodes
+In this script is an example of how to compute and plot the roles of nodes
 according to the partition of a network into communities.
+For more information and citation, please refer to:
+F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths, G. Zamora-Lopez (2014)
+Individual node's contribution to the mesoscale of complex networks, New J.
+Phys. 16, 125006.
 """
 
-from os.path import join
-from numpy import*
+__author__ = "Gorka Zamora-Lopez" 
+__email__ = "Gorka.zamora@ymail.com"
+__copyright__ = "Copyright 2013-2015"
+__license__ = "GPL"
+__update__="07/01/2015"
+
 import matplotlib.pyplot as plt
+from numpy import*
 from gatools import SymmetriseMatrix
 from galib import *
 
+def MaxDispersionCurve(d, M):
+    """This function is defined only to be plotted in the dispersion vs
+    participation plot.
+    """
+    M = float(M)
+    x = 0.5 * (2.0 - d)
+    
+    return 1.0 - sqrt( M/(M-1.0) * ( x**2 + (1.0 - x)**2 - 1.0/M ) )
+    
+    
+
+############################################################################
 # 0) READ THE DATA OF THE CORTICAL NETWORK OF THE CAT
-datapath = '/yourpath/GAlib/Data/'
-net = loadtxt(join(datapath, 'Cat53_cortex.txt'), uint8)
+net = loadtxt('Data/Cat53_cortex.txt', uint8)
 net = SymmetriseMatrix(net)
 N = len(net)
 
@@ -24,64 +44,93 @@ partition = [visual, auditory, somatomotor, frontolimbic]
 ncoms = len(partition)
 
 
-# 1) CALCULATE THE PARTICIPATION MATRIX
-# pmatrix[i,s] is the number of neighbours of node i in community s
-pmatrix = ParticipationMatrix(net, partition)
+# 1) COMPUTE THE FOUR PARAMETERS DEFINIG THE ROLE OF EACH NODE --
+# global hubness, local hubness, node participation and node dispersion
+ghubness, lhubness, pindex, dindex = RolesNodes(net, partition)
 
 
-# 2) COMPUTE THE ROLES OF THE NODES
-# 2.1) Normalized global hubness of the nodes
-degree = Degree(net)
-normdeg = degree.astype(float) / N
+# 2) PLOT THE RESULTS
+# 2.0) Some helper data for the plots
+# Define colors of the nodes
+colorlist = ['black', 'red', 'green', 'blue']
+colornodes = []
+for n in xrange(ncoms):
+    com = partition[n]
+    colornodes += len(com)*[colorlist[n]]
 
-# 2.2) The participation index of the nodes
-for re in xrange(1000):
-    pindex = ParticipationIndex(pmatrix,partition)
+plt.figure(figsize=(17,6))
+
+# 2.1) Plot local hubness vs global hubness
+plt.subplot(1,3,1)
+
+# Plot the data
+plt.scatter(lhubness,ghubness, color=colornodes)
+
+# Draw the axis (look for other manner!)
+plt.plot((-100,100),(0,0), color='gray', zorder=0)
+plt.plot((0,0),(-100,100), color='gray', zorder=0)
+
+# Draw the significance lines
+plt.plot((-100,100),(2.5,2.5), '--', color='gray', zorder=0)
+plt.plot((-100,100),(-2.5,-2.5), '--', color='gray', zorder=0)
+plt.plot((2.5,2.5),(-100,100), '--', color='gray', zorder=0)
+plt.plot((-2.5,-2.5),(-100,100), '--', color='gray', zorder=0)
+
+# Axis properties
+#plt.xlim(floor(lhubness.min()), floor(lhubness.max()+1))
+#plt.ylim(floor(ghubness.min()), floor(ghubness.max()+1))
+plt.xlim(-5,5)
+plt.ylim(-6,6)
+plt.xlabel('Local hubness', fontsize=16)
+plt.ylabel('Global hubness', fontsize=16)
 
 
-# 3) FOR COMPARISON, COMPUTE THE ROLES ORIGINALLY GIVEN BY GUIMERA AND AMARAL
-# 3.1) The local hubness of the nodes
-zlocal = LocalHubness_GA(pmatrix, partition)
+# 2.2) Plot node participation vs. global hubness
+plt.subplot(1,3,2)
 
-# 3.2) The participation index of the nodes
-pindex_GA = ParticipationIndex_GA(pmatrix)
+# Plot the data
+plt.scatter(pindex,ghubness, color=colornodes)
 
+# Draw the axis (look for other manner!)
+plt.plot((-100,100),(0,0), color='gray', zorder=0)
+#plt.plot((0,0),(-100,100), color='gray', zorder=0)
 
-# 4) PLOT THE ROLES IN BOTH FRAMEWORKS
-# NOTE!! Plotting requires to have Matplotlib installed.
-# Otherwise, comment the rest of the script
+# Draw the significance lines
+plt.plot((-100,100),(2.5,2.5), '--', color='gray', zorder=0)
+plt.plot((-100,100),(-2.5,-2.5), '--', color='gray', zorder=0)
+plt.plot((0.3333,0.3333),(-100,100), '--', color='gray', zorder=0)
+plt.plot((0.6666,0.6666),(-100,100), '--', color='gray', zorder=0)
 
-# Colors for the nodes according to their community
-colornodes = ['black']*16 + ['red']*7 + ['green']*16 + ['blue']*14
+# Axis properties
+plt.xlim(-0.01,1.01)
+plt.ylim(-6,6)
+plt.xlabel('Participation Index', fontsize=16)
+plt.ylabel('Global hubness', fontsize=16)
 
-# 4.1) Plot the roles of the nodes
-plt.figure()
+# 2.3) Plot node dispersion vs. node participation
+# Compute the background limit curves for the dindex vs. pindex plot
+ddata = arange(-0.1,1.001,0.001)
+pdata = MaxDispersionCurve(ddata, 4)
 
-plt.scatter(pindex, normdeg, s=50, color=colornodes)
-plt.xlabel('Participation index, $P_i$', fontsize=18)
-plt.xlim(0,1)
-plt.ylabel('Normalized degree, $k_i / N$', fontsize=18)
-plt.ylim(0,1)
+plt.subplot(1,3,3)
 
+# Plot the background lines
+plt.plot(pdata, ddata, color='gray')
+plt.plot((0,1),(0,1), color='gray')
+
+# Include the shades
+plt.fill_between((0,1.2), (-0.5,-0.5), (0,1.2), color='gray', alpha=0.2)
+plt.fill_between(pdata, ddata, 1.1*ones(len(ddata)), color='gray', alpha=0.2)
+
+# Plot the data
+plt.scatter(pindex,dindex, color=colornodes)
+plt.xlabel('Participation Index', fontsize=16)
+plt.ylabel('Dispersion Index', fontsize=16)
+plt.xlim(-0.01,1.01)
+plt.ylim(-0.01,1.01)
 plt.grid()
 
-# 4.2) Plot the roles in the z-Pi plane as done by Guimera & Amaral
-plt.figure()
-
-plt.scatter(pindex_GA, zlocal, s=50, color=colornodes)
-plt.xlabel('Participation index of GA, $P_i$', fontsize=18)
-plt.xlim(0,1)
-plt.ylabel('Within-module degree, $Z$', fontsize=18)
-plt.ylim(-3,6)
-
-# Plot the delimiter lines
-plt.plot((0,1),(2.5,2.5), 'k')
-plt.plot((0.1,0.1), (-10,2.5), 'k')
-plt.plot((0.65,0.65), (-10,2.5), 'k')
-plt.plot((0.8,0.8), (-10,2.5), 'k')
-plt.plot((0.3,0.3), (2.5, 10), 'k')
-plt.plot((0.75,0.75), (2.5,10), 'k')
-
-
+plt.tight_layout()
 plt.show()
+
 

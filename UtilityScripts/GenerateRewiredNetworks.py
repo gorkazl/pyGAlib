@@ -55,6 +55,12 @@ then type the following command:
 
 """
 
+__author__ = "Gorka Zamora-Lopez" 
+__email__ = "Gorka.zamora@ymail.com"
+__copyright__ = "Copyright 2013-2015"
+__license__ = "GPL"
+__update__="07/01/2015"
+
 from os.path import join
 from numpy import*
 from gatools import Save2Pajek, LoadFromPajek
@@ -64,7 +70,7 @@ from gamodels import RewireNetwork
 ### PARAMETERS TO BE MODIFIED BY THE USER ##################################
 ### NETWORK OPTIONS
 # Path to the original network to be rewired
-inputfile = '/yourpath/GAlib/Data/Cat53_cortex.txt'
+inputfile = '/yourpath/GAlib/Examples/Data/Cat53_cortex.txt'
 
 # Number of realizations
 realiz = 100

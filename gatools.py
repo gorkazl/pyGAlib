@@ -58,6 +58,12 @@ AllBipartitions
     Given a set, finds all its possible bipartitions.
 """
 
+__author__ = "Gorka Zamora-Lopez" 
+__email__ = "Gorka.zamora@ymail.com"
+__copyright__ = "Copyright 2013-2015"
+__license__ = "GPL"
+__update__="07/01/2015"
+
 import itertools
 import numpy as np
 import galib
