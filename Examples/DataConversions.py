@@ -14,7 +14,7 @@ from gatools import LoadFromPajek, Save2Pajek, LoadLabels, SaveLabels
 
 
 # 1) READ SOME DATA IN PAJEK FORMAT AND SAVE THE ADJACENCY MATRIX
-datapath = '/yourpath/GAlib/Data/'
+datapath = 'Data/'
 
 # 1.1) Read the data splitting the adjacency matrix and the labels
 fname = 'LesMiserables.net'
@@ -35,7 +35,7 @@ SaveLabels(join(datapath,outfname3), labels)
 
 
 # 2) READ AN ADJACENCY MATRIX AND SAVE IT AS PAJEK FORMAT
-datapath = '/yourpath/GAlib/Data/'
+datapath = 'Data/'
 
 # 2.1) Read the adjacency matrix
 fname = 'Cat53_cortex.txt'
