@@ -75,6 +75,17 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+December 23\ :sup:`rd`, 2014
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Following publication of Klimm et al. “*Individual node’s contribution to the mesoscale of complex networks*” New J. Phys. 16:125006 (2014), functions to compute the roles of nodes have been included into the main library *galib.py*. Individual functions for each of the four new measures  are available:
+
+- ``GlobalHubness()``, ``LocalHubness()``, ``NodeParticipation()``, ``NodeDispersion()``.
+- Function name ``ParticipationIndex()`` changed to ``NodePArticipation()``.
+- Additionally, the function ``NodeRoles()`` returns all the four measures at once.
+- Functions to compute the *participation matrix* and the *participation vectors* of every node have been included.
+
+
 February 24\ :sup:`th`, 2014
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -88,15 +99,5 @@ Since the official release on September 10\ :sup:`th` 2013, I have performed sev
 - ``RewireNetwork()`` in *gamodels.py* has been corrected. In the very particular case of undirected graphs with assymetric link weights, weigths were not conserved. Now all nodes conserve their input intensity also in that case.
 - A new module has been included: *galib_numba.py*. This is intended for the slowest functions of GAlib to be accelerated using the Numba package. Users with Numba installed can call those faster functions independently of the main galib import. For the moment I only included my main priority, a fast function for the Floyd-Warshall algorithm, ``FloydWarshall_Numba()``.
 
-
-December 23\ :sup:`rd`, 2014
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Following publication of Klimm et al. “*Individual node’s contribution to the mesoscale of complex networks*” New J. Phys. 16:125006 (2014), functions to compute the roles of nodes have been included into the main library *galib.py*. Individual functions for each of the four new measures  are available:
-
-- ``GlobalHubness()``, ``LocalHubness()``, ``NodeParticipation()``, ``NodeDispersion()``.
-- Function name ``ParticipationIndex()`` changed to ``NodePArticipation()``.
-- Additionally, the function ``NodeRoles()`` returns all the four measures at once.
-- Functions to compute the *participation matrix* and the *participation vectors* of every node have been included.
 
 
