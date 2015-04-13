@@ -75,6 +75,11 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+April 13\ :sup:`th`, 2015
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Function to compute the Fisher-corrected mean correlation values, ``MeanCorrelation()``, has been added to *gatools.py* module.
+
 December 23\ :sup:`rd`, 2014
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

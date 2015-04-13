@@ -56,6 +56,8 @@ AllCominations
     Given a set, finds all combinations of given size.
 AllBipartitions
     Given a set, finds all its possible bipartitions.
+MeanCorrelation
+    Computes the Fisher-corrected mean value of correlation values.
 """
 
 __author__ = "Gorka Zamora-Lopez" 
@@ -929,3 +931,40 @@ def AllBipartitions(data):
 
     return bipartitions
 
+def MeanCorrelation(data, tolerance=10**(-15)):
+    """Computes the Fisher-corrected mean value of correlation values.
+    
+    Parameters
+    ----------
+    data : array-like ndarray or list
+        A tuple, list or array containing the values of correlation that
+        are to be averaged. Accepts only 1-dimensional data, no matrices.
+    tolerance : float
+        Small jitter in the correlation values around exact 1.0 and -1.0
+        that will also be accepted. Largest correlation values are
+        set to 1.0 - tolerance and smallest correlation values are set to
+        -1.0 + tolerance. This avoids +/- inf values to be returned by the 
+        arctanh() function. A single inf value would totally bias the mean.
+    
+    Returns
+    -------
+    float value
+        Mean value of correlation in the range (-1,1).
+    """
+    # Security checks and data preparation
+    assert len(np.shape(data)) == 1, 'Only 1D arrays or lists of data accepted'
+    dataset = np.array(data, np.float64)
+
+    assert dataset.max() < 1.0 + tolerance, 'Correlation values larger than 1.0 in data'
+    assert dataset.min() > -1.0 - tolerance, 'Correlation values smaller than -1.0 in data'
+    
+    # Remove extremal values to avoid infinite values in the arctanh(x).
+    idx = np.where(data >= 1.0)
+    if idx: data[idx] = 1.0 - tolerance
+    idx = np.where(data <= -1.0)
+    if idx: data[idx] = -1.0 + tolerance
+    
+    # Compute the Fisher corrected
+    newdata = np.arctanh(data)
+    
+    return np.tanh(newdata.mean())
