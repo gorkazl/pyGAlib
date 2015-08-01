@@ -33,7 +33,7 @@ ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
 None yet.
 """
 
-__author__ = "Gorka Zamora-Lopez" 
+__author__ = "Gorka Zamora-Lopez"
 __email__ = "Gorka.zamora@ymail.com"
 __copyright__ = "Copyright 2013-2015"
 __license__ = "GPL"
@@ -52,11 +52,11 @@ import galib
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
 def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
     """Computes the pathlength between all pairs of nodes in a network.
-    
-    WARNING! This version returns the same output as 'FloydWarshall()' 
-        function in main galib.py module but runs much faster (for networks 
+
+    WARNING! This version returns the same output as 'FloydWarshall()'
+        function in main galib.py module but runs much faster (for networks
         of N > 100). It requires package Numba to be installed.
-    
+
     Parameters
     ----------
     adjmatrix : ndarray of rank-2
@@ -66,13 +66,13 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
         of the links. False, otherwise. If 'adjmatrix' is a weighted
         network but'weighted_dist = False', the weights of the links are
         ignored.
-        
+
     Returns
     -------
     distmatrix : ndarray of rank-2
         The pairwise distance matrix dij of the shortest pathlength between
         nodes i and j.
-        
+
     See Also
     --------
     FloydWarshall : Computes the pathlength between all pairs of nodes.
@@ -110,10 +110,10 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
         distmatrix = np.where(adjmatrix == 0, np.inf, adjmatrix)
     else:
         distmatrix = np.where(adjmatrix == 0, np.inf, 1)
-    
+
     # 1.2) Find out whether the network is directed or undirected
     recip = galib.Reciprocity(adjmatrix)
-    
+
     # 2) RUN THE FLOYD-WARSHALL ALGORITHM USING FASTER FUNCTIONS (NUMBA)
     if recip==1.0:
         FW_Undirected(distmatrix)
