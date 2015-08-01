@@ -75,6 +75,12 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+June 14\ :sup:`th`, 2015
+^^^^^^^^^^^^^^^^^^^^^^^^^
+- started adding unit-tests
+- removed ``gatools.ArrayCompare()`` since the function was broken. The functionality is covered by ``numpy.array_equal()``
+- fixed bug in ``gatools.Quartiles()``
+
 April 13\ :sup:`th`, 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
