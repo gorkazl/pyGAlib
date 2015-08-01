@@ -75,6 +75,11 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+August 1\ :sup:`st`, 2015
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A function ``ModularInhomogeneousGraph()`` has been included to the *gamodels.py* module to generate random modular graphs in which every module can be of different size and/or different internal density.
+
 April 13\ :sup:`th`, 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
