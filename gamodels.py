@@ -17,7 +17,7 @@ ErdosRenyiGraph
 RandomGraph
     Returns a random graph with N nodes and L links.
 BarabasiAlbertGraph
-    Returns a scale-free network after the Barabasi & Albert model.
+    Returns a scale-free network following the Barabasi & Albert model.
 ScaleFreeGraph
     Returns a scale-free graph of given size and exponent.
 
@@ -28,8 +28,10 @@ RewireNetwork
 
 HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
 ============================================
+ModularInhomogenousGraph
+    Returns a random modular network with desired module sizes and densities.
 HMpartition
-    Returns a partition of nodes for a hierarchical/modular random network..
+    Returns a partition of nodes for a hierarchical/modular random network.
 HMRandomNetwork
     Returns a random hierarchical/modular network of given shape.
 RavaszBarabasiModel
@@ -588,6 +590,111 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
 ######################################################################
 """MODULAR AND HIERARCHICAL NETWORK MODELS"""
+def ModularInhomogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
+    """
+    Returns a random modular network with desired module sizes and densities.
+    
+    This function generates modular networks in which both the internal
+    links within the modules and the external links across modules are shed 
+    at random. As in the Erdos-Renyi model, every pair of nodes is linked 
+    with the specified probability and therefore, the total number of links 
+    slightly varies from one realization to another. The user will specify
+    the size and the internal connection probability for each of the modules,
+    and one unique probability for the external links across communities. 
+    
+    Parameters
+    ----------
+    Nsizelist : list, tuple or array of integers
+        A list containing the desired size (number of nodes) for every 
+        module in the network.
+    pintlist : list, tuple or array of floats
+        A list  containing the internal link probability for each of the 
+        modules. All values must range between 0 and 1.
+    pext : float
+        The external probability of connection between nodes in different 
+        communities.
+    directed : Boolean (optional)
+        True if a directed graph is desired, False if an undirected graph is 
+        desired.
+    selfloops: Boolean (optional)
+        True if self-loops are allowed, False otherwise.
+        
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2 and dtype = uin8
+        The adjacency matrix of the generated random modular graph.
+    partition : list of ndarrays of dtype = uint
+        A list containing the indices of the nodes in each module.
+    
+    Usage and examples
+    ------------------
+    Setting Nsizelist = [100,200,300], pintlist = [0.3, 0.3, 0.5] and
+    pext = 0.01 will generate a random graph of size N = 600 nodes with
+    three modules of sizes N1 = 100, N2 = 200 and N3 = 300 nodes respectively.
+    Each module is an Erdos-Renyi random graph with link probability
+    (approximate density of links) pint1 = 0.3, pint2 = 0.3 and pint3 = 0.5
+    respectively. The probability that a pair of nodes in different 
+    modules are connected is pext = 0.01.
+    
+    See Also
+    --------
+    HMRandomNetwork : Generates Nested random hierarchical/modular networks.
+    ErdosRenyiGraph : Generates random graphs with given link probability.
+    """
+    # 0) SECURITY CHECKS
+    assert len(Nsizelist) == len(pintlist), 'Nsizelist and pintlist not aligned.'
+    assert pext >= 0.0 and pext <= 1.0, \
+        "Probability 'pext' out of bounds. Insert value between 0 and 1"
+    for c in xrange(len(pintlist)):
+        assert pintlist[c] >= 0.0 and pintlist[c] <= 1.0, \
+            "Probability 'pintlist' out of bounds. Insert values between 0 and 1"
+
+    # 1) PREPARE TO CREATE THE NETWORK
+    N = np.add.reduce(Nsizelist)
+    ncommunities = len(Nsizelist)
+    adjmatrix = np.zeros((N,N), np.uint8)
+    
+    # Define the partition
+    counter = 0
+    partition = []
+    for c in xrange(ncommunities):
+        com = np.arange(counter,counter+Nsizelist[c])
+        partition.append(com)
+        counter += Nsizelist[c]
+    
+    # 2) GENERATE THE RANDOM MODULAR NETWORK
+    for c1 in xrange(ncommunities):
+        com1 = partition[c1]
+        N1 = Nsizelist[c1]
+        
+        for c2 in xrange(ncommunities):
+            com2 = partition[c2]
+            N2 = Nsizelist[c2]
+            
+            # 2.0) Choose the probability to use
+            if c1 == c2: pthres = pintlist[c1]
+            else: pthres = pext
+            
+            # 2.1) Create a random matrix with normally distributed values
+            submatrix = np.random.rand(N1,N2)
+            # 2.2) Select the entries with value <= p
+            submatrix = np.where(submatrix <= pthres, 1, 0).astype(np.uint8)
+            # 1.3) Copy the submatrix into the final adjmatrix
+            imin = com1[0]; imax = com1[-1] + 1
+            jmin = com2[0]; jmax = com2[-1] + 1
+            adjmatrix[imin:imax,jmin:jmax] = submatrix
+            
+    # 3) IF GRAPH SHOULD BE UNDIRECTED...
+    if not directed:
+        adjmatrix[np.tril_indices(N, k=1)] = 0
+        adjmatrix += adjmatrix.T
+
+    # 4) Remove the diagonal if no self-loops are desired
+    if not selfloops:
+        adjmatrix[np.diag_indices(N)] = 0
+
+    return adjmatrix, partition
+
 def HMpartition(HMshape):
     """Returns a partition of nodes for a hierarchical/modular random
     network.
@@ -608,7 +715,7 @@ def HMpartition(HMshape):
     
     See Also
     --------
-    HMRNetwork : Generato of random modular and hierarchical networks.
+    HMRNetwork : Generates random modular and hierarchical networks.
     """
     N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
@@ -704,6 +811,12 @@ def HMRandomNetwork(HMshape, avklist, directed=False, \
     the random generation process, every node will only have the desired 
     internal and external degrees on the ensemble average, but not
     necessarily in each realization.
+    
+    See Also
+    --------
+    ModularInhomogeneousGraph
+        Generates random modular networks with desired module sizes and
+        densities.
     """
     def SeedLinks(adjmatrix, L, partition, directed=False):
         # 0) SSECURITY CHECK
