@@ -381,7 +381,7 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
     
     Examples
     --------
-    >>> testmat = array(((1,2,3,4),(5,6,7,8),(9,10,11,12),(13,14,15,16)), int)
+    >>> testmat = array(((1,2,3),(4,5,6),(7,8,9)),int)
     >>> ExtractSubmatrix(testmat,[0,3])
     array([[ 1,  4],
            [13, 16]])
