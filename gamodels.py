@@ -601,7 +601,7 @@ def ModularInhomogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
     slightly varies from one realization to another. The user will specify
     the size and the internal connection probability for each of the modules,
     and one unique probability for the external links across communities. 
-    
+
     Parameters
     ----------
     Nsizelist : list, tuple or array of integers
@@ -618,14 +618,14 @@ def ModularInhomogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
         desired.
     selfloops: Boolean (optional)
         True if self-loops are allowed, False otherwise.
-        
+
     Returns
     -------
     adjmatrix : ndarray of rank-2 and dtype = uin8
         The adjacency matrix of the generated random modular graph.
     partition : list of ndarrays of dtype = uint
         A list containing the indices of the nodes in each module.
-    
+
     Usage and examples
     ------------------
     Setting Nsizelist = [100,200,300], pintlist = [0.3, 0.3, 0.5] and
@@ -635,7 +635,7 @@ def ModularInhomogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
     (approximate density of links) pint1 = 0.3, pint2 = 0.3 and pint3 = 0.5
     respectively. The probability that a pair of nodes in different 
     modules are connected is pext = 0.01.
-    
+
     See Also
     --------
     HMRandomNetwork : Generates Nested random hierarchical/modular networks.
@@ -653,7 +653,7 @@ def ModularInhomogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
     N = np.add.reduce(Nsizelist)
     ncommunities = len(Nsizelist)
     adjmatrix = np.zeros((N,N), np.uint8)
-    
+
     # Define the partition
     counter = 0
     partition = []
@@ -661,20 +661,20 @@ def ModularInhomogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
         com = np.arange(counter,counter+Nsizelist[c])
         partition.append(com)
         counter += Nsizelist[c]
-    
+
     # 2) GENERATE THE RANDOM MODULAR NETWORK
     for c1 in xrange(ncommunities):
         com1 = partition[c1]
         N1 = Nsizelist[c1]
-        
+
         for c2 in xrange(ncommunities):
             com2 = partition[c2]
             N2 = Nsizelist[c2]
-            
+
             # 2.0) Choose the probability to use
             if c1 == c2: pthres = pintlist[c1]
             else: pthres = pext
-            
+
             # 2.1) Create a random matrix with normally distributed values
             submatrix = np.random.rand(N1,N2)
             # 2.2) Select the entries with value <= p
@@ -683,12 +683,12 @@ def ModularInhomogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
             imin = com1[0]; imax = com1[-1] + 1
             jmin = com2[0]; jmax = com2[-1] + 1
             adjmatrix[imin:imax,jmin:jmax] = submatrix
-            
+
     # 3) IF GRAPH SHOULD BE UNDIRECTED...
     if not directed:
         adjmatrix[np.tril_indices(N, k=1)] = 0
         adjmatrix += adjmatrix.T
-
+        
     # 4) Remove the diagonal if no self-loops are desired
     if not selfloops:
         adjmatrix[np.diag_indices(N)] = 0
