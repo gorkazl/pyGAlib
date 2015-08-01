@@ -75,6 +75,14 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+August 1\ :sup:`st`, 2015
+^^^^^^^^^^^^^^^^^^^^^^^^^
+- Pulled and merged into master branch changes by Schmigu (see update on June 14\ :sup: `th`).
+- The function ``ModularInhomogeneousGraph()`` was added to *gamodels.py* module to generate random modular networks in which the size and/or the density of each module
+can be specified.
+- Example in ``gatools.ExtractSubmatrix()`` corrected. The example used a 3x3 array when a 4x4 array was required.
+
+
 June 14\ :sup:`th`, 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 - started adding unit-tests
