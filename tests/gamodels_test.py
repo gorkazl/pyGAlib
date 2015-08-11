@@ -1,7 +1,7 @@
-import galib_numba
-import untittest
+from pyGAlib import gamodels
+import unittest
 
-class galib_numba_test(unittest.TestCase):
+class gamodels_test(unittest.TestCase):
     def test_Lattice1D(self):
         pass
     

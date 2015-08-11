@@ -68,10 +68,7 @@ __update__ = "07/01/2015"
 
 import itertools
 import re
-
-import galib
 import numpy as np
-
 
 ## I/O AND DATA CONVERSIONS ################################################
 def LoadLabels(filepath):
@@ -396,21 +393,18 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
 def SymmetriseMatrix(adjmatrix):
     """Converts a directed network into undirected by averaging the weights,
     i.e., bij = 1/2 * (aij + aji).
-
+ 
     Parameters
     ----------
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network.
-
+ 
     Returns
     -------
     An adjacency matrix of the same shape, of dype=float, with values
     """
-
-    if galib.Reciprocity(adjmatrix) == 1:
-        return adjmatrix
-    else:
-        return 0.5 * (adjmatrix + adjmatrix.T)
+ 
+    return 0.5 * (adjmatrix + adjmatrix.T)
 
 def LaplacianMatrix(adjmatrix):
     """Returns the Laplacian matrix of a given network.
