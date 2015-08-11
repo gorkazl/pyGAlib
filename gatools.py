@@ -139,7 +139,7 @@ def LoadPartition(filepath, sep=r'\s'):
             # 1) CUT AT SEPARATOR
             newcom = re.split(sep, line.strip())
             # 2) CONVERT TO DECIMALS AND APPEND TO LIST
-            partition.append([float(x) for x in newcom])
+            partition.append([int(x) for x in newcom])
 
         return partition
 
