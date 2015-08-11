@@ -363,7 +363,7 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
 
     Examples
     --------
-    >>> testmat = array(((1,2,3),(4,5,6),(7,8,9)),int)
+    >>> testmat = arange(1,17).reshape(4,4)
     >>> ExtractSubmatrix(testmat,[0,3])
     array([[ 1,  4],
            [13, 16]])
