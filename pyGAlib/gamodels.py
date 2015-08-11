@@ -44,10 +44,10 @@ __copyright__ = "Copyright 2013-2015"
 __license__ = "GPL"
 __update__="07/01/2015"
 
+from .galib import Reciprocity
 import numpy as np
 import numpy.random
 import random
-from galib import Reciprocity
 
 ######################################################################
 """RANDOM NETWORK GENERATORS"""

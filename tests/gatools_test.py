@@ -1,4 +1,4 @@
-import gatools
+from pyGAlib import gatools
 import numpy
 import numpy.testing as nptest
 import unittest
@@ -6,7 +6,7 @@ import tempfile
 
 class gatoolsTest(unittest.TestCase):
     def test_LoadLabels(self):
-        labels = gatools.LoadLabels('TestResources/labels.txt')
+        labels = gatools.LoadLabels('tests/resources/labels.txt')
          
         self.assertEqual(labels, ['AB', 'C', 'DEF'])
 
@@ -28,7 +28,7 @@ class gatoolsTest(unittest.TestCase):
             self.assertEqual(loaded_labels, labels)
     
     def test_LoadPartition(self):
-        partition = gatools.LoadPartition('TestResources/matrix.txt')
+        partition = gatools.LoadPartition('tests/resources/matrix.txt')
         
         expected = [[0, 1, 2], [2, 0, 3], [1, 2, 0]]
         self.assertEqual(partition, expected)

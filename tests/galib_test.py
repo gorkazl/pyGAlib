@@ -1,4 +1,4 @@
-import galib
+from pyGAlib import galib
 import unittest
 
 class gatoolsTest(unittest.TestCase):

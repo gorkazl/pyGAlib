@@ -80,8 +80,8 @@ __copyright__ = "Copyright 2013-2015"
 __license__ = "GPL"
 __update__="07/01/2015"
 
+from . import gatools
 import numpy as np
-import gatools
 
 
 ############################################################################

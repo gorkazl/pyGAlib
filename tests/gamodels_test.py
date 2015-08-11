@@ -1,4 +1,4 @@
-import gamodels
+from pyGAlib import gamodels
 import unittest
 
 class gamodels_test(unittest.TestCase):
