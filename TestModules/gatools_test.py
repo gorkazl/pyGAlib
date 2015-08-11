@@ -48,10 +48,8 @@ class gatoolsTest(unittest.TestCase):
         pass
     
     def test_ExtractSubmatrix(self):
-        testmat = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]], int)
-        
-        # TODO: fix it- for me this runs into an error and I cannot fix it since I don't grasp the purpose of this function:
-        # IndexError: index 3 is out of bounds for axis 0 with size 3
+        testmat = numpy.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], \
+                               [13, 14, 15, 16]], int)
         result = gatools.ExtractSubmatrix(testmat, [0, 3])
         expected = numpy.array([[1, 4], [13, 16]])
         
