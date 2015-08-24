@@ -78,7 +78,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "Gorka.zamora@ymail.com"
 __copyright__ = "Copyright 2013-2015"
 __license__ = "GPL"
-__update__="07/01/2015"
+__update__="24/08/2015"
 
 import numpy as np
 import gatools
