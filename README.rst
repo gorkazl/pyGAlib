@@ -75,9 +75,9 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
-August 24\ :sup:`st`, 2015
+August 24\ :sup:`th`, 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-- Solved a bug in function ``galib.RichClub()`` that affected only the calculations on the option *’average’*.
+- Solved a bug in function ``galib.RichClub()`` that affected only the calculations with the option *’average’*.
 
 
 August 1\ :sup:`st`, 2015
