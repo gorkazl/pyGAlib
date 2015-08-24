@@ -497,7 +497,7 @@ def RichClub(adjmatrix, rctype='undirected'):
     adjmatrix = adjmatrix.copy()
     N = len(adjmatrix)
 
-    kmax = np.int(degree.max())
+    kmax = int( np.round((degree+0.000001).max()) )
     kdensity = np.zeros(kmax, np.float)
 
     # Density of the original network
@@ -505,18 +505,18 @@ def RichClub(adjmatrix, rctype='undirected'):
     kdensity[0] = float(initialL) / (N*(N-1))
 
     # 2) Compute the k-density of all degrees
-    klist = np.unique(degree)
+    klist = np.unique( np.round((degree+0.000001)) )
     for k in xrange(1,kmax):
         # Avoid unnecessary iterations
         if k in klist:
             # 2.1) Remove the links of all nodes with degree = k
             if rctype == 'average':
-                indices = np.where(degree<=k)[0]
+                nodes = np.where(degree<=k)[0]
             else:
-                indices = np.where(degree==k)[0]
-            adjmatrix[indices] = 0
-            adjmatrix[:,indices] = 0
-            degree[indices] = 0
+                nodes = np.where(degree==k)[0]
+            adjmatrix[nodes] = False
+            adjmatrix[:,nodes] = False
+            degree[nodes] = False
 
             # 2.2 Compute the k-density of the remainig network
             Lk = adjmatrix.sum()
