@@ -75,8 +75,12 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+September 14\ :sup:`th`, 2015
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Function ``gatools.AllBipartitions()`` improved and extended. (i) Internal dependence with function ``gatools.AllCombinations()`` removed, (ii) function is now faster, and (iii) optional parameter *’comblength’* has been introduced in case that only the bipartitions of given length are desired.
+
 August 24\ :sup:`th`, 2015
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Solved a bug in function ``galib.RichClub()`` that affected only the calculations with the option *’average’*.
 
 
@@ -88,7 +92,7 @@ August 1\ :sup:`st`, 2015
 
 
 June 14\ :sup:`th`, 2015
-^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^
 - started adding unit-tests
 - removed ``gatools.ArrayCompare()`` since the function was broken. The functionality is covered by ``numpy.array_equal()``
 - fixed bug in ``gatools.Quartiles()``

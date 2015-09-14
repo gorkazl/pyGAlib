@@ -64,7 +64,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "Gorka.zamora@ymail.com"
 __copyright__ = "Copyright 2013-2015"
 __license__ = "GPL"
-__update__ = "07/01/2015"
+__update__ = "14/09/2015"
 
 import itertools
 import re
@@ -567,7 +567,6 @@ def NonZeroMin(data):
     idx = np.where(data)
     return data[idx].min()
 
-
 def CumulativeDistribution(data, nbins, range=None, normed=True):
     """Computes the cumulative distribution of a dataset.
 
@@ -623,7 +622,7 @@ def Factorial(x):
     """Computes the factorial of an integer number.
     """
     # 0) SECURITY CHECK
-    assert isinstance(x, int), "'factorial' function only accepts integers"
+    assert isinstance(x, int), "'Factorial' function only accepts integers"
 
     # 1) COMPUTE THE FACTORIAL
     if x == 0 or x == 1:
@@ -755,17 +754,24 @@ def AllCombinations(data, comblength):
     """
     return [c for c in itertools.combinations(data, comblength)]
 
-def AllBipartitions(data):
-    """Given a set, finds all its possilbe bipartitions.
+def AllBipartitions(data, comblength=None):
+    """Given a set, finds all possilbe bipartitions.
+
+    If optional 'comblength=None', it will return all bipartitions of
+    all sizes. If 'comblength' is an integer, it will return all bipartitions
+    in which one of the subsets has size N1 = comblength and complementary
+    has size N2 = len(data) - comblength. 
 
     Parameters
     ----------
     data : array_like
         A list, tuple or array containing data.
+    comblength : integer, optional
+        The size of one of the two complementary subsets.
 
     Returns
     -------
-    bipartitions : list
+    result : list
         A list with all possible bipartitions of the elements in 'data'.
 
     See Also
@@ -792,36 +798,93 @@ def AllBipartitions(data):
         (('s', 'a'), ('p', 'm')),
         (('s', 'm'), ('a', 'p'))]
     """
-    # 0) FIND WHETHER LENGTH OF DATASET IS ODD OR EVEN
+    # 0) PREPARE FOR CALCULATIONS
     Ndata = len(data)
     iseven = Ndata % 2 == 0
-
-    # 1) FIND ALL THE COMBINATIONS UP TO LENGTH len(data)/2
     Nmax = Ndata / 2
     setdata = set(data)
-    bipartitions = []
-    for n in xrange(1, Nmax):
-        combinations = AllCombinations(data, n)
-        for comb in combinations:
-            complementary = tuple(setdata - set(comb))
-            bipartitions.append((comb, complementary))
 
-    # 2) ORGANIZSE THE COMBINATIONS INTO BIPARTITIONS
-    combinations = AllCombinations(data, Nmax)
+    # Security check, avoid confusing comblength=0 with None
+    assert comblength != 0, \
+        "'comblength' out of range. 0 < comblength < len(data)."
 
-    helperlist = []
-    for comb in combinations:
-        combinationset = set(comb)
-        if iseven and combinationset in helperlist:
-            continue
+    ########################################################################
+    # 1) DEFINE THE TWO FUNCTIONS THAT WILL DO THE ACTUAL JOB
+    def AllBipartitionsAllSizes(data):
+        """Given a dataset, it finds all bipartitions of all sizes.
+        """
+        # 1) FIND ALL THE COMBINATIONS UP TO LENGTH < len(data)/2
+        bipartitions = []
+        for n in xrange(1, Nmax):
+            # 1.1) Find all combinations of given size out of dataset
+            combinations = [c for c in itertools.combinations(data, n)]
+            # 1.2) Sort and find complementary sets
+            for comb in combinations:
+                complementary = tuple(setdata - set(comb))
+                bipartitions.append((comb, complementary))
+
+        # 2) FIND AND SORT THE BIPARTITIONS OF SIZE Nmax
+        # 2.1) Find all combinations of size Nmax
+        combinations = [c for c in itertools.combinations(data, Nmax)]
+        # 2.2) Sort and find complementary sets
+        ncombs = len(combinations)
+        # Ignore repeated combinations if both subsets are of size = Nmax
+        if iseven: ncombs = ncombs/2
+
+        for i in xrange(ncombs):
+            comb = combinations[i]
+            combset = set(comb)
+            complementary = setdata - combset
+            bipartitions.append((comb, tuple(complementary)))
+
+        return bipartitions
+
+    def AllBipartitionsGivenSize(data, comblength):
+        """Given a dataset, finds all bipartitions in which one of the 
+        subsets is of size 'comblength'. The size of the complementary
+        subset is N - 'comblength', where N is the size of the data.
+        """
+        # 0) SECURITY CHECKS
+        comblength = int(comblength)
+        assert 0 < comblength, \
+            "'comblength' out of range. 0 < comblength < len(data)."
+        assert comblength < Ndata, \
+            "'comblength' out of range. 0 < comblength < len(data)."
+
+        # 1) FIND ALL THE COMBINATIONS OF SIZE 'comblength'
+        combinations = [c for c in itertools.combinations(data, comblength)]
+
+        # 2) SORT AND FIND THE COMPLEMENTARY SETS
+        bipartitions = []
+
+        # If size of set is even, and we are looking for bipartitions of size
+        # Nmax, then we need to remove repeated combinations
+        if iseven and comblength == Nmax:
+            ncombs = len(combinations)
+            for i in xrange(ncombs/2):
+                comb = combinations[i]
+                combset = set(comb)
+                complementary = setdata - combset
+                bipartitions.append((comb, tuple(complementary)))
+
+        # For any other case, bipartitions are found as usual
         else:
-            complementary = tuple(setdata - combinationset)
-            bipartitions.append((comb, complementary))
-            helperlist.append(set(complementary))
+            for comb in combinations:
+                complementary = tuple(setdata - set(comb))
+                bipartitions.append((comb, complementary))
 
-    return bipartitions
+        return bipartitions
 
-def MeanCorrelation(data, tolerance=10 ** (-15)):
+    ########################################################################
+    # 2) DO THE JOB
+    if comblength:
+        result = AllBipartitionsGivenSize(data, comblength)
+    else:
+        result = AllBipartitionsAllSizes(data)
+
+    return result
+
+def MeanCorrelation(data, tolerance=10**(-15)):
     """Computes the Fisher-corrected mean value of correlation values.
 
     Parameters
