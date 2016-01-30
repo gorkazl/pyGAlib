@@ -64,7 +64,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "Gorka.zamora@ymail.com"
 __copyright__ = "Copyright 2013-2015"
 __license__ = "GPL"
-__update__ = "21/11/2015"
+__update__ = "19/12/2015"
 
 import itertools
 import re
@@ -991,5 +991,7 @@ def MeanCorrelation(data, tolerance=10**(-15)):
 
     # Compute the Fisher corrected
     newdata = np.arctanh(data)
+    newdata = np.where(newdata==np.inf, 10,newdata)
+    newdata = np.where(newdata==-np.inf, -10,newdata)
 
     return np.tanh(newdata.mean())
