@@ -201,6 +201,9 @@ def Reciprocity(adjmatrix):
     # 1) COMPUTE THE RECIPROCITY
     # 1.1) The number of links
     L = adjmatrix.sum()
+    if L == 0:
+        print 'Reciprocity(): WARNING! Empty network, returning 0'
+        return 0
 
     # 1.2) Find the assymmetric links
     Rest = abs(adjmatrix - adjmatrix.T)
@@ -421,9 +424,12 @@ def Clustering(adjmatrix):
     """
     adjmatrix = np.where(adjmatrix,1,0).astype(np.float32)
 
-    # 0) SECURITY CHECK
+    # 0) SECURITY CHECKS
     assert Reciprocity(adjmatrix) == 1, \
         'Please introduce an undirected graph.'
+
+    # Remove diagonal entries, in case there is any self-loop
+    adjmatrix[np.diag_indices(len(adjmatrix))] = 0
 
     # 1) COMPUTE THE NUMBER OF TRIANGLES EACH NODE PARTICIPATES IN
     ntriangles = np.diag(np.linalg.matrix_power(adjmatrix,3))
@@ -435,10 +441,17 @@ def Clustering(adjmatrix):
     # 3) COMPUTE THE COEFFICIENT AND THE CLUSTERING OF EACH NODE
     # The usual multiplication x3 is not needed because by computing
     # the matrix power A**3, we have already included it.
-    coefficient = float(ntriangles.sum()) / ndiads.sum()
-    if 0 in ndiads:
-        ndiads = np.where(ndiads==0,1,ndiads)
-    cnodes = ntriangles.astype(np.float) / ndiads
+    # Avoid Error for very sparse networks with no diads
+    Ndiads = ndiads.sum()
+    if Ndiads == 0:
+        coefficient = 0
+        cnodes = np.zeros(len(adjmatrix),float)
+    # Compute the clustering if test passed
+    else:
+        coefficient = float(ntriangles.sum()) / Ndiads
+        if 0 in ndiads:
+            ndiads = np.where(ndiads==0,1,ndiads)
+        cnodes = ntriangles.astype(np.float) / ndiads
 
     return coefficient, cnodes
 
@@ -1479,7 +1492,7 @@ def RolesNodes(adjmatrix, partition):
     the roles that nodes take in a network given a partition of its nodes
     into communites, classes or any predefined categories.
 
-        Parameters
+    Parameters
     ----------
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network. Weighted links are ignored.
@@ -1657,5 +1670,3 @@ def Hubness_GA(participmatrix, partition):
         zscore[community] = (participmatrix[community,s] - avklist) / devklist
 
     return zscore
-
-

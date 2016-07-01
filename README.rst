@@ -53,7 +53,7 @@ For IPython users, the help command is replaced by a question mark after the mod
 CONTACT INFORMATION
 -------------------
 
-GAlib will have soon its own webpage and domain. For the moment, contact me at <galib@Zamora-Lopez.xyz> for any questions, bug reports, etc.
+GAlib will have soon its own webpage and domain. For the moment, contact me at < galib@Zamora-Lopez.xyz > for any questions, bug reports, etc.
 
 
 FUTURE DEVELOPMENTS
