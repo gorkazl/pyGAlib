@@ -61,10 +61,10 @@ MeanCorrelation
 """
 
 __author__ = "Gorka Zamora-Lopez"
-__email__ = "Gorka.zamora@ymail.com"
-__copyright__ = "Copyright 2013-2015"
+__email__ = "galib@Zamora-Lopez.xyz"
+__copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
-__update__ = "19/12/2015"
+__update__ = "05/08/2016"
 
 import itertools
 import re
@@ -408,7 +408,7 @@ def Save2Pajek(filepath, adjmatrix, labels=[], directed=False, weighted=False):
                 for j in neighbours:
                     if j > i:
                         line = formatstring % (i + 1, j + 1)
-                        print >> outfile, line        
+                        print >> outfile, line
 
     # 4) CLOSE FILE AND FINISH
     outfile.close()
@@ -829,7 +829,7 @@ def AllBipartitions(data, comblength=None):
     If optional 'comblength=None', it will return all bipartitions of
     all sizes. If 'comblength' is an integer, it will return all bipartitions
     in which one of the subsets has size N1 = comblength and complementary
-    has size N2 = len(data) - comblength. 
+    has size N2 = len(data) - comblength.
 
     Parameters
     ----------
@@ -909,7 +909,7 @@ def AllBipartitions(data, comblength=None):
         return bipartitions
 
     def AllBipartitionsGivenSize(data, comblength):
-        """Given a dataset, finds all bipartitions in which one of the 
+        """Given a dataset, finds all bipartitions in which one of the
         subsets is of size 'comblength'. The size of the complementary
         subset is N - 'comblength', where N is the size of the data.
         """

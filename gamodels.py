@@ -9,7 +9,9 @@ including random networks and methods to rewire networks.
 RANDOM NETWORK GENERATORS
 =========================
 Lattice1D
-    Generates ring lattices.
+    Generates regular ring lattices (all nodes have same degree).
+Lattice1D_FixLinks
+    Generates ring lattices with desired number of links.
 WattsStrogatzGraph
     Generates small-world networks as in the Watts & Strogatz model.
 ErdosRenyiGraph
@@ -39,17 +41,17 @@ HMRandomGraph
     of hierarchical levels and modules.
 HMCentralisedGraph
     Generates random hierarchical and modular networks of desired number
-    of hierarchical levels and modules, with centralised inter-modular 
+    of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
 RavaszBarabasiModel
     Generates hierarchical networks after the Ravasz & Barabasi model.
 """
 
 __author__ = "Gorka Zamora-Lopez"
-__email__ = "Gorka.zamora@ymail.com"
+__email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2015"
 __license__ = "GPL"
-__update__="30/01/2016"
+__update__="05/08/2016"
 
 import numpy as np
 import numpy.random
@@ -60,8 +62,10 @@ from galib import Reciprocity
 ############################################################################
 """RANDOM NETWORK GENERATORS"""
 def Lattice1D(N,z):
-    """Generates ring lattices. Each node is connected toits 2z closest
-    neighbours (z on the left and z on the right).
+    """Generates regular ring lattices.
+
+    Each node is connected to its 2z closest neighbours (z on the left and z on
+    the right). Hence, all nodes have same degree.
 
     Parameters
     ----------
@@ -75,6 +79,10 @@ def Lattice1D(N,z):
     -------
     adjmatrix : ndarray of rank-2 and integer type.
         The adjacency matrix of the 1-dimensional lattice.
+
+    See Also
+    --------
+    Lattice1D_FixLinks : Generates ring lattices with desired number of links.
     """
     # 0) SECURITY CHECK
     assert z <= int(N/2), 'Largest possible z in N/2: %d' %(N/2)
@@ -83,7 +91,7 @@ def Lattice1D(N,z):
         return np.zeros((N,N), np.uint8)
 
     # 1) CREATE THE LATTICE
-    adjmatrix = np.zeros((N,N), np.int)
+    adjmatrix = np.zeros((N,N), np.uint8)
 
     # 1.1) Create the first row according to the number of neighbours
     adjmatrix[0,1:z+1] = 1
@@ -94,6 +102,55 @@ def Lattice1D(N,z):
         adjmatrix[i] = np.roll(adjmatrix[0],i)
 
     return adjmatrix
+
+def Lattice1D_FixLinks(N,L):
+    """Generates a 1D ring lattice with given number of links.
+
+    Because the total number of links L is fixed, the resulting ring is not a
+    perfect regular lattice in which all nodes have exactly the same degree.
+    The result is quasi-regular. The largest degree found will be kmax = <k> + 2
+    and the smallest degree kmin = <k> - 2.
+
+    Parameters
+    ----------
+    N : integer
+        Size of the network (number of nodes).
+    L : integer
+        Number of links the resulting network must have.
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2 and integer type.
+        The adjacency matrix of the 1-dimensional lattice.
+
+    See Also
+    --------
+    Lattice1D : Generates regular ring lattices (all nodes have same degree)
+    """
+    # 0) SECURITY CHECK
+    assert L <= int(0.5*N*(N-1)), 'Maximum number of links is 0.5*N*N(-1)'
+
+    if L == 0:
+        return np.zeros((N,N), np.uint8)
+
+    adjmatrix = np.zeros((N,N), np.uint8)
+
+    # 1.2) Use numpy.roll() to copy rotated version of a pattern row
+    counter = 0
+    finished = False
+    for k in xrange(1,N):
+        if finished: break
+        row = np.zeros(N,np.uint8)
+        row[k] = 1
+
+        for i in xrange(N):
+            adjmatrix[i] += np.roll(row,i)
+            counter += 1
+            if counter == L:
+                finished = True
+                break
+
+    return adjmatrix + adjmatrix.T
 
 def WattsStrogatzGraph(N, z, prew, lattice=None):
     """Generates small-world networks as in the Watts & Strogatz model.
@@ -300,15 +357,14 @@ def RandomGraph(N, L, directed=False, selfloops=False):
                 'L out of bounds. For the options given, max(L) = 1/2*N*(N-1) = %d' %maxL
 
     # 1) INITIATE THE MATRIX AND HELPERS
-    adjmatrix = np.zeros((N,N), int)
-    nodelist = np.arange(N)
+    adjmatrix = np.zeros((N,N), np.uint8)
     counter = 0
 
     # 2) GENERATE THE MATRIX
     while counter < L:
         # 2.1) Pick up two nodes at random
-        source = random.choice(nodelist)
-        target = random.choice(nodelist)
+        source = int(N * numpy.random.rand())
+        target = int(N * numpy.random.rand())
 
         # 2.2) Check if they can be linked, otherwise look for another pair
         if adjmatrix[source,target] == 1: continue
@@ -599,12 +655,12 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
 def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
     """Randomises an input graph conserving its modular structure.
-    
+
     Given the adjacency matrix of a graph and a partition of its nodes, this
     function returns a network that contains the same number of links in
     each community and across them, but with the links randomly seeded.
     modules and across them as in the input graph.
-    
+
     Parameters
     ----------
     adjmatrix : ndarray of rank-2
@@ -613,7 +669,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
     partition : list of ndarrays of dtype = uint
         A list containing the indices of the nodes in each module.
     directed : Boolean (optional)
-        True if a directed graph is desired, False if an undirected graph is 
+        True if a directed graph is desired, False if an undirected graph is
         desired.
     selfloops: Boolean (optional)
         True if self-loops are allowed, False otherwise.
@@ -627,7 +683,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
     --------
     HMRandomGraph : Generates Nested random hierarchical/modular networks.
     RewireNetwork : Randomises an input graph conserving degrees of nodes.
-    ModularHeterogenousGraph : Generates random modular networks of given 
+    ModularHeterogenousGraph : Generates random modular networks of given
                                module sizes and densities.
     """
     def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
@@ -670,7 +726,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
     # 0) SECURITY CHECKS AND SETUP
     # Convert the input network into a boolean matrix
     adjmatrix = adjmatrix.astype('bool')
-    
+
     # Check if the original network is directed or undirected
     if directed == None:
         if Reciprocity(adjmatrix) == 1: directed = False
@@ -717,7 +773,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
             if not directed and c2 < c1: continue
             if c1 == c2: continue
 
-            com2 = partition[c2]            
+            com2 = partition[c2]
             subnet = ExtractSubmatrix(adjmatrix,com1,com2)
             Lblock = subnet.astype('bool').sum()
             counter = 0
@@ -744,28 +800,28 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     """
     Generates random modular networks of given module sizes and densities.
-    
+
     This function generates modular networks in which both the internal
-    links within the modules and the external links across modules are shed 
-    at random. As in the Erdos-Renyi model, every pair of nodes is linked 
-    with the specified probability and therefore, the total number of links 
+    links within the modules and the external links across modules are shed
+    at random. As in the Erdos-Renyi model, every pair of nodes is linked
+    with the specified probability and therefore, the total number of links
     slightly varies from one realization to another. The user will specify
     the size and the internal connection probability for each of the modules,
-    and one unique probability for the external links across communities. 
+    and one unique probability for the external links across communities.
 
     Parameters
     ----------
     Nsizelist : list, tuple or array of integers
-        A list containing the desired size (number of nodes) for every 
+        A list containing the desired size (number of nodes) for every
         module in the network.
     pintlist : list, tuple or array of floats
-        A list  containing the internal link probability for each of the 
+        A list  containing the internal link probability for each of the
         modules. All values must range between 0 and 1.
     pext : float
-        The external probability of connection between nodes in different 
+        The external probability of connection between nodes in different
         communities.
     directed : Boolean (optional)
-        True if a directed graph is desired, False if an undirected graph is 
+        True if a directed graph is desired, False if an undirected graph is
         desired.
     selfloops: Boolean (optional)
         True if self-loops are allowed, False otherwise.
@@ -784,7 +840,7 @@ def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
     three modules of sizes N1 = 100, N2 = 200 and N3 = 300 nodes respectively.
     Each module is an Erdos-Renyi random graph with link probability
     (approximate density of links) pint1 = 0.3, pint2 = 0.3 and pint3 = 0.5
-    respectively. The probability that a pair of nodes in different 
+    respectively. The probability that a pair of nodes in different
     modules are connected is pext = 0.01.
 
     See Also
@@ -839,7 +895,7 @@ def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
     if not directed:
         adjmatrix[np.tril_indices(N, k=1)] = 0
         adjmatrix += adjmatrix.T
-        
+
     # 4) Remove the diagonal if no self-loops are desired
     if not selfloops:
         adjmatrix[np.diag_indices(N)] = 0
@@ -915,7 +971,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
     avklist : list, tuple or array-like.
         The mean degree of the nodes at each hierarchical level. For example,
         avklist = [1,3,20] will generate a network in which nodes will have,
-        on average, 20 links with their neighbours at the lowest level 
+        on average, 20 links with their neighbours at the lowest level
         submodule they belong to, 3 links with the rest of neighbours at the
         submodule they belong to at the second level, and 1 link with any
         node at any community of the rest of the network.
@@ -962,11 +1018,11 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
     the random generation process, every node will only have the desired
     internal and external degrees on the ensemble average, but not
     necessarily in each realization.
-    
+
     See Also
     --------
     HMCentralisedGraph
-        Random hierarchical and modular network with inter-modular 
+        Random hierarchical and modular network with inter-modular
         connectivity centralised through local hubs.
     ModularHeterogeneousGraph
         Generates random modular networks with desired module sizes and
@@ -1050,23 +1106,23 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
 
 def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtype=np.uint8):
     """    Generates random hierarchical and modular networks of desired number
-    of hierarchical levels and modules, with centralised inter-modular 
+    of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
-    
-    This function creates networks of networks that are randomly connected 
+
+    This function creates networks of networks that are randomly connected
     at each hierarchical level. The submodules at the lowest level are
     random scale-free-like graphs. Setting a high exponent for this
     level (e.g. gamma=[x,x,100]) will make them usual random graphs.
     At each heirarchical level, the links between modules are seeded
     following a preferential attachment rule (same as as for the generation
     of scale-free graphs). The nodes at every module are assigned different
-    probability to link with other modules, hence, the inter-modular links 
+    probability to link with other modules, hence, the inter-modular links
     end up concentrated on few hubs, with every community having its own
     set of hubs.
 
     For further details see references:
-    - G. Zamora-Lopez, Y. Chen et al. "Functional complexity emerging from 
-    anatomical constraints in the brain: the significance of network 
+    - G. Zamora-Lopez, Y. Chen et al. "Functional complexity emerging from
+    anatomical constraints in the brain: the significance of network
     modularity and rich-clubs." XXXX, YYY (2016).
 
     Parameters
@@ -1080,17 +1136,17 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
     avklist : list, tuple or array-like.
         The mean degree of the nodes at each hierarchical level. For example,
         avklist = [1,3,20] will generate a network in which nodes will have,
-        on average, 20 links with their neighbours at the lowest level 
+        on average, 20 links with their neighbours at the lowest level
         submodule they belong to, 3 links with the rest of neighbours at the
         submodule they belong to at the second level, and 1 link with any
         node at any community of the rest of the network.
     gammalist : list, tuple or array-like.
         Exponent controling the preferential attachement rule at each
-        level. For a network with HMshape = [4,50], setting gammalist = 
+        level. For a network with HMshape = [4,50], setting gammalist =
         [2.0,3.0] will create a network of four modules of 50 nodes each.
-        Internally, the four submodules are scale-free-like networks with 
+        Internally, the four submodules are scale-free-like networks with
         exponent gamma = 3.0. The links between modules are seeded at random
-        but 
+        but
     directed : boolean, optional.
         If true, the resulting network will be directed, else, it will be
         undirected.
@@ -1124,17 +1180,17 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
     the first or the second level.
 
     The parameter 'gammalist' controls for the probability that every node
-    has to be selected while links are seeded. This probability may change 
+    has to be selected while links are seeded. This probability may change
     at different hierarchical levels.
     - gammalist = [2,100] with HMshape = [4,50], will lead to a modular
     network consisting of four random graphs (random because of the high
     gamma=100 at the level of the modules). To seed the inter-modular
-    links, two nodes are chosen at random from two different communities. 
+    links, two nodes are chosen at random from two different communities.
     Internally, the probability of a node to be chosen differs such that
-    each community will have its own hubs such that intermodular links 
+    each community will have its own hubs such that intermodular links
     preferentially occur between those hubs. The probability of a node within
     a module to be chosen as the target of an intermodular link is
-    determined by the exponent gamma = 2, which would eventually to a 
+    determined by the exponent gamma = 2, which would eventually to a
     schale-free graph of gamma = 2 in the limit of large networks.
 
     See Also
@@ -1183,7 +1239,7 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
             blockmatrix[head,tail] = 1
             if not directed:
                 blockmatrix[tail,head] = 1
-            counter += 1    
+            counter += 1
 
         return blockmatrix
 
@@ -1212,7 +1268,7 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
             blockmatrix[head,tail] = 1
             if not directed:
                 blockmatrix[tail,head] = 1
-            counter += 1    
+            counter += 1
 
         return blockmatrix
 
@@ -1229,7 +1285,7 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
     nlevels = len(HMshape)
     adjmatrix = np.zeros((N,N), outdtype)
 
-    # 1.1) If no hub parameters given, connect modules at random. 
+    # 1.1) If no hub parameters given, connect modules at random.
     # This case returns the same networks as 'HMRandomGraph' function.
     if not gammalist:
         alpha = np.ones(nlevels, float)
@@ -1312,7 +1368,3 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
             SkewedRandomGraph(Lcom, cumprobability, directed)
 
     return adjmatrix
-
-
-
-

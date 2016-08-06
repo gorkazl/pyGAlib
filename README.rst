@@ -75,6 +75,10 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+August 6\ :sup:`th`, 2016
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Function ``gamodels.RandomGraph()`` improved. Method to choose source and target nodes to connect changed. Originally I would use the official ``ranodm.choice()`` function to select nodes from the list of nodes. Now it uses ``N * numpy.random.rand()`` to choose the index. The latter was slower years ago but with newer Numpy versions, it has become a faster option.
+
 September 14\ :sup:`th`, 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Function ``gatools.AllBipartitions()`` improved and extended. (i) Internal dependence with function ``gatools.AllCombinations()`` removed, (ii) function is now faster, and (iii) optional parameter *’comblength’* has been introduced in case that only the bipartitions of given length are desired.
