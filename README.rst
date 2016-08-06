@@ -77,7 +77,7 @@ HISTORY OF CHANGES
 
 August 6\ :sup:`th`, 2016
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-- Function ``gamodels.RandomGraph()`` improved. Method to choose source and target nodes to connect changed. Originally I would use the official ``ranodm.choice()`` function to select nodes from the list of nodes. Now it uses ``N * numpy.random.rand()`` to choose the index. The latter was slower years ago but with newer Numpy versions, it has become a faster option.
+- Function ``gamodels.RandomGraph()`` improved. Method to choose source and target nodes to connect changed. Originally I would use the official ``random.choice()`` function to select nodes from the list of nodes. Now it uses ``N * numpy.random.rand()`` to choose the index. The latter was slower years ago but with newer Numpy versions, it has become a faster option. This change also allows better use of Numba. Faster generation functions coming soon!
 
 September 14\ :sup:`th`, 2015
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
