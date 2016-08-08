@@ -32,7 +32,7 @@ ModularityPreservingGraph
 
 HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
 ============================================
-ModularInhomogenousGraph
+ModularHeterogeneousGraph
     Generates random modular networks of given module sizes and densities.
 HMpartition
     Returns a partition of nodes for a hierarchical and modular network.
@@ -49,13 +49,12 @@ RavaszBarabasiModel
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2015"
+__copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
-__update__="05/08/2016"
+__update__="08/08/2016"
 
 import numpy as np
 import numpy.random
-import random
 from galib import Reciprocity
 
 
@@ -219,8 +218,6 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
         adjmatrix = lattice.copy()
 
     # 2) REWIRE THE LINKS CLOCKWISE AND BY RANK OF NEIGHBOURHOOD
-    # List of nodes from which to randomly choose
-    nodelist = range(N)
     # For each rank of neighbourhood...
     for k in xrange(1,z+1):
         # Choose every node in clockwise direction
@@ -229,7 +226,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
             if numpy.random.rand() <= prew:
                 done = False
                 while not done:
-                    target = random.choice(nodelist)
+                    target = int( N * numpy.random.rand() )
                     # Avoid self-loops and double links
                     if target == i: continue
                     if adjmatrix[i,target]: continue
@@ -745,8 +742,9 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
     # 2) GENERATE THE BLOCK-WISE RANDOM GRAPH
     for c1 in xrange(ncoms):
         com1 = partition[c1]
+        N1 = len(com1)
 
-        # 2.1) Seed the random links within a module
+        # 2.1) Seed the random links within the module
         submatrix = ExtractSubmatrix(adjmatrix, com1)
         Lblock = submatrix.astype('bool').sum()
         if not directed:
@@ -754,12 +752,15 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
         counter = 0
         while counter < Lblock:
             # Pick up two nodes at random
-            source = random.choice(com1)
-            target = random.choice(com1)
+            idx1 = int( N1*numpy.random.rand() )
+            idx2 = int( N1*numpy.random.rand() )
+            # Check for self-loops
+            if not selfloops and idx1==idx2: continue
+            source = com1[idx1]
+            target = com1[idx2]
 
-            # Check if they can be linked, otherwise look for another pair
+            # Check if they are already connected
             if randmatrix[source,target] == 1: continue
-            if not selfloops and source == target: continue
 
             # If the nodes are linkable, place the link
             randmatrix[source,target] = 1
@@ -774,13 +775,16 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
             if c1 == c2: continue
 
             com2 = partition[c2]
+            N2 = len(com2)
             subnet = ExtractSubmatrix(adjmatrix,com1,com2)
             Lblock = subnet.astype('bool').sum()
             counter = 0
             while counter < Lblock:
                 # Pick up two nodes at random, each from a different module
-                source = random.choice(com1)
-                target = random.choice(com2)
+                idx1 = int( N1*numpy.random.rand() )
+                idx2 = int( N2*numpy.random.rand() )
+                source = com1[idx1]
+                target = com2[idx2]
 
                 # Check if they can be linked, otherwise look for another pair
                 if randmatrix[source,target] == 1: continue
@@ -883,7 +887,7 @@ def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
             else: pthres = pext
 
             # 2.1) Create a random matrix with normally distributed values
-            submatrix = np.random.rand(N1,N2)
+            submatrix = numpy.random.rand(N1,N2)
             # 2.2) Select the entries with value <= p
             submatrix = np.where(submatrix <= pthres, 1, 0).astype(np.uint8)
             # 1.3) Copy the submatrix into the final adjmatrix
@@ -1035,6 +1039,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
         assert len(partition) > 1, 'Partition needs to have at least 2 communities'
 
         ncoms = len(partition)
+        Ncoms = len(partition[0])
         counter = 0
         while counter < L:
             # 1) Choose two communities at random
@@ -1044,8 +1049,10 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
             if com1idx == com2idx: continue
 
             # 2) Choose one node from each community
-            node1 = random.choice(partition[com1idx])
-            node2 = random.choice(partition[com2idx])
+            nodeidx1 = int( Ncoms*numpy.random.rand() )
+            nodeidx2 = int( Ncoms*numpy.random.rand() )
+            node1 = partition[com1idx][nodeidx1]
+            node2 = partition[com2idx][nodeidx2]
             # Avoid multiple links
             if adjmatrix[node1,node2]: continue
 
@@ -1215,18 +1222,18 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
         counter = 0
         while counter < L:
             # 1) Choose two communities at random
-            com1idx = int(ncoms*np.random.rand())
-            com2idx = int(ncoms*np.random.rand())
+            com1idx = int(ncoms*numpy.random.rand())
+            com2idx = int(ncoms*numpy.random.rand())
             # Make sure the communities are different
             if com1idx == com2idx: continue
 
             # 2) Choose two nodes to connect given the cumulative probabilities
-            x = np.random.rand()     # A random number between 0 and 1
+            x = numpy.random.rand()     # A random number between 0 and 1
             xsum = sum(np.sign(cumprobability-x))
             idx = int(0.5*(Ns-xsum))
             head = com1idx * Ns + idx
 
-            x = np.random.rand()
+            x = numpy.random.rand()
             xsum = sum(np.sign(cumprobability-x))
             idx = int(0.5*(Ns-xsum))
             tail = com2idx * Ns + idx
@@ -1252,11 +1259,11 @@ def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtyp
         counter = 0
         while counter < L:
             # 1) Choose two nodes to connect given the cumulative probabilities
-            x = np.random.rand()
+            x = numpy.random.rand()
             xsum = sum(np.sign(cumprobability-x))
             head = int(0.5*(Ncom-xsum))
 
-            x = np.random.rand()
+            x = numpy.random.rand()
             xsum = sum(np.sign(cumprobability-x))
             tail = int(0.5*(Ncom-xsum))
 
