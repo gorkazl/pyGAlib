@@ -78,7 +78,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
-__update__="05/08/2016"
+__update__="10/08/2016"
 
 import numpy as np
 import gatools
@@ -201,15 +201,13 @@ def Reciprocity(adjmatrix):
     # 1) COMPUTE THE RECIPROCITY
     # 1.1) The number of links
     L = adjmatrix.sum()
-    if L == 0:
-        print 'Reciprocity(): WARNING! Empty network, returning 0'
-        return 0
+    assert L > 0, 'Reciprocity(): Input network empty.'
 
     # 1.2) Find the assymmetric links
-    Rest = abs(adjmatrix - adjmatrix.T)
+    Rest = np.abs(adjmatrix - adjmatrix.T)
     Lsingle = 0.5*Rest.sum()
 
-    return float(L-Lsingle)/L
+    return np.float(L-Lsingle)/L
 
 def ReciprocalDegree(adjmatrix, normed=False):
     """Returns the reciprocal degree and excess degrees of every nodes.
@@ -396,7 +394,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     else:
         return AvKnn
 
-def Clustering(adjmatrix):
+def Clustering(adjmatrix, checkdirected=True):
     """Returns the clustering coefficient and the local clustering of every node.
 
     Directed networks are NOT accepted by the function. Weighted networks are
@@ -406,6 +404,11 @@ def Clustering(adjmatrix):
     ----------
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network.
+    checkdirected : boolean (optional)
+        If 'True', it calls Reciprocity() to make sure adjmatrix is undirected.
+        If 'False', it skips the check and runs a bit faster. Only recommended
+        for large networks and in exceptional cases when you exactly know the
+        input adjacency matrix is undirected.
 
     Returns
     --------
@@ -422,20 +425,25 @@ def Clustering(adjmatrix):
     is provided because it costs no additional resources and the data is
     useful for an further statistical analysis.
     """
+    N = len(adjmatrix)
     adjmatrix = np.where(adjmatrix,1,0).astype(np.float32)
 
     # 0) SECURITY CHECKS
-    assert Reciprocity(adjmatrix) == 1, \
-        'Please introduce an undirected graph.'
+    if checkdirected:
+        assert Reciprocity(adjmatrix) == 1, \
+            'Please introduce an undirected graph.'
 
     # Remove diagonal entries, in case there is any self-loop
     adjmatrix[np.diag_indices(len(adjmatrix))] = 0
 
     # 1) COMPUTE THE NUMBER OF TRIANGLES EACH NODE PARTICIPATES IN
-    ntriangles = np.diag(np.linalg.matrix_power(adjmatrix,3))
+    pow2matrix = np.dot(adjmatrix,adjmatrix)
+    ntriangles = np.zeros(N, np.float64)
+    for i in xrange(N):
+        ntriangles[i] = np.dot(adjmatrix[i],pow2matrix[i])
 
     # 2) COMPUTE THE NUMBER OF DIADS EACH NODE PARTICIPATES IN
-    deg = Degree(adjmatrix)
+    deg = adjmatrix.sum(axis=1)
     ndiads = deg*(deg-1)
 
     # 3) COMPUTE THE COEFFICIENT AND THE CLUSTERING OF EACH NODE
@@ -445,13 +453,13 @@ def Clustering(adjmatrix):
     Ndiads = ndiads.sum()
     if Ndiads == 0:
         coefficient = 0
-        cnodes = np.zeros(len(adjmatrix),float)
-    # Compute the clustering if test passed
+        cnodes = np.zeros(N,float)
+    # Compute clustering if at least one triad has been found
     else:
-        coefficient = float(ntriangles.sum()) / Ndiads
+        coefficient = ntriangles.sum() / Ndiads
         if 0 in ndiads:
             ndiads = np.where(ndiads==0,1,ndiads)
-        cnodes = ntriangles.astype(np.float) / ndiads
+        cnodes = ntriangles / ndiads
 
     return coefficient, cnodes
 
