@@ -78,7 +78,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
-__update__="10/08/2016"
+__update__="14/08/2016"
 
 import numpy as np
 import gatools
@@ -500,7 +500,7 @@ def RichClub(adjmatrix, rctype='undirected'):
            "Please enter a proper 'rctype': 'undirected', 'outdegree', 'indegree' or 'average'."
 
     # Convert the network in binary
-    adjmatrix = adjmatrix.astype('bool')
+    adjmatrix = adjmatrix.copy().astype(np.float32)
 
     # Select the proper data
     indegree, outdegree = Degree(adjmatrix, True)
@@ -515,19 +515,18 @@ def RichClub(adjmatrix, rctype='undirected'):
         degree = 0.5 * (indegree + outdegree)
 
     # 1) Prepare for calculations
-    adjmatrix = adjmatrix.copy()
     N = len(adjmatrix)
 
     kmax = int( np.round((degree+0.000001).max()) )
-    kdensity = np.zeros(kmax, np.float)
+    kdensity = np.zeros(kmax+1, np.float64)
 
     # Density of the original network
-    initialL = len(adjmatrix.nonzero()[0])
-    kdensity[0] = float(initialL) / (N*(N-1))
+    initialL = adjmatrix.sum()
+    kdensity[0] = np.float64(initialL) / (N*(N-1))
 
     # 2) Compute the k-density of all degrees
     klist = np.unique( np.round((degree+0.000001)) )
-    for k in xrange(1,kmax):
+    for k in xrange(1,kmax+1):
         # Avoid unnecessary iterations
         if k in klist:
             # 2.1) Remove the links of all nodes with degree = k
@@ -535,16 +534,16 @@ def RichClub(adjmatrix, rctype='undirected'):
                 nodes = np.where(degree<=k)[0]
             else:
                 nodes = np.where(degree==k)[0]
-            adjmatrix[nodes] = False
-            adjmatrix[:,nodes] = False
-            degree[nodes] = False
+            adjmatrix[nodes] = 0
+            adjmatrix[:,nodes] = 0
+            degree[nodes] = 0
 
             # 2.2 Compute the k-density of the remainig network
             Lk = adjmatrix.sum()
             Nk = len(degree.nonzero()[0])
 
             if Nk > 1:
-                kdensity[k] = float(Lk)/(Nk*(Nk-1))
+                kdensity[k] = np.float64(Lk)/(Nk*(Nk-1))
 
         else:
             kdensity[k] = kdensity[k-1]
