@@ -78,7 +78,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
-__update__="14/08/2016"
+__update__="16/08/2016"
 
 import numpy as np
 import gatools
@@ -554,12 +554,7 @@ def MatchingIndex(adjmatrix, normed=True):
     """Computes the number of common neighbours of every pair of nodes.
 
     The matching index of two nodes i and j is the number of common
-    neighbours they are linked with. The function accepts weighted networks
-    but it ignores the weights of the links. If adjmatrix is a directed network,
-    MatchingIndex(adjmatrix) computes the matching of the output neighbours
-    and MatchingIndex(adjmatrix.T) the matching of the input neighbours.
-    Further functions to account for other weighted and/or directed cases
-    will follow.
+    neighbours they are linked with.
 
     Parameters
     ----------
@@ -580,15 +575,19 @@ def MatchingIndex(adjmatrix, normed=True):
 
     Returns
     -------
-    MImatrix : ndarray of rank-2. If 'normalise=True' dtype is 'float',
-               otherwise dtype is 'int'.
-        The matching index of all pairs of nodes in the network. It is
-        therefore of the same shape as adjmatrix.
+    MImatrix : ndarray of rank-2 of ndtype 'float64'
+        A matrix containing the matching index for all pairs of nodes.
+
+    Notes
+    -----
+    - The function accepts weighted networks but it ignores the weights.
+    - If adjmatrix is directed, calling MatchingIndex(adjmatrix) computes the
+    matching of the output neighbours. Passing the transpose adjmatrix.T to
+    the function computes the matching of the input neighbours.
     """
     N = len(adjmatrix)
 
-    if normed: MImatrix = np.identity(N, np.float)
-    else: MImatrix = np.identity(N, np.int)
+    MImatrix = np.identity(N, np.float64)
 
     for i in xrange(N):
         ineighbours = set(adjmatrix[i].nonzero()[0])
@@ -597,22 +596,23 @@ def MatchingIndex(adjmatrix, normed=True):
 
             # Intersection and union of the sets
             mi = len(ineighbours & jneighbours)
-            union = ineighbours | jneighbours
 
             if normed:
+                union = ineighbours | jneighbours
                 norm = len(union)
                 # Avoid counting the explicit links i-->j and j-->i
                 if i in union: norm -= 1
                 if j in union: norm -= 1
                 # Normalize and save the value avoiding ZeroDivision errors
                 if norm > 0:
-                    MImatrix[i,j] = float(mi) / norm
-                    MImatrix[j,i] = MImatrix[i,j]
+                    mi = float(mi) / norm
+                    MImatrix[i,j] = mi
+                    MImatrix[j,i] = mi
 
             else:
                 # Save the value
-                MImatrix[i,j] = float(mi)
-                MImatrix[j,i] = MImatrix[i,j]
+                MImatrix[i,j] = mi
+                MImatrix[j,i] = mi
 
     return MImatrix
 
