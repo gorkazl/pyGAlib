@@ -64,10 +64,12 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
-__update__ = "05/08/2016"
+__update__ = "16/08/2016"
 
 import itertools
+import types
 import re
+import warnings
 
 import galib
 import numpy as np
@@ -419,11 +421,16 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
     Parameters
     ----------
     adjmatrix : ndarray of rank-2.
-    nodelist1 : list, tuple or ndarray.
-        A list of indices meaning the rows to be extracted.
-    nodelist2 : list, tuple or ndarray. Optional.
-        A list of indices meaning the columns to be extracted.
-        If a list not given (nodelist2=None), then nodelist2 is nodelist1
+        The matrix from which the submatrix will be extracted.
+    nodelist1 : arra_like. list, tuple, set or ndarray of rank-1.
+        A list of indices with the rows of the matrix to be extracted.
+        Prefered type is 'ndarray'. All other sequence types (lists, tuples and
+        sets) will be converted to an ndarray of dtype = numpy.int.
+    nodelist2 : arra_like. list, tuple, set or ndarray of rank-1 (optional)
+        If not given (nodelist2=None), then nodelist2 is nodelist1.
+        A list of indices with the columns of the matrix to be extracted.
+        Prefered type is 'ndarray'. All other sequence types (lists, tuples and
+        sets) will be converted to an ndarray of dtype = numpy.int.
 
     Returns
     -------
@@ -442,22 +449,47 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
            [14, 15, 16]])
 
     """
-    # 0) CHECK WHETHER LISTS OF NODES ARE GIVEN AS ARRAYS
-    if type(nodelist1) == np.ndarray:
-        nodelist1 = list(nodelist1)
-    if nodelist2 == None:
-        nodelist2 = nodelist1
+    # 0) CHECK WHETHER LISTS OF NODES ARE GIVEN AS ARRAYS. OTHERWISE, CONVERT.
+    # Check nodelist1
+    if type(nodelist1) != np.ndarray:
+        warnings.simplefilter('once', UserWarning)
+        warnings.warn("Prefered type for parameter 'nodelist1' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
+                    stacklevel=2)
+
+        if type(nodelist1) == set:
+            nodelist1 = list(nodelist1)
+        if type(nodelist1) in [list, tuple]:
+            nodelist1 = np.array(nodelist1,np.int)
+
+    # Check nodelist2
+    if type(nodelist2) == types.NoneType:
+        nodelist2 = nodelist1.copy()
     else:
-        if type(nodelist2) == np.ndarray:
-            nodelist2 = list(nodelist2)
+        if type(nodelist2) != np.ndarray:
+            warnings.simplefilter('module', UserWarning)
+            warnings.warn("Prefered type for parameter 'nodelist2' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
+                            stacklevel=2)
+
+            if type(nodelist2) == set:
+                nodelist2 = list(nodelist2)
+            if type(nodelist2) in [list, tuple]:
+                nodelist2 = np.array(nodelist2,np.int)
 
     # 1) CREATE LISTS OF INDICES FOR SLICING
     N1 = len(nodelist1)
     N2 = len(nodelist2)
-    xindices = []
-    for node in nodelist1:
-        xindices += [node] * N2
-    yindices = nodelist2 * N1
+    xindices = np.zeros(N1*N2, np.int)
+    for ncounter in xrange(N1):
+        node = nodelist1[ncounter]
+        startidx = ncounter*N2
+        endidx = startidx + N2
+        xindices[startidx:endidx] = node
+
+    yindices = np.zeros(N1*N2, np.int)
+    for n in xrange(N1):
+        startidx = n*N2
+        endidx = startidx + N2
+        yindices[startidx:endidx] = nodelist2
 
     # 2) EXTRACT THE SUBMATRIX AND FINISH
     return adjmatrix[xindices, yindices].reshape(N1, N2)
