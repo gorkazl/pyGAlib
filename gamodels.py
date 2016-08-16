@@ -56,7 +56,8 @@ __update__="16/08/2016"
 import types
 import numpy as np
 import numpy.random
-from galib import Reciprocity
+import gatools
+import galib
 
 
 ############################################################################
@@ -570,7 +571,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     # 0) PREPARE FOR THE CALCULATIONS
     # 0.1) Check the conditions for the rewiring process
     if directed==None:
-        recip = Reciprocity(adjmatrix)
+        recip = galib.Reciprocity(adjmatrix)
         if recip == 1.0: directed = False
         else: directed = True
     if weighted:
@@ -684,80 +685,14 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
     ModularHeterogenousGraph : Generates random modular networks of given
                                module sizes and densities.
     """
-    def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
-        """Same function as in gatools.py module. Code duplicated here
-        only to avoid recurrent imports.
-        """
-        # 0) CHECK WHETHER LISTS OF NODES ARE GIVEN AS ARRAYS. OTHERWISE, CONVERT.
-        # Check nodelist1
-        if type(nodelist1) != np.ndarray:
-            warnings.simplefilter('once', UserWarning)
-            warnings.warn("Prefered type for parameter 'nodelist1' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
-                        stacklevel=2)
 
-            if type(nodelist1) == set:
-                nodelist1 = list(nodelist1)
-            if type(nodelist1) in [list, tuple]:
-                nodelist1 = np.array(nodelist1,np.int)
-
-        # Check nodelist2
-        if type(nodelist2) == types.NoneType:
-            nodelist2 = nodelist1.copy()
-        else:
-            if type(nodelist2) != np.ndarray:
-                warnings.simplefilter('module', UserWarning)
-                warnings.warn("Prefered type for parameter 'nodelist2' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
-                                stacklevel=2)
-
-                if type(nodelist2) == set:
-                    nodelist2 = list(nodelist2)
-                if type(nodelist2) in [list, tuple]:
-                    nodelist2 = np.array(nodelist2,np.int)
-
-        # 1) CREATE LISTS OF INDICES FOR SLICING
-        N1 = len(nodelist1)
-        N2 = len(nodelist2)
-        xindices = np.zeros(N1*N2, np.int)
-        for ncounter in xrange(N1):
-            node = nodelist1[ncounter]
-            startidx = ncounter*N2
-            endidx = startidx + N2
-            xindices[startidx:endidx] = node
-
-        yindices = np.zeros(N1*N2, np.int)
-        for n in xrange(N1):
-            startidx = n*N2
-            endidx = startidx + N2
-            yindices[startidx:endidx] = nodelist2
-
-        # 2) EXTRACT THE SUBMATRIX AND FINISH
-        return adjmatrix[xindices, yindices].reshape(N1, N2)
-
-    def Reciprocity(adjmatrix):
-        """Same function as in galib.py module. Here code duplicated only
-        to avoid recurrent imports.
-        """
-        adjmatrix = adjmatrix.astype('bool')
-
-        # 1) COMPUTE THE RECIPROCITY
-        # 1.1) The number of links
-        L = adjmatrix.sum()
-        assert L > 0, 'Reciprocity(): Input network empty.'
-
-        # 1.2) Find the assymmetric links
-        Rest = np.abs(adjmatrix - adjmatrix.T)
-        Lsingle = 0.5*Rest.sum()
-
-        return np.float(L-Lsingle) / L
-
-    #______________________________________________________________________
     # 0) SECURITY CHECKS AND SETUP
     # Convert the input network into a boolean matrix
     adjmatrix = adjmatrix.astype('bool')
 
     # Check if the original network is directed or undirected
     if directed == None:
-        if Reciprocity(adjmatrix) == 1: directed = False
+        if galib.Reciprocity(adjmatrix) == 1: directed = False
         else: directed = True
 
     # Check if the original network accepts self-loops
@@ -776,7 +711,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
         N1 = len(com1)
 
         # 2.1) Seed the random links within the module
-        submatrix = ExtractSubmatrix(adjmatrix, com1)
+        submatrix = gatools.ExtractSubmatrix(adjmatrix, com1)
         Lblock = submatrix.astype('bool').sum()
         if not directed:
             Lblock = int( round(np.float32(Lblock / 2)) )
@@ -807,7 +742,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
             com2 = partition[c2]
             N2 = len(com2)
-            subnet = ExtractSubmatrix(adjmatrix,com1,com2)
+            subnet = gatools.ExtractSubmatrix(adjmatrix,com1,com2)
             Lblock = subnet.astype('bool').sum()
             counter = 0
             while counter < Lblock:

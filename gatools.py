@@ -71,8 +71,8 @@ import types
 import re
 import warnings
 
-import galib
 import numpy as np
+import galib
 
 
 ## I/O AND DATA CONVERSIONS ################################################
