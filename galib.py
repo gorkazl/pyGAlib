@@ -80,6 +80,7 @@ __copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
 __update__="16/08/2016"
 
+import types
 import numpy as np
 import gatools
 
@@ -207,7 +208,7 @@ def Reciprocity(adjmatrix):
     Rest = np.abs(adjmatrix - adjmatrix.T)
     Lsingle = 0.5*Rest.sum()
 
-    return np.float(L-Lsingle)/L
+    return np.float(L-Lsingle) / L
 
 def ReciprocalDegree(adjmatrix, normed=False):
     """Returns the reciprocal degree and excess degrees of every nodes.
@@ -1041,7 +1042,7 @@ def Modularity(adjmatrix, partition, degree=None):
     Ncoms = len(partition)
     L = adjmatrix.sum()
 
-    if degree==None:
+    if type(degree) == types.NoneType:
         indegree, outdegree = Intensity(adjmatrix, directed=True)
     else:
         assert len(degree) == 2, \

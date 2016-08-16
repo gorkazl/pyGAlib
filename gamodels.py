@@ -51,8 +51,9 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2016"
 __license__ = "GPL"
-__update__="08/08/2016"
+__update__="16/08/2016"
 
+import types
 import numpy as np
 import numpy.random
 from galib import Reciprocity
@@ -209,7 +210,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
         "Probability 'prew' out of bounds. Insert value between 0 and 1"
 
     # 1) CREATE OR CHECK THE VALIDITY OF THE INITIAL RING-LATTICE
-    if lattice==None:
+    if type(lattice) == types.NoneType:
         assert z <= int(N/2), 'Largest possible z in N/2: %d' %(N/2)
         adjmatrix = Lattice1D(N,z)
     else:
@@ -687,22 +688,47 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
         """Same function as in gatools.py module. Code duplicated here
         only to avoid recurrent imports.
         """
-        # 0) CHECK WHETHER LISTS OF NODES ARE GIVEN AS ARRAYS
-        if type(nodelist1) == np.ndarray:
-            nodelist1 = list(nodelist1)
-        if nodelist2 == None:
-            nodelist2 = nodelist1
+        # 0) CHECK WHETHER LISTS OF NODES ARE GIVEN AS ARRAYS. OTHERWISE, CONVERT.
+        # Check nodelist1
+        if type(nodelist1) != np.ndarray:
+            warnings.simplefilter('once', UserWarning)
+            warnings.warn("Prefered type for parameter 'nodelist1' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
+                        stacklevel=2)
+
+            if type(nodelist1) == set:
+                nodelist1 = list(nodelist1)
+            if type(nodelist1) in [list, tuple]:
+                nodelist1 = np.array(nodelist1,np.int)
+
+        # Check nodelist2
+        if type(nodelist2) == types.NoneType:
+            nodelist2 = nodelist1.copy()
         else:
-            if type(nodelist2) == np.ndarray:
-                nodelist2 = list(nodelist2)
+            if type(nodelist2) != np.ndarray:
+                warnings.simplefilter('module', UserWarning)
+                warnings.warn("Prefered type for parameter 'nodelist2' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
+                                stacklevel=2)
+
+                if type(nodelist2) == set:
+                    nodelist2 = list(nodelist2)
+                if type(nodelist2) in [list, tuple]:
+                    nodelist2 = np.array(nodelist2,np.int)
 
         # 1) CREATE LISTS OF INDICES FOR SLICING
         N1 = len(nodelist1)
         N2 = len(nodelist2)
-        xindices = []
-        for node in nodelist1:
-            xindices += [node] * N2
-        yindices = nodelist2 * N1
+        xindices = np.zeros(N1*N2, np.int)
+        for ncounter in xrange(N1):
+            node = nodelist1[ncounter]
+            startidx = ncounter*N2
+            endidx = startidx + N2
+            xindices[startidx:endidx] = node
+
+        yindices = np.zeros(N1*N2, np.int)
+        for n in xrange(N1):
+            startidx = n*N2
+            endidx = startidx + N2
+            yindices[startidx:endidx] = nodelist2
 
         # 2) EXTRACT THE SUBMATRIX AND FINISH
         return adjmatrix[xindices, yindices].reshape(N1, N2)
@@ -713,11 +739,16 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
         """
         adjmatrix = adjmatrix.astype('bool')
 
+        # 1) COMPUTE THE RECIPROCITY
+        # 1.1) The number of links
         L = adjmatrix.sum()
-        Rest = abs(adjmatrix - adjmatrix.T)
+        assert L > 0, 'Reciprocity(): Input network empty.'
+
+        # 1.2) Find the assymmetric links
+        Rest = np.abs(adjmatrix - adjmatrix.T)
         Lsingle = 0.5*Rest.sum()
 
-        return float(L-Lsingle)/L
+        return np.float(L-Lsingle) / L
 
     #______________________________________________________________________
     # 0) SECURITY CHECKS AND SETUP
@@ -1111,7 +1142,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
 
     return adjmatrix
 
-def HMCentralizedGraph(HMshape, avklist, gammalist=None, directed=False, outdtype=np.uint8):
+def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.uint8):
     """    Generates random hierarchical and modular networks of desired number
     of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
