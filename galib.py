@@ -3,6 +3,9 @@
 GRAPH ANALYSIS DESCRIPTORS
 ==========================
 
+
+
+
 This module contains functions to compute many graph descriptors of a
 network. Many functions compute also the results both for graphs and
 digraphs. Most of functions accept weighted networks as input but they
