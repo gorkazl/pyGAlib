@@ -1093,10 +1093,10 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     end up concentrated on few hubs, with every community having its own
     set of hubs.
 
-    For further details see references:
+    For further details see reference:
     - G. Zamora-Lopez, Y. Chen et al. "Functional complexity emerging from
     anatomical constraints in the brain: the significance of network
-    modularity and rich-clubs." XXXX, YYY (2016).
+    modularity and rich-clubs." Scientific Reports 6:38424 (2016).
 
     Parameters
     ----------
