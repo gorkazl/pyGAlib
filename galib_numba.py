@@ -17,11 +17,12 @@ for any network of N > 100 nodes Numba-based functions run faster.
 
 BASIC CONNECTIVITY DESCRIPTORS
 ==============================
-None yet.
+MatchingIndex_Numba
+    Computes the number of common neighbours of every pair of nodes.
 
 PATHS AND GRAPH DISTANCE FUNCTIONS
 ==================================
-FloydWarshall
+FloydWarshall_Numba
     Computes the pathlength between all pairs of nodes in a network.
 
 COMMUNITIES, COMPONENTS, K-CORES, ...
@@ -35,9 +36,9 @@ None yet.
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2016"
+__copyright__ = "Copyright 2013-2017"
 __license__ = "GPL"
-__update__="05/08/2016"
+__update__="03/05/2017"
 
 import numpy as np
 from numba import autojit
@@ -47,6 +48,79 @@ import galib
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
+@autojit
+def MatchingIndex_Numba(adjmatrix, normed=True):
+    """Computes the number of common neighbours of every pair of nodes.
+
+    The matching index of two nodes i and j is the number of common
+    neighbours they are linked with.
+
+    Returns same result as MatchingIndex() in galib.py but uses an ndarray-based
+    algorithm and the Numba package to accelerate the calculations. Recommended
+    only for networks of size N > 250 nodes.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network.
+
+    normed : Boolean, optional
+        If 'normed=False', returns the number of common neighbours
+        of two nodes i and j. If 'normed=True', the number of common
+        neighbours is divided by the total number of different nodes they
+        are linked with, so values range from 0 (no common neighbours)
+        to 1 (all neighbours are common to i and j). Explicit links i-->j
+        and j-->i are excluded because they do not contribute to the
+        matching. For example:
+            1 --> [2,3,4,5]
+            2 --> [4,5,6]
+            MI(1,2) = len([4,5])/len([3,4,5,6]) = 0.5
+
+    Returns
+    -------
+    MImatrix : ndarray of rank-2 of ndtype 'float64'
+        A matrix containing the matching index for all pairs of nodes.
+
+    Notes
+    -----
+    - The function accepts weighted networks but it ignores the weights.
+    - If adjmatrix is directed, calling MatchingIndex(adjmatrix) computes the
+    matching of the output neighbours. Passing the transpose adjmatrix.T to
+    the function computes the matching of the input neighbours.
+    """
+    N = len(adjmatrix)
+    # Convert the adjacency matrix into a boolean matrix
+    adjmatrix = adjmatrix.astype(np.bool)
+
+    MImatrix = np.identity(N, np.float64)
+
+    for i in xrange(N):
+        for j in xrange(i+1,N):
+
+            # Number of common neighbours (intersection of neighbourhoods)
+            mi = (adjmatrix[i] * adjmatrix[j]).sum()
+
+            if normed:
+                # Size of the union of the neighbourhoods
+                norm = (adjmatrix[i] + adjmatrix[j]).sum()
+                # Avoid counting the explicit links i-->j and j-->i
+                if adjmatrix[i,j]: norm -= 1
+                if adjmatrix[j,i]: norm -= 1
+
+                # Normalize and save the value avoiding ZeroDivision errors
+                if norm > 0:
+                    mi = np.float64(mi) / norm
+                    MImatrix[i,j] = mi
+                    MImatrix[j,i] = mi
+
+            else:
+                # Save the value
+                mi = np.float64(mi)
+                MImatrix[i,j] = mi
+                MImatrix[j,i] = mi
+
+    return MImatrix
+
 
 ###############################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
