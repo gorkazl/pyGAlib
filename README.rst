@@ -64,7 +64,6 @@ The current version includes core functionalities for graph analysis. Future rel
 * accelaration of slowest functions using the Numba package,
 * further measures for weighted and/or directed networks,
 * further classical (textbook) graph models,
-* roles of nodes in networks with modular organization,
 * extended data conversions between graph formats,
 * support for sparse matrices to increase the size of networks handled, and
 * ... any extensions/functions you want to include.
@@ -75,8 +74,13 @@ The current version includes core functionalities for graph analysis. Future rel
 HISTORY OF CHANGES
 ------------------
 
+May 3\ :sup:`rd`, 2017
+^^^^^^^^^^^^^^^^^^^^^^
+- Today I have added a new module to the library: ``galib_extra``. This module does not provide core functionalities for the analysis of complex networks. The module is intended to host code and measures I have either developed as the result of my research, or third-party measures and functionalities which I have adapted myself into Python. These functions and measures are all related to complex network analysis and network dynamics but cannot be strictly regarded as typical graph analysis. It includes functions to compute the `Functional Complexity` and the `Topological Similarity` measures we have recently published.
+
+
 August 6\ :sup:`th`, 2016
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 - Function ``gamodels.RandomGraph()`` improved. Method to choose source and target nodes to connect changed. Originally I would use the official ``random.choice()`` function to select nodes from the list of nodes. Now it uses ``N * numpy.random.rand()`` to choose the index. The latter was slower years ago but with newer Numpy versions, it has become a faster option. This change also allows better use of Numba. Faster generation functions coming soon!
 
 September 14\ :sup:`th`, 2015
