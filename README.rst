@@ -76,7 +76,7 @@ HISTORY OF CHANGES
 
 May 3\ :sup:`rd`, 2017
 ^^^^^^^^^^^^^^^^^^^^^^
-- Today I have added a new module to the library: *galib_extra.py*. This module does not provide core functionalities for the analysis of complex networks. The module is intended to host code and measures I have either developed as the result of my research, or third-party measures and functionalities which I have adapted myself into Python. These functions and measures are all related to complex network analysis and network dynamics but cannot be strictly regarded as typical graph analysis. It includes functions to compute the *Functional Complexity* and the *Topological Similarity* measures we have recently published.
+- Today I have added a new module to the library: *galib_extra.py*. This module does not provide core functionalities for the analysis of complex networks. The module is intended to host code and measures I have either developed as the result of my research, or third-party measures and functionalities which I have adapted myself into Python. These functions and measures are all related to complex network analysis and network dynamics but cannot be strictly regarded as typical graph analysis. It includes functions to compute the *Functional Complexity* and the *Topological Similarity* measures we have recently published: Zamora-Lopez et al. “*Functional complexity emerging from anatomical constraints in the brain: the significance of network modularity and rich-clubs*” Sci. Reps. 6:38424 (2016) [DOI: 10.1038/srep38424], and Bettinardi et al “*How structure sculpts function: Unveiling the contribution of anatomical connectivity to the brain’s spontaneous correlation structure*” Chaos 27, 047409 (2017) [DOI: 10.1063/1.4980099].
 
 
 August 6\ :sup:`th`, 2016
