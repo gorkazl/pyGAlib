@@ -76,9 +76,9 @@ Hubness_GA
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2016"
+__copyright__ = "Copyright 2013-2017"
 __license__ = "GPL"
-__update__="16/08/2016"
+__update__="12/05/2017"
 
 import types
 import numpy as np
@@ -193,22 +193,24 @@ def Reciprocity(adjmatrix):
 
     Returns
     -------
-    A scalar value between 0 (for acyclic directed networks) and 1 (for fully
-    reciprocal).
+    reciprocity : float
+        A scalar value between 0 (for acyclic directed networks) and 1 (for
+        fully reciprocal).
     """
     # 0) PREPARE FOR COMPUTATIONS
     adjmatrix = adjmatrix.astype('bool')
 
     # 1) COMPUTE THE RECIPROCITY
-    # 1.1) The number of links
     L = adjmatrix.sum()
-    assert L > 0, 'Reciprocity(): Input network empty.'
+    if L == 0:
+        reciprocity = 0
+    else:
+        # Find the assymmetric links
+        Rest = np.abs(adjmatrix - adjmatrix.T)
+        Lsingle = 0.5*Rest.sum()
+        reciprocity = np.float(L-Lsingle) / L
 
-    # 1.2) Find the assymmetric links
-    Rest = np.abs(adjmatrix - adjmatrix.T)
-    Lsingle = 0.5*Rest.sum()
-
-    return np.float(L-Lsingle) / L
+    return reciprocity
 
 def ReciprocalDegree(adjmatrix, normed=False):
     """Returns the reciprocal degree and excess degrees of every nodes.
