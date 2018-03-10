@@ -479,8 +479,7 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
     N1 = len(nodelist1)
     N2 = len(nodelist2)
     xindices = np.zeros(N1*N2, np.int)
-    for ncounter in xrange(N1):
-        node = nodelist1[ncounter]
+    for ncounter, node in enumerate(nodelist1):
         startidx = ncounter*N2
         endidx = startidx + N2
         xindices[startidx:endidx] = node

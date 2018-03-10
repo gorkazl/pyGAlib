@@ -13,8 +13,8 @@ It's main features are...
 
 ... and some limitations:
 
-- poor management of very large networks due to NumPy dependence,
-- no included graph visualization tools.
+- limited management of large networks due to NumPy dependence,
+- no graph visualization tools.
 
 
 INSTALLATION

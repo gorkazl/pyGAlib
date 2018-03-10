@@ -362,8 +362,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
 
     # 1) Find the degrees k of all the neighbours of nodes with given degree k'
     kdict = {}
-    for i in xrange(N):
-        kout = outdegree[i]
+    for i, kout in enumerate(outdegree):
         if kout not in kdict: kdict[kout] = []
         neighbours = adjmatrix[i].nonzero()[0]
         for node in neighbours:
@@ -373,8 +372,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     # 2) Compute the av. degree for all neighbours of nodes with degree k'
     klist = np.sort(kdict.keys())
     AvKnn = np.zeros((3,len(klist)), np.float)
-    for count in xrange(len(kdict)):
-        k = klist[count]
+    for count, k in enumerate(klist):
         avk, devk = gatools.StdDeviation(np.array(kdict[k]))
         AvKnn[0,count] = k
         AvKnn[1,count] = avk
@@ -1054,8 +1052,7 @@ def Modularity(adjmatrix, partition, degree=None):
     # Compute the modularity
     Q = 0.0
     L_norm = 1./L
-    for s in xrange(Ncoms):
-        community = partition[s]
+    for s, community in enumerate(partition):
         submat = gatools.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
         Q += float(submat.sum()) * L_norm
@@ -1284,8 +1281,7 @@ def LocalHubness(adjmatrix, partition):
     ncoms = len(partition)
 
     localhubness = np.zeros(N,np.float64)
-    for n in xrange(ncoms):
-        com = partition[n]
+    for n, com in enumerate(partition):
 
         # Skip nodes of only one node
         if len(com) == 1: continue
@@ -1543,8 +1539,7 @@ def RolesNodes(adjmatrix, partition):
     localhubness = np.zeros(N,np.float64)
     commsizes = np.zeros(ncomms,np.float64)
     partitionmatrix = np.zeros((N,ncomms), np.uint)
-    for c in xrange(ncomms):
-        com = partition[c]
+    for c, com in enumerate(partition):
         commsizes[c] = len(partition[c])
         partitionmatrix[com,c] = 1
 
@@ -1671,8 +1666,7 @@ def Hubness_GA(participmatrix, partition):
     N, ncoms = np.shape(participmatrix)
 
     zscore = np.zeros(N, np.float)
-    for s in xrange(ncoms):
-        community = partition[s]
+    for s, community in enumerate(partition):
         klist = participmatrix[community,s]
         avklist = klist.mean()
         devklist = klist.std()

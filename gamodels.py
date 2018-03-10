@@ -706,8 +706,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
     randmatrix = np.zeros((N,N), np.uint8)
 
     # 2) GENERATE THE BLOCK-WISE RANDOM GRAPH
-    for c1 in xrange(ncoms):
-        com1 = partition[c1]
+    for c1, com1 in enumerate(partition):
         N1 = len(com1)
 
         # 2.1) Seed the random links within the module
@@ -840,12 +839,10 @@ def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
         counter += Nsizelist[c]
 
     # 2) GENERATE THE RANDOM MODULAR NETWORK
-    for c1 in xrange(ncommunities):
-        com1 = partition[c1]
+    for c1, com1 in enumerate(partition):
         N1 = Nsizelist[c1]
 
-        for c2 in xrange(ncommunities):
-            com2 = partition[c2]
+        for c2, com2 in enumerate(partition):
             N2 = Nsizelist[c2]
 
             # 2.0) Choose the probability to use
