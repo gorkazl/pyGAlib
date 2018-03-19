@@ -206,7 +206,8 @@ def Reciprocity(adjmatrix):
         reciprocity = 0
     else:
         # Find the assymmetric links
-        Rest = np.abs(adjmatrix - adjmatrix.T)
+        # Rest = np.abs(adjmatrix - adjmatrix.T)
+        Rest = np.abs(adjmatrix ^ adjmatrix.T)
         Lsingle = 0.5*Rest.sum()
         reciprocity = np.float(L-Lsingle) / L
 
@@ -441,8 +442,8 @@ def Clustering(adjmatrix, checkdirected=True):
     pow2matrix = np.dot(adjmatrix,adjmatrix)
     ntriangles = np.zeros(N, np.float64)
     for i in xrange(N):
-        ntriangles[i] = np.dot(adjmatrix[i],pow2matrix[i])
-
+        ntriangles[i] = (adjmatrix[i] * pow2matrix[i]).sum()
+         
     # 2) COMPUTE THE NUMBER OF DIADS EACH NODE PARTICIPATES IN
     deg = adjmatrix.sum(axis=1)
     ndiads = deg*(deg-1)
