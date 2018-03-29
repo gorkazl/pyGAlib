@@ -443,7 +443,7 @@ def Clustering(adjmatrix, checkdirected=True):
     ntriangles = np.zeros(N, np.float64)
     for i in xrange(N):
         ntriangles[i] = (adjmatrix[i] * pow2matrix[i]).sum()
-         
+
     # 2) COMPUTE THE NUMBER OF DIADS EACH NODE PARTICIPATES IN
     deg = adjmatrix.sum(axis=1)
     ndiads = deg*(deg-1)
@@ -593,7 +593,7 @@ def MatchingIndex(adjmatrix, normed=True):
 
     for i in xrange(N):
         ineighbours = set(adjmatrix[i].nonzero()[0])
-        for j in xrange(i+1,N):
+        for j in xrange(i,N):
             jneighbours = set(adjmatrix[j].nonzero()[0])
 
             # Intersection and union of the sets

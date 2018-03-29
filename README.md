@@ -69,6 +69,10 @@ The current version includes core functionalities for graph analysis. Future rel
 -------------------------------------------------------------------------------
 ### HISTORY OF CHANGES
 
+##### March 29th 2018
+Replaced README.rst by a README.md file and minor issues corrected in *galib.py* module.
+
+
 ##### May 3rd 2017
 GAlib has a new module named *galib_extra.py*. This module does not provide core functionalities for the analysis of complex networks but it is intended to host measures I have developed as the result of my research, and third-party measures and functionalities which I have adapted myself into Python. These measures are all related to complex network analysis and network dynamics but they may be difficult to understand as typical graph analysis tools. It includes functions to compute the **Functional Complexity** and the **Topological Similarity** measures we have recently published. See:
 
