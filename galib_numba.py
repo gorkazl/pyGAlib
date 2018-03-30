@@ -41,14 +41,14 @@ __license__ = "GPL"
 __update__="03/05/2017"
 
 import numpy as np
-from numba import autojit
+from numba import jit
 import gatools
 import galib
 
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
-@autojit
+@jit
 def MatchingIndex_Numba(adjmatrix, normed=True):
     """Computes the number of common neighbours of every pair of nodes.
 
@@ -95,7 +95,7 @@ def MatchingIndex_Numba(adjmatrix, normed=True):
     MImatrix = np.identity(N, np.float64)
 
     for i in xrange(N):
-        for j in xrange(i+1,N):
+        for j in xrange(i,N):
 
             # Number of common neighbours (intersection of neighbourhoods)
             mi = (adjmatrix[i] * adjmatrix[j]).sum()
@@ -152,7 +152,7 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
     FloydWarshall : Computes the pathlength between all pairs of nodes.
     """
     # 0) DEFINE THE CORE OF THE FW ALGORITHM, ACCELARATED BY 'Numba'
-    @autojit
+    @jit
     def FW_Undirected(distmatrix):
         """The Floyd-Warshall algorithm for undirected networks
         """
@@ -165,7 +165,7 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
                         distmatrix[i,j] = d
                         distmatrix[j,i] = d
 
-    @autojit
+    @jit
     def FW_Directed(distmatrix):
         """The Floyd-Warshall algorithm for directed networks
         """
