@@ -69,6 +69,11 @@ The current version includes core functionalities for graph analysis. Future rel
 -------------------------------------------------------------------------------
 ### HISTORY OF CHANGES
 
+##### March 30th 2018
+New step towards accelerating slowest functions:
+- Function `MatchingIndex_Numba()` added to module *galib_numba.py*
+- New module *gamodels_numba.py* has been added to GAlib. This module will contain faster network generation and rewiring functions, accelerated using Numba. The module is started with a function `RandomGraph_Numba()`, with same functionality as its equivalent in the original *gamodels.py* module but significantly faster.
+
 ##### March 29th 2018
 Replaced README.rst by a README.md file and minor issues corrected in *galib.py* module.
 
