@@ -76,9 +76,9 @@ Hubness_GA
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2017"
+__copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="12/05/2017"
+__update__="30/03/2018"
 
 import types
 import numpy as np

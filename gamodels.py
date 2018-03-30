@@ -49,9 +49,9 @@ RavaszBarabasiModel
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2016"
+__copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="16/08/2016"
+__update__="30/03/2018"
 
 import types
 import numpy as np
