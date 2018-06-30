@@ -64,7 +64,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__ = "30/03/2018"
+__update__ = "30/06/2018"
 
 import itertools
 import types
@@ -415,7 +415,7 @@ def Save2Pajek(filepath, adjmatrix, labels=[], directed=False, weighted=False):
     # 4) CLOSE FILE AND FINISH
     outfile.close()
 
-def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
+def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
     """Returns the sub-matrix composed by a set of nodes.
 
     Parameters
@@ -462,7 +462,7 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=None):
             nodelist1 = np.array(nodelist1,np.int)
 
     # Check nodelist2
-    if type(nodelist2) == types.NoneType:
+    if len(nodelist2) == 0:
         nodelist2 = nodelist1.copy()
     else:
         if type(nodelist2) != np.ndarray:

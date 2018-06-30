@@ -32,9 +32,9 @@ NeuralComplexity_Sampled
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2017"
+__copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="03/05/2017"
+__update__="30/03/2018"
 
 import numpy as np
 import numpy.random
@@ -104,7 +104,7 @@ def ExponentialMapping(adjmatrix, coupling, partialcorr=False):
     nodes is the same, and when the decay rate for all nodes is the same, as
     shown in "Bettinardi et al. Chaos 27:047409 (2017) (Supp. Material)."
     I recommend to use TopologicalSimilarity() instead. I added this function
-    here only for reference from interested readers of the paper above. 
+    here only for reference from interested readers of the paper above.
 
     Parameters
     ----------

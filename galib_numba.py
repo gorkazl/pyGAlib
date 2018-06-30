@@ -38,7 +38,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="39/03/2018"
+__update__="30/06/2018"
 
 import numpy as np
 from numba import jit
