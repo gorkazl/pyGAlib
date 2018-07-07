@@ -667,7 +667,7 @@ def NonZeroMin(data):
     idx = np.where(data)
     return data[idx].min()
 
-def CumulativeDistribution(data, nbins, range=None, normed=True):
+def CumulativeDistribution(data, nbins, range=None, normed=True, centerbins=False):
     """Computes the cumulative distribution of a dataset.
 
     Parameters
@@ -689,6 +689,11 @@ def CumulativeDistribution(data, nbins, range=None, normed=True):
         the *integral* over the range is 1. Note that the sum of the
         histogram values will not be equal to 1 unless bins of unity
         width are chosen; it is not a probability *mass* function.
+    centerbins : bool, optional
+        If False, the positions of the bins ('xdata' variable) returned
+        correspond to the lower limit of the each bin, as it is returned
+        originally by the histogram() function of numpy. If True, 'xdata' will
+        contain the value at the center of the bin.
 
     Returns
     -------
@@ -709,6 +714,10 @@ def CumulativeDistribution(data, nbins, range=None, normed=True):
     ydata = ydata.cumsum()
 
     # 2) RETURN THE RESULTS
+    if centerbins:
+        dif = 0.5 * (xdata[-1] - xdata[0]) / nbins
+        xdata += dif
+
     if normed:
         norm = 1. / ydata[-1]
         ydata *= norm
