@@ -697,10 +697,12 @@ def CumulativeDistribution(data, nbins, range=None, normed=True, centerbins=Fals
 
     Returns
     -------
+    xdata : ndarray
+        Returns the bin location. This will be the left edge of the bins if
+        option 'centerbins=False', and the center of the bin if option
+        centerbins=True.
     ydata : ndarray
         The values of the cumulative probability.
-    xdata : ndarray
-        Returns the bin edges.
 
     See Also
     --------
