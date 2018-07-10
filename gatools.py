@@ -3,7 +3,7 @@
 MISCELLANOUS HELPER FUNCTIONS
 =============================
 
-This module contains miscellaneous helper functions useful for the analisys
+This module contains miscellaneous helper functions useful for the analysis
 of graphs and complex networks.
 
 I/O AND DATA CONVERSIONS
