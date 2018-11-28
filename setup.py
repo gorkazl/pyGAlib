@@ -25,7 +25,7 @@ config = {
     'author': 'HBP Infrastructure Developers',
     'author_email': 'platform@humanbrainproject.eu',
     'url': 'https://github.com/HumanBrainProject/hbp-service-client',
-    'version': '0.0.1',
+    'version': '0.0.2',
     'license': 'Apache License 2.0',
     'install_requires': REQS,
     'packages': find_packages(exclude=['doc', '*tests*']),
