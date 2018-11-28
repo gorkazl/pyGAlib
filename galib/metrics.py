@@ -1,5 +1,4 @@
 """
-==========================
 GRAPH ANALYSIS DESCRIPTORS
 ==========================
 
@@ -10,7 +9,7 @@ ignore the weights unless explicitely specified. Support for weighted
 measures will be added to GAlib in future releases.
 
 BASIC CONNECTIVITY DESCRIPTORS
-==============================
+------------------------------
 Density
     Returns the density of links in a network.
 Degree
@@ -31,7 +30,7 @@ MatchingIndex
     Computes the number of common neighbours of every pair of nodes.
 
 PATHS AND GRAPH DISTANCE FUNCTIONS
-==================================
+----------------------------------
 FloydWarshall
     Computes the pathlength between all pairs of nodes in a network.
 PathsAllinOne
@@ -40,7 +39,7 @@ AllShortestPaths
     Finds all the shortest paths between two nodes.
 
 COMMUNITIES, COMPONENTS, K-CORES, ...
-=====================================
+-------------------------------------
 AssortativityMatrix
     Returns the assortativity matrix of network given a partition of nodes.
 ConnectedComponents
@@ -53,7 +52,7 @@ K_Shells
     Returns the K-shells of a network for all k from kmin to kmax.
 
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
-====================================================
+----------------------------------------------------
 GlobalHubness
     Computes the global hubness of all nodes in a network.
 LocalHubness
@@ -73,17 +72,28 @@ ParticipationIndex_GA
 Hubness_GA
     Returns the within-module degree defined by Guimera & Amaral.
 """
+from __future__ import absolute_import
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="30/06/2018"
+__update__="11/07/2018"
 
 import types
 import numpy as np
-import gatools
 
+# from . import tools
+import galib.tools
+
+__all__ = ['Density', 'Degree', 'Intensity', 'Reciprocity', 'ReciprocalDegree', \
+        'AvNeighboursDegree', 'Clustering', 'RichClub', 'MatchingIndex',\
+        'FloydWarshall', 'PathsAllinOne', 'ShortestPaths', \
+        # 'ConnectedComponents', \
+        'AssortativityMatrix', 'Modularity', 'K_Core', 'K_Shells', \
+        'GlobalHubness', 'LocalHubness', 'ParticipationMatrix', \
+        'ParticipationVectors', 'NodeParticipation', 'NodeDispersion', \
+        'RolesNodes', 'ParticipationIndex_GA', 'Hubness_GA']
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
@@ -374,7 +384,10 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     klist = np.sort(kdict.keys())
     AvKnn = np.zeros((3,len(klist)), np.float)
     for count, k in enumerate(klist):
-        avk, devk = gatools.StdDeviation(np.array(kdict[k]))
+        dummy = np.array(kdict[k])
+        avk = dummy.mean()
+        devk = dummy.std()
+
         AvKnn[0,count] = k
         AvKnn[1,count] = avk
         AvKnn[2,count] = devk
@@ -979,7 +992,7 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
             com1 = partition[c1]
             for c2 in xrange(Ncoms):
                 com2 = partition[c2]
-                submat = gatools.ExtractSubmatrix(adjmatrix, com1, com2)
+                submat = galib.gatools.ExtractSubmatrix(adjmatrix, com1, com2)
                 assortmatrix[c1,c2] = submat.sum()
                 # Normalise, avoiding self-loops
                 if c1 == c2:
@@ -991,7 +1004,7 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     else:
         for c1 in xrange(Ncoms):
             for c2 in xrange(Ncoms):
-                submat = gatools.ExtractSubmatrix(adjmatrix, partition[c1], \
+                submat = galib.gatools.ExtractSubmatrix(adjmatrix, partition[c1], \
                                                   partition[c2])
                 assortmatrix[c1,c2] = submat.sum()
 
@@ -1054,7 +1067,7 @@ def Modularity(adjmatrix, partition, degree=None):
     Q = 0.0
     L_norm = 1./L
     for s, community in enumerate(partition):
-        submat = gatools.ExtractSubmatrix(adjmatrix, community)
+        submat = galib.gatools.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
         Q += float(submat.sum()) * L_norm
         # Minus the expected fraction of links
@@ -1117,7 +1130,7 @@ def K_Core(adjmatrix, kmin):
         # 'nodelist' is already empty before end of loop.
         degree = Degree(adjmatrix)
         try:
-            newkmin = gatools.NonZeroMin(degree)
+            newkmin = galib.gatools.NonZeroMin(degree)
         except ValueError:
             #print "ValueError of 'NonzeroMin()' catched and passed"
             done = True
@@ -1167,7 +1180,7 @@ def K_Shells(adjmatrix):
 
     # Find the smallest non-zero degree to start from
     degree = Degree(adjmatrix)
-    kmin = gatools.NonZeroMin(degree)
+    kmin = galib.gatools.NonZeroMin(degree)
 
     # 1) Start computing the k-shells
     kshells = {}
@@ -1192,7 +1205,7 @@ def K_Shells(adjmatrix):
             # 'nodelist' is already empty before end of loop
             degree = Degree(adjmatrix)
             try:
-                newkmin = gatools.NonZeroMin(degree)
+                newkmin = galib.gatools.NonZeroMin(degree)
             except ValueError:
                 #print "ValueError of 'NonzeroMin()' catched and passed"
                 kshells[kmin] = shell
@@ -1288,7 +1301,7 @@ def LocalHubness(adjmatrix, partition):
         if len(com) == 1: continue
 
         # Compute the hubness of nodes in the isolated community
-        subnet = gatools.ExtractSubmatrix(adjmatrix,com)
+        subnet = galib.gatools.ExtractSubmatrix(adjmatrix,com)
         hubness = GlobalHubness(subnet)
 
         if np.isnan(hubness.min()): continue
@@ -1548,7 +1561,7 @@ def RolesNodes(adjmatrix, partition):
         if len(com) == 1: continue
 
         # Compute the hubness of nodes in the isolated community
-        subnet = gatools.ExtractSubmatrix(adjmatrix,com)
+        subnet = galib.gatools.ExtractSubmatrix(adjmatrix,com)
         hubness = GlobalHubness(subnet)
 
         if np.isnan(hubness.min()): continue
@@ -1675,3 +1688,5 @@ def Hubness_GA(participmatrix, partition):
         zscore[community] = (participmatrix[community,s] - avklist) / devklist
 
     return zscore
+
+#

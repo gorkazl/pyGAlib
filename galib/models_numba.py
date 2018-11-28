@@ -1,5 +1,4 @@
 """
-===================================
 FASTER SYNTHETIC NETWORK GENERATORS
 ===================================
 
@@ -16,17 +15,9 @@ to function and I will report approximate valuesfor each of them. In general,
 for any network of N > 100 nodes Numba-based functions run faster.
 
 RANDOM NETWORK GENERATORS
-=========================
+-------------------------
 RandomGraph_Numba
     Generates random graphs with N nodes and L links.
-
-NETWORK REWIRING/RANDOMIZATION ALGORITHMS
-=========================================
-None yet.
-
-HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
-============================================
-None yet
 
 """
 
@@ -34,16 +25,16 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="30/03/2018"
+__update__="11/07/2018"
 
 import numpy as np
 import numpy.random
-from numba import autojit
+from numba import jit
 
 
 ############################################################################
 """RANDOM NETWORK GENERATORS"""
-@autojit
+@jit
 def RandomGraph_Numba(N, L, directed=False, selfloops=False):
     """Generates random graphs with N nodes and L links.
 

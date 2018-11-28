@@ -1,5 +1,4 @@
 """
-=============================
 MISCELLANOUS HELPER FUNCTIONS
 =============================
 
@@ -7,7 +6,7 @@ This module contains miscellaneous helper functions useful for the analisys
 of graphs and complex networks.
 
 I/O AND DATA CONVERSIONS
-========================
+------------------------
 LoadLabels
     Reads the labels of nodes from a text file.
 SaveLabels
@@ -30,14 +29,14 @@ CleanPaths
     Finds and removes in-place repeated, opposite paths from a list of paths.
 
 ARRAY AND MATRIX COMPARISONS
-============================
+----------------------------
 ArrayCompare
     Compares whether two arrays are identical or not.
 HammingDistance
     Computes the Hamming distance between two arrays of same shape.
 
 ADDITIONAL MATH FUNCTIONS
-=========================
+-------------------------
 NonZeroMin
     Returns the smallest non-zero value in an array.
 CumulativeDistribution
@@ -46,8 +45,6 @@ Factorial
     Computes the factorial of an integer number.
 BinomialCoefficient
     Computes the binomial coefficient of n over m.
-StdDeviation
-    Returns the mean value and standard deviation of a dataset.
 Quartiles
     Finds the Q1, Q2 and Q3 quartiles of a dataset.
 AllPermutations
@@ -59,21 +56,31 @@ AllBipartitions
 MeanCorrelation
     Computes the Fisher-corrected mean value of correlation values.
 """
+from __future__ import absolute_import
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__ = "30/06/2018"
+__update__ = "11/07/2018"
 
 import itertools
 import types
 import re
 import warnings
+import functools
 
 import numpy as np
-import galib
 
+# from . import gametrics
+import galib.metrics
+
+__all__ = ['LoadFromPajek', 'Save2Pajek', 'LoadLabels', 'SaveLabels', \
+        'LoadPartition', 'SavePartition', 'ExtractSubmatrix', 'SymmetriseMatrix', \
+        'LaplacianMatrix', 'CleanPaths', 'HammingDistance', 'NonZeroMin', \
+        'CumulativeDistribution', 'Factorial', 'BinomialCoefficient', \
+        'Quartiles', 'AllPermutations', 'AllCombinations', 'AllBipartitions', \
+        'MeanCorrelation']
 
 ## I/O AND DATA CONVERSIONS ################################################
 def LoadLabels(filepath):
@@ -507,7 +514,7 @@ def SymmetriseMatrix(adjmatrix):
     An adjacency matrix of the same shape, of dype=float, with values
     """
 
-    if galib.Reciprocity(adjmatrix) == 1:
+    if galib.gametrics.Reciprocity(adjmatrix) == 1:
         return adjmatrix
     else:
         return 0.5 * (adjmatrix + adjmatrix.T)
@@ -758,16 +765,6 @@ def BinomialCoefficient(n, m):
         enum = reduce(lambda x, y: x * y, xrange(ma + 1, n + 1), 1)
 
         return enum / Factorial(mi)
-
-def StdDeviation(data):
-    """Returns the mean value and the standard deviation of an array of data.
-    It is a simple wrapper using the numpy ufuncs a.mean() and a.dev().
-    """
-    if type(data) == np.ndarray:
-        return data.mean(), data.std()
-    else:
-        data = np.array(data)
-        return data.mean(), data.std()
 
 def Quartiles(data):
     """
@@ -1037,3 +1034,5 @@ def MeanCorrelation(data, tolerance=10**(-15)):
     newdata = np.where(newdata==-np.inf, -10,newdata)
 
     return np.tanh(newdata.mean())
+
+#

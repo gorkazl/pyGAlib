@@ -3,12 +3,12 @@
 ADDITIONAL FUNCTIONALITIES
 ==========================
 
-This module exists to host code for functionalities and measures I have
-developed and published during my research, which might be of interest for
-some users and which do not fully fit in the original goals of GAlib,
-intended as a library for the analysis of complex networks.
-The module also includes my own adaptation into Python of third-party
-functions and measures I needed for my research, or merely for comparison.
+This module hosts functionalities and measures related to the study of complex
+networks which do not fit in the more strict classification of graph metrics,
+models and tools. These correspond to functionalities I have developed and
+published during my research, which might be of interest for some users or
+readers. It also contains adaptation into Python of measures published by
+third-party authors which I needed for my own research.
 
 
 ESTIMATION OF EXPECTED CROSS-CORRELATION
@@ -29,18 +29,20 @@ NeuralComplexity
 NeuralComplexity_Sampled
     Calculates the neural complexity of a correlation(-like) matrix (Faster).
 """
+from __future__ import absolute_import
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="30/03/2018"
+__update__="11/07/2018"
 
 import numpy as np
 import numpy.random
 import scipy.linalg
-import gatools
 
+from . import tools
+# from .gatools import ExtractSubmatrix, Factorial, AllBipartitions
 
 ############################################################################
 """ESTIMATION OF EXPECTED CROSS-CORRELATION"""

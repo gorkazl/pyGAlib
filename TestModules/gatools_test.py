@@ -9,6 +9,7 @@ class gatoolsTest(unittest.TestCase):
         labels = gatools.LoadLabels('TestResources/labels.txt')
          
         self.assertEqual(labels, ['AB', 'C', 'DEF'])
+        assert False
 
     def test_SaveLabels(self):
         labels = ['AB', 'C', 'DEF']

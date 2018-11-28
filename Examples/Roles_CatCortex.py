@@ -7,16 +7,16 @@ Individual node's contribution to the mesoscale of complex networks, New J.
 Phys. 16, 125006.
 """
 
-__author__ = "Gorka Zamora-Lopez" 
-__email__ = "Gorka.zamora@ymail.com"
-__copyright__ = "Copyright 2013-2015"
+__author__ = "Gorka Zamora-Lopez"
+__email__ = "galib@zamora-lopez.xyz"
+__copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="07/01/2015"
+__update__="13/07/2018"
 
 import matplotlib.pyplot as plt
 from numpy import*
-from gatools import SymmetriseMatrix
 from galib import *
+from galib.gatools import SymmetriseMatrix
 
 def MaxDispersionCurve(d, M):
     """This function is defined only to be plotted in the dispersion vs
@@ -24,10 +24,10 @@ def MaxDispersionCurve(d, M):
     """
     M = float(M)
     x = 0.5 * (2.0 - d)
-    
+
     return 1.0 - sqrt( M/(M-1.0) * ( x**2 + (1.0 - x)**2 - 1.0/M ) )
-    
-    
+
+
 
 ############################################################################
 # 0) READ THE DATA OF THE CORTICAL NETWORK OF THE CAT
@@ -132,5 +132,3 @@ plt.grid()
 
 plt.tight_layout()
 plt.show()
-
-

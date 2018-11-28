@@ -1,12 +1,12 @@
 """
 In this script we show how to compute the rich-club coefficient of a graph,
-including the expected rich-club as quantified out of a set of rewired 
+including the expected rich-club as quantified out of a set of rewired
 networks for comparison. It requires matplotlib only for the visualization.
 """
 
-__author__ = "Gorka Zamora-Lopez" 
-__email__ = "Gorka.zamora@ymail.com"
-__copyright__ = "Copyright 2013-2015"
+__author__ = "Gorka Zamora-Lopez"
+__email__ = "galib@zamora-lopez.xyz"
+__copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
 __update__="07/01/2015"
 
@@ -35,7 +35,7 @@ rewphidens = zeros((nrealiz,kmax), float)
 for re in xrange(nrealiz):
     # 2.1) Rewire the network
     rewnet = RewireNetwork(net, prewire, directed=False)
-    
+
     # 2.2) Compute the rich club of the rewired network
     rewphidens[re] = RichClub(rewnet, rctype='undirected')
 
@@ -61,5 +61,3 @@ plt.legend(loc='upper left')
 
 
 plt.show()
-
-

@@ -1,49 +1,42 @@
 """
-=================================
 FASTER GRAPH ANALYSIS DESCRIPTORS
 =================================
 
-This module duplicates the slowest functions of main module 'galib.py'
+This module duplicates the slowest functions of main module 'metrics.py'
 and significantly accelerates their performance. This is achieved thanks to
 the Numba package (http://numba.pydata.org) which compiles annotated Python
 and NumPy code to LLVM on run-time. Therefore, the use of this module
 requires Numba to be installed.
 
-Due to the run-time approach of Numba, the original functions in 'galib.py'
+Due to the run-time approach of Numba, the original functions in 'metrics.py'
 will run faster in very small networks and Numba-based functions take the
 lead as network size increases. The precise size limit varies from function
 to function and I will report approximate valuesfor each of them. In general,
 for any network of N > 100 nodes Numba-based functions run faster.
 
 BASIC CONNECTIVITY DESCRIPTORS
-==============================
+------------------------------
 MatchingIndex_Numba
     Computes the number of common neighbours of every pair of nodes.
 
 PATHS AND GRAPH DISTANCE FUNCTIONS
-==================================
+----------------------------------
 FloydWarshall_Numba
     Computes the pathlength between all pairs of nodes in a network.
-
-COMMUNITIES, COMPONENTS, K-CORES, ...
-=====================================
-None yet.
-
-ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
-====================================================
-None yet.
 """
+from __future__ import absolute_import
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="30/06/2018"
+__update__="11/07/2018"
 
 import numpy as np
 from numba import jit
-import gatools
-import galib
+from . import metrics
+
+__all__ = ['MatchingIndex_Numba', 'FloydWarshall_Numba']
 
 
 ############################################################################
@@ -55,7 +48,7 @@ def MatchingIndex_Numba(adjmatrix, normed=True):
     The matching index of two nodes i and j is the number of common
     neighbours they are linked with.
 
-    Returns same result as MatchingIndex() in galib.py but uses an ndarray-based
+    Returns same result as MatchingIndex() in metrics.py but uses an ndarray-based
     algorithm and the Numba package to accelerate the calculations. Recommended
     only for networks of size N > 250 nodes.
 
@@ -128,7 +121,7 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
     """Computes the pathlength between all pairs of nodes in a network.
 
     WARNING! This version returns the same output as 'FloydWarshall()'
-        function in main galib.py module but runs much faster (for networks
+        function in main metrics.py module but runs much faster (for networks
         of N > 100). It requires package Numba to be installed.
 
     Parameters
@@ -186,7 +179,7 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
         distmatrix = np.where(adjmatrix == 0, np.inf, 1)
 
     # 1.2) Find out whether the network is directed or undirected
-    recip = galib.Reciprocity(adjmatrix)
+    recip = metrics.Reciprocity(adjmatrix)
 
     # 2) RUN THE FLOYD-WARSHALL ALGORITHM USING FASTER FUNCTIONS (NUMBA)
     if recip==1.0:
@@ -203,3 +196,6 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
 
 ######################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
+
+
+#

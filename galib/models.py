@@ -1,5 +1,4 @@
 """
-============================
 SYNTHETIC NETWORK GENERATORS
 ============================
 
@@ -7,7 +6,7 @@ This module contains functions to generate typical synthetic networks,
 including random networks and methods to rewire networks.
 
 RANDOM NETWORK GENERATORS
-=========================
+-------------------------
 Lattice1D
     Generates regular ring lattices (all nodes have same degree).
 Lattice1D_FixLinks
@@ -24,14 +23,14 @@ ScaleFreeGraph
     Generates scale-free graphs of given size and exponent.
 
 NETWORK REWIRING/RANDOMIZATION ALGORITHMS
-=========================================
+-----------------------------------------
 RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
 ModularityPreservingGraph
     Randomises an input graph conserving its modular structure.
 
 HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
-============================================
+--------------------------------------------
 ModularHeterogeneousGraph
     Generates random modular networks of given module sizes and densities.
 HMpartition
@@ -46,19 +45,26 @@ HMCentralisedGraph
 RavaszBarabasiModel
     Generates hierarchical networks after the Ravasz & Barabasi model.
 """
+from __future__ import absolute_import
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
-__update__="30/06/2018"
+__update__="11/07/2018"
 
 import types
+
 import numpy as np
 import numpy.random
-import gatools
-import galib
 
+from .metrics import Reciprocity
+from .tools import ExtractSubmatrix
+
+__all__ = ['Lattice1D', 'Lattice1D_FixLinks', 'WattsStrogatzGraph', \
+        'ErdosRenyiGraph', 'RandomGraph', 'BarabasiAlbertGraph', 'ScaleFreeGraph', \
+        'RewireNetwork', 'ModularityPreservingGraph', 'ModularHeterogeneousGraph', \
+        'HMRandomGraph', 'HMCentralizedGraph']
 
 ############################################################################
 """RANDOM NETWORK GENERATORS"""
@@ -571,7 +577,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     # 0) PREPARE FOR THE CALCULATIONS
     # 0.1) Check the conditions for the rewiring process
     if directed==None:
-        recip = galib.Reciprocity(adjmatrix)
+        recip = Reciprocity(adjmatrix)
         if recip == 1.0: directed = False
         else: directed = True
     if weighted:
@@ -692,7 +698,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
     # Check if the original network is directed or undirected
     if directed == None:
-        if galib.Reciprocity(adjmatrix) == 1: directed = False
+        if Reciprocity(adjmatrix) == 1: directed = False
         else: directed = True
 
     # Check if the original network accepts self-loops
@@ -710,7 +716,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
         N1 = len(com1)
 
         # 2.1) Seed the random links within the module
-        submatrix = gatools.ExtractSubmatrix(adjmatrix, com1)
+        submatrix = ExtractSubmatrix(adjmatrix, com1)
         Lblock = submatrix.astype('bool').sum()
         if not directed:
             Lblock = int( round(np.float32(Lblock / 2)) )
@@ -741,7 +747,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
             com2 = partition[c2]
             N2 = len(com2)
-            subnet = gatools.ExtractSubmatrix(adjmatrix,com1,com2)
+            subnet = ExtractSubmatrix(adjmatrix,com1,com2)
             Lblock = subnet.astype('bool').sum()
             counter = 0
             while counter < Lblock:
@@ -1338,3 +1344,5 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
             SkewedRandomGraph(Lcom, cumprobability, directed)
 
     return adjmatrix
+
+#

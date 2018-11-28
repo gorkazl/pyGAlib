@@ -2,9 +2,9 @@
 In this script we show how to convert datasets
 """
 
-__author__ = "Gorka Zamora-Lopez" 
-__email__ = "Gorka.zamora@ymail.com"
-__copyright__ = "Copyright 2013-2015"
+__author__ = "Gorka Zamora-Lopez"
+__email__ = "galib@zamora-lopez.xyz"
+__copyright__ = "Copyright 2013-2018"
 __license__ = "GPL"
 __update__="07/01/2015"
 
@@ -48,6 +48,3 @@ netlabels = LoadLabels(join(datapath,fname2))
 # 2.3) Save the network and labels into a Pajek formatted text file
 outfname = 'Cat53_cortex.net'
 Save2Pajek(join(datapath,outfname), net, labels=netlabels, directed=True)
-
-
-
