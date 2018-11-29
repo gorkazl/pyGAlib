@@ -2,3 +2,5 @@
 .pydevproject
 .project
 __pycache__
+.DS_store
+.gitignore
