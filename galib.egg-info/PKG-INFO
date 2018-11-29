@@ -1,0 +1,21 @@
+Metadata-Version: 1.1
+Name: galib
+Version: 0.0.2
+Summary: Write me.
+Home-page: https://github.com/HumanBrainProject/hbp-service-client
+Author: HBP Infrastructure Developers
+Author-email: platform@humanbrainproject.eu
+License: Apache License 2.0
+Description: UNKNOWN
+Keywords: hbp,human brain project,collaboratory,library,science
+Platform: UNKNOWN
+Classifier: Development Status :: 0 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
