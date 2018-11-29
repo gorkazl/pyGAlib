@@ -113,7 +113,7 @@ See LICENSE.txt file.
 Copyright (C) 2013 - 2018, Gorka Zamora Lopez, Ph.D.
 
 """
-from __future__ import absolute_import
+# from __future__ import absolute_import
 
 from . import metrics
 from .metrics import*
