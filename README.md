@@ -1,7 +1,8 @@
 GAlib – Graph Analysis library in Python / NumPy
 ================================================
 
-**DEPRECATED BRANCH !!** See the '*master*' branch for the reshaped library into a proper Python package.
+*!!! (30/11/2018) GAlib is becoming a proper Python package. Version 1.0 to be released very soon. A copy of the actual library has been frozen in branch "old_GAlib" merely for legacy reasons. No pull requests will be accepted to that branch !!!*
+
 
 GAlib is a library for the analysis of graphs and complex networks in Python. It treats networks as adjacency matrices in order to take advantage of faster NumPy
 array manipulations. The library is very easy to install, use, modify and extend.
@@ -71,8 +72,6 @@ The current version includes core functionalities for graph analysis. Future rel
 ----------------------------------------------------
 ### HISTORY OF CHANGES
 
-##### November 29 2018
-The old version GAlib, consisting of a simple library of various modules, has been deprecated and moved into this separate branch '*old_GAlib*' for reference reasons. GAlib has been reshaped into a proper Python Package, continued in the '*Master*' branch.
 
 ##### March 30th 2018
 New step towards accelerating slowest functions:
