@@ -2,8 +2,7 @@ GAlib – Graph Analysis library in Python / NumPy
 ================================================
 
 ---
-
-**!!!** *(30/11/2018) GAlib is becoming a proper Python package. Version 1.0 to be released very soon. A copy of the actual library has been frozen in branch "old_GAlib" merely for legacy reasons. No pull requests will be accepted to that branch* **!!!**
+**NOTE !!!** *(30/11/2018) GAlib is becoming a proper Python package. Version 1.0 to be released very soon. A copy of the actual library has been frozen in branch "old_GAlib" merely for legacy reasons. No pull requests will be accepted to that branch* **!!!**
 
 ----
 
