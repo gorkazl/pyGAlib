@@ -2,4 +2,8 @@
 .pydevproject
 .project
 __pycache__
+<<<<<<< HEAD
 .DS_Store
+=======
+.DS_Store
+>>>>>>> origin/master
