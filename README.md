@@ -26,7 +26,7 @@ Installation of pyGAlib is simple. An existing python distribution and the [pip]
 
 pyGAlib is still not registered in PyPI (the Python Packages Index) and installation follows directly from GitHub. However, pip will automatically take care of the  dependencies (see the *requirements.txt* file). There are two alternative manners to install: the easy and the lazy. 
 
-**-- The easy installation**: Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
+**- The easy installation**: Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
 
 	$ cd ~/Downloads/pyGAlib-master/
 
@@ -41,7 +41,7 @@ Do not forget the "." at the end which means "*look for the setup.py file in the
 
 > **NOTE**: After installation the current folder "*~/Downloads/pyGAlib-master/*" can be safely deleted, or moved somewhere else if you want to conserve the examples and the tests.
 
-**-- The lazy installation**: If [git](https://git-scm.com) is also installed in your computer, then open a terminal and type:
+**- The lazy installation**: If [git](https://git-scm.com) is also installed in your computer, then open a terminal and type:
 
 	$ pip install git+https://github.com/gorkazl/pyGAlib.git@gmaster
 
