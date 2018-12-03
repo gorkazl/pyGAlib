@@ -20,23 +20,39 @@ Main features...
 
 ### INSTALLATION
 
-*RE-WRITE THIS!!*
+Installation of pyGAlib is simple. An existing python distribution and the [pip](https://github.com/pypa/pip) package manager need to be installed. If Python was installed via the [Canopy](https://www.enthought.com/product/canopy/) or the [Anaconda](https://www.anaconda.com) distributions, then pip is surely installed. To check, open a terminal and type:
 
-Installation of pyGAlib is very simple, it only requires to manually copying the modules of the library into a special folder named "site-packages" and creating a pointer for python to know where to find the library.
+	$ pip --help
 
-Requirements: Python 2.7, NumPy, SciPy, Numba (optional):
+pyGAlib is still not registered in PyPI (the Python Packages Index) and installation follows directly from GitHub. However, pip will automatically take care of the  dependencies (see the *requirements.txt* file). There are two alternative manners to install: the easy and the lazy. 
 
-1) Locate the "site-packages" folder for the Python 2.7 distribution in which GAlib will be installed. For example, **Canopy** users will find it in:  "*/~/Library/Enthought/Canopy_64bit/User/lib/python2.7/site-packages/*"
-**Anaconda** users with a Python 2.7 environment installed (e.g. named as 'py2') will find the folder in, for example:
-"*/anaconda3/envs/py2/lib/python2.7/site-packages/.*"
-2) Visit the GitHub repository for [pyGAlib](https://github.com/gorkazl/pyGAlib) and download the library clicking on the "Clone or Download" button (in green). Select "Download ZIP".
-3) Unzip and remane the folder as "pyGAlib" (drop the "-master").
-4) Move this folder into the "site-packages" folder previously identified.
-5) Using a text editor create an empty file named *pyGAlib.pth* and save it in the "site-packages" folder. Add one line to this file containing the path to the pyGAlib library.
-6)	Check installation opening an interactive python session and typing `import galib`.
+**-- The easy installation**: Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
+
+	$ cd ~/Downloads/pyGAlib-master/
+
+Once on the folder that contains the *setup.py* file, type the following
+
+	$ pip install .
+
+Do not forget the "." at the end which means "*look for the setup.py file in the current directory*." This will check for the dependencies and install pyGAlib. To confirm the installation open an interactive session and try to import the library by typing `import galib`, or run one of the test scripts in the *Examples/* folder, e.g.,
+
+	$ cd Examples/Test_Python2/
+	$ python test_metrics_py2.py
+
+> **NOTE**: After installation the current folder "*~/Downloads/pyGAlib-master/*" can be safely deleted, or moved somewhere else if you want to conserve the examples and the tests.
+
+**-- The lazy installation**: If [git](https://git-scm.com) is also installed in your computer, then open a terminal and type:
+
+	$ pip install git+https://github.com/gorkazl/pyGAlib.git@gmaster
+
+This will install the package, that is, the content in the folder *galib/*. Other files (Examples/, README.md, LICENSE.txt, etc.) need to be downloaded manually, if wanted.
 
 
-### USING pyGAlib
+> **NOTE:** If you are using Python 2 and Python 3 environments, pyGAlib needs to be installed in each of the environments.
+
+
+
+### HOW TO USE pyGAlib
 
 The library is organised in the following modules: 
 
@@ -148,7 +164,7 @@ usual data I/O functionalities of NumPy. See for example the documentation for f
 
 
 
-#### How to find further documentation
+#### Finding further documentation
 
 While working in an interactive session, after importing a module, the built-in `help()` function will show further details:
 
@@ -188,7 +204,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-> **Note:** Please, use the logos provided in the Branding/ folder whenever possible.
+**Note:** Please, use the logos provided in the *Branding/* folder whenever possible.
 
 -----------------------------------------------------------------
 ### WHAT IS NEW
