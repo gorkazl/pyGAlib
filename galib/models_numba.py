@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+#
+# Released under the Apache License, Version 2.0 (the "License");
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+
 """
-===================================
 FASTER SYNTHETIC NETWORK GENERATORS
 ===================================
 
@@ -16,34 +24,24 @@ to function and I will report approximate valuesfor each of them. In general,
 for any network of N > 100 nodes Numba-based functions run faster.
 
 RANDOM NETWORK GENERATORS
-=========================
+-------------------------
 RandomGraph_Numba
     Generates random graphs with N nodes and L links.
 
-NETWORK REWIRING/RANDOMIZATION ALGORITHMS
-=========================================
-None yet.
 
-HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
-============================================
-None yet
+...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
 
 """
-
-__author__ = "Gorka Zamora-Lopez"
-__email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2018"
-__license__ = "GPL"
-__update__="30/03/2018"
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
 import numpy.random
-from numba import autojit
+from numba import jit
 
 
 ############################################################################
 """RANDOM NETWORK GENERATORS"""
-@autojit
+@jit
 def RandomGraph_Numba(N, L, directed=False, selfloops=False):
     """Generates random graphs with N nodes and L links.
 
@@ -85,21 +83,21 @@ def RandomGraph_Numba(N, L, directed=False, selfloops=False):
     if directed:
         if selfloops:
             maxL = N**2
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = N**2 = %d' %maxL
+            if L > maxL:
+                raise ValueError("L out of bounds, max(L) = N**2 = %d" %maxL)
         else:
             maxL = N*(N-1)
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = N*(N-1) = %d' %maxL
+            if L > maxL:
+                raise ValueError("L out of bounds, max(L) = N*(N-1) = %d" %maxL)
     else:
         if selfloops:
             maxL = 0.5*N*(N+1)
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = 1/2*N*(N+1) = %d' %maxL
+            if L > maxL:
+                raise ValueError("L out of bounds, max(L) = 1/2*N*(N+1) = %d" %maxL)
         else:
             maxL = 0.5*N*(N-1)
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = 1/2*N*(N-1) = %d' %maxL
+            if L > maxL:
+                raise ValueError("L out of bounds. For the options given, max(L) = 1/2*N*(N-1) = %d" %maxL)
 
     # 1) INITIATE THE MATRIX AND HELPERS
     adjmatrix = np.zeros((N,N), np.uint8)

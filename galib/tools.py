@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+#
+# Released under the Apache License, Version 2.0 (the "License");
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+
 """
-=============================
 MISCELLANOUS HELPER FUNCTIONS
 =============================
 
@@ -7,7 +15,11 @@ This module contains miscellaneous helper functions useful for the analisys
 of graphs and complex networks.
 
 I/O AND DATA CONVERSIONS
-========================
+------------------------
+LoadFromPajek
+    Reads a network from a text file with Pajek format.
+Save2Pajek
+    Saves a network into a text file with Pajek format.
 LoadLabels
     Reads the labels of nodes from a text file.
 SaveLabels
@@ -16,10 +28,6 @@ ReadPartition
     Reads a partition of nodes from a text file.
 SavePartition
     Saves a partition of nodes into a text file.
-LoadFromPajek
-    Reads a network from a text file with Pajek format.
-Save2Pajek
-    Saves a network into a text file with Pajek format.
 ExtractSubmatrix
     Returns the sub-matrix composed by a set of nodes.
 SymmetriseMatrix
@@ -30,14 +38,14 @@ CleanPaths
     Finds and removes in-place repeated, opposite paths from a list of paths.
 
 ARRAY AND MATRIX COMPARISONS
-============================
+----------------------------
 ArrayCompare
     Compares whether two arrays are identical or not.
 HammingDistance
     Computes the Hamming distance between two arrays of same shape.
 
 ADDITIONAL MATH FUNCTIONS
-=========================
+-------------------------
 NonZeroMin
     Returns the smallest non-zero value in an array.
 CumulativeDistribution
@@ -46,8 +54,6 @@ Factorial
     Computes the factorial of an integer number.
 BinomialCoefficient
     Computes the binomial coefficient of n over m.
-StdDeviation
-    Returns the mean value and standard deviation of a dataset.
 Quartiles
     Finds the Q1, Q2 and Q3 quartiles of a dataset.
 AllPermutations
@@ -58,24 +64,271 @@ AllBipartitions
     Given a set, finds all its possible bipartitions.
 MeanCorrelation
     Computes the Fisher-corrected mean value of correlation values.
-"""
 
-__author__ = "Gorka Zamora-Lopez"
-__email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2018"
-__license__ = "GPL"
-__update__ = "30/06/2018"
+
+...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+
+"""
+from __future__ import division, print_function, absolute_import
 
 import itertools
 import types
 import re
 import warnings
+import functools
 
 import numpy as np
-import galib
+
+# from . import metrics
+import galib.metrics
 
 
-## I/O AND DATA CONVERSIONS ################################################
+# I/O AND DATA CONVERSIONS ################################################
+def LoadFromPajek(filepath, getlabels=False):
+    """Reads a network from a text file with Pajek format.
+
+    Parameters
+    ----------
+    filepath : string
+        The source .net file of the network in Pajek format.
+    getlabels : boolean, optional
+        If True, the function also reads and returns the labels of the nodes.
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network.
+    labels : list, optional
+        If getlabels = True, the function also return a list containing the
+        names of the nodes.
+
+    See Also
+    --------
+    LoadLabels, SaveLabels
+    Save2Pajek : Saves a network into a file in Pajek-readable format.
+
+    Notes
+    -----
+    1. The function automatically determines whether the network is directed,
+    undirected and / or weighted.
+    2. The returned adjacency matrix is of dtype 'int' or 'float', depending
+    on the weights in the file.
+    """
+    # 0) OPEN THE FILE AND READ THE SIZE OF THE NETWORK
+    pajekfile = open(filepath, 'r')
+    firstline = pajekfile.readline()
+    firstline = firstline.split()
+    N = int(firstline[1])
+
+    # 1) READ THE LABELS OF THE NODES IF WANTED
+    if getlabels:
+        labels = []
+
+        # Security check, make sure that labels of nodes are listed in file
+        line = pajekfile.readline()
+        if line.split()[0] != '1':
+            pajekfile.seek(1)
+            print('LoadFromPajek() warning: No labels found to read.')
+
+        # If labels are in file continue reading the labels.
+        else:
+            # If labels are wrapped in between quotes
+            try:
+                idx1 = line.index('"') + 1
+                # Add the first label
+                idx2 = line[idx1:].index('"')
+                label = line[idx1:idx1+idx2]
+                labels.append(label)
+
+                # And now read the labels for the rest of the nodes
+                for i in range(1,N):
+                    line = pajekfile.readline()
+                    idx1 = line.index('"') + 1
+                    idx2 = line[idx1:].index('"')
+                    label = line[idx1:idx1+idx2]
+                    labels.append(label)
+
+            # Otherwise, make a wild guess of what the label is
+            except ValueError:
+                # Add the first label
+                label = line.split()[1]
+                labels.append(label)
+
+                # And now read the labels of the rest of the nodes
+                for i in range(1,N):
+                    line = pajekfile.readline()
+                    label = line.split()[1]
+                    labels.append(label)
+
+    # 2) READ THE LINKS AND CREATE THE ADJACENCY MATRIX
+    # 2.1) Find out whether the network is directed or undirected
+    # while loop to skip empty lines if needed or the lines of the labels
+    done = False
+    while not done:
+        line = pajekfile.readline()
+        if line[0] == '*':
+            if 'Edges' in line:
+                directed = False
+            elif 'Arcs' in line:
+                directed = True
+            else:
+                print('Could not find whether network is directed or undirected')
+                break
+            done = True
+
+    # 2.2) Read the first line contining a link
+    line = pajekfile.readline()
+    line = line.split()
+
+    # If link information is BINARY, just read the adjacency list links
+    if len(line) == 2:
+        # 2.3) Declare the adjacency matrix and include the first link
+        adjmatrix = np.zeros((N,N), np.uint8)
+        i = int(line[0]) - 1
+        j = int(line[1]) - 1
+        adjmatrix[i,j] = 1
+        if not directed:
+            adjmatrix[j,i] = 1
+
+        # 2.4) Include the rest of the links
+        for line in pajekfile:
+            i, j = line.split()
+            i = int(i) - 1
+            j = int(j) - 1
+            adjmatrix[i, j] = 1
+            if not directed:
+                adjmatrix[j, i] = 1
+
+    # If the link information is WEIGHTED, read the weighted links
+    elif len(line) == 3:
+        # 2.3) Find whether link weights are integer or floating poing
+        i, j, aij = line
+        outdtype = np.int
+        try:
+            outdtype(aij)
+        except ValueError:
+            outdtype = np.float
+
+        # 2.4) Declare the adjacency matrix and include the first link
+        adjmatrix = np.zeros((N, N), outdtype)
+        i = int(i) - 1
+        j = int(j) - 1
+        adjmatrix[i, j] = outdtype(aij)
+        if not directed:
+            adjmatrix[j, i] = outdtype(aij)
+
+        # 2.5) Read the rest of the file and fill-in the adjacency matrix
+        for line in pajekfile:
+            i, j, aij = line.split()
+            i = int(i) - 1
+            j = int(j) - 1
+            adjmatrix[i, j] = outdtype(aij)
+            if not directed:
+                adjmatrix[j, i] = adjmatrix[i, j]
+
+    # 3) CLOSE FILE AND RETURN RESULTS
+    pajekfile.close()
+
+    if getlabels:
+        return adjmatrix, labels
+    else:
+        return adjmatrix
+
+def Save2Pajek(filepath, adjmatrix, labels=[], directed=False, weighted=False):
+    """Saves a network into a text file with Pajek format.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network.
+    filepath : string
+        The target file in which the partition is to be saved.
+    labels : list, optional
+        A list containing the labels of each node.
+    directed : Boolean, optional
+        True if the network is directed, False otherwise.
+    weighted : Boolean, optional
+        If 'True', the weights of the links will be included in the file.
+        Otherwise, it assumes the network is binary and it saves only the
+        adjacency list, without information on the link weights.
+
+    See Also
+    --------
+    LoadFromPajek : Loads a network from file in Pajek format.
+    """
+    # 0) SECURITY CHECK
+    N = len(adjmatrix)
+    if labels:
+        if len(labels) != N:
+            raise ValueError( "List of labels not aligned with network size" )
+
+    # 1) OPEN THE TARGET FILE
+    outfile = open(filepath, 'w')
+
+    # 2) SAVE INFORMATION OF THE NODES
+    print('*Vertices', N, file=outfile)
+
+    # Wrie the list of nodes if labels have been given
+    if labels:
+        for i in range(N):
+            # line = '%d "%s"' %(i+1, labels[i])
+            line = '%d\t"%s"' % (i + 1, labels[i])
+            print(line, file=outfile)
+
+    # 3) SAVE THE LINKS
+    # Save the links AND their WEIGHTS
+    if weighted:
+        # 3.1) Find whether weights are integers or floats
+        if adjmatrix[0, 0].dtype in [np.uint8, np.uint, np.int8, np.int]:
+            formatstring = '%d %d %d'
+        elif adjmatrix[0, 0].dtype in [np.float16, np.float32, np.float, np.float64]:
+            formatstring = '%d %d %f'
+
+        # 3.2) Save the ARCS if directed
+        if directed:
+            print('*Arcs', file=outfile)
+            for i in range(N):
+                neighbours = adjmatrix[i].nonzero()[0]
+                for j in neighbours:
+                    line = formatstring % (i + 1, j + 1, adjmatrix[i, j])
+                    print(line, file=outfile)
+
+        # 3.2) Save the EDGES, if undirected
+        else:
+            print('*Edges', file=outfile)
+            for i in range(N):
+                neighbours = adjmatrix[i].nonzero()[0]
+                for j in neighbours:
+                    if j > i:
+                        line = formatstring % (i + 1, j + 1, adjmatrix[i, j])
+                        print(line, file=outfile)
+
+    # Save ONLY the adjacency list
+    else:
+        formatstring = '%d %d'
+
+        # 3.1) Save the ARCS if directed
+        if directed:
+            print('*Arcs', file=outfile)
+            for i in range(N):
+                neighbours = adjmatrix[i].nonzero()[0]
+                for j in neighbours:
+                    line = formatstring % (i + 1, j + 1)
+                    print(line, file=outfile)
+
+        # 3.1) Save the EDGES, if undirected
+        else:
+            print('*Edges', file=outfile)
+            for i in range(N):
+                neighbours = adjmatrix[i].nonzero()[0]
+                for j in neighbours:
+                    if j > i:
+                        line = formatstring % (i + 1, j + 1)
+                        print(line, file=outfile)
+
+    # 4) CLOSE FILE AND FINISH
+    outfile.close()
+
 def LoadLabels(filepath):
     """Reads the labels of nodes from a text file.
 
@@ -171,250 +424,6 @@ def SavePartition(filepath, partition, sep=' '):
     with open(filepath, 'w') as outfile:
         outfile.write(text)
 
-def LoadFromPajek(filepath, getlabels=False):
-    """Reads a network from a text file with Pajek format.
-
-    Parameters
-    ----------
-    filepath : string
-        The source .net file of the network in Pajek format.
-    getlabels : boolean, optional
-        If True, the function also reads and returns the labels of the nodes.
-
-    Returns
-    -------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network.
-    labels : list, optional
-        If getlabels = True, the function also return a list containing the
-        names of the nodes.
-
-    See Also
-    --------
-    LoadLabels, SaveLabels
-    Save2Pajek : Saves a network into a file in Pajek-readable format.
-
-    Notes
-    -----
-    1. The function automatically determines whether the network is directed,
-    undirected and / or weighted.
-    2. The returned adjacency matrix is of dtype 'int' or 'float', depending
-    on the weights in the file.
-    """
-    # 0) OPEN THE FILE AND READ THE SIZE OF THE NETWORK
-    pajekfile = open(filepath, 'r')
-    firstline = pajekfile.readline()
-    firstline = firstline.split()
-    N = int(firstline[1])
-
-    # 1) READ THE LABELS OF THE NODES IF WANTED
-    if getlabels:
-        labels = []
-
-        # Security check, make sure that labels of nodes are listed in file
-        line = pajekfile.readline()
-        if line.split()[0] != '1':
-            pajekfile.seek(1)
-            print 'LoadFromPajek() warning: No labels found to read.'
-
-        # If labels are in file continue reading the labels.
-        else:
-            # If labels are wrapped in between quotes
-            try:
-                idx1 = line.index('"') + 1
-                # Add the first label
-                idx2 = line[idx1:].index('"')
-                label = line[idx1:idx1+idx2]
-                labels.append(label)
-
-                # And now read the labels for the rest of the nodes
-                for i in xrange(1,N):
-                    line = pajekfile.readline()
-                    idx1 = line.index('"') + 1
-                    idx2 = line[idx1:].index('"')
-                    label = line[idx1:idx1+idx2]
-                    labels.append(label)
-
-            # Otherwise, make a wild guess of what the label is
-            except ValueError:
-                # Add the first label
-                label = line.split()[1]
-                labels.append(label)
-
-                # And now read the labels of the rest of the nodes
-                for i in xrange(1,N):
-                    line = pajekfile.readline()
-                    label = line.split()[1]
-                    labels.append(label)
-
-    # 2) READ THE LINKS AND CREATE THE ADJACENCY MATRIX
-    # 2.1) Find out whether the network is directed or undirected
-    # while loop to skip empty lines if needed or the lines of the labels
-    done = False
-    while not done:
-        line = pajekfile.readline()
-        if line[0] == '*':
-            if 'Edges' in line:
-                directed = False
-            elif 'Arcs' in line:
-                directed = True
-            else:
-                print 'Could not find whether network is directed or undirected'
-                break
-            done = True
-
-    # 2.2) Read the first line contining a link
-    line = pajekfile.readline()
-    line = line.split()
-
-    # If link information is BINARY, just read the adjacency list links
-    if len(line) == 2:
-        # 2.3) Declare the adjacency matrix and include the first link
-        adjmatrix = np.zeros((N,N), np.uint8)
-        i = int(line[0]) - 1
-        j = int(line[1]) - 1
-        adjmatrix[i,j] = 1
-        if not directed:
-            adjmatrix[j,i] = 1
-
-        # 2.4) Include the rest of the links
-        for line in pajekfile:
-            i, j = line.split()
-            i = int(i) - 1
-            j = int(j) - 1
-            adjmatrix[i, j] = 1
-            if not directed:
-                adjmatrix[j, i] = 1
-
-    # If the link information is WEIGHTED, read the weighted links
-    elif len(line) == 3:
-        # 2.3) Find whether link weights are integer or floating poing
-        i, j, aij = line
-        outdtype = np.int
-        try:
-            outdtype(aij)
-        except ValueError:
-            outdtype = np.float
-
-        # 2.4) Declare the adjacency matrix and include the first link
-        adjmatrix = np.zeros((N, N), outdtype)
-        i = int(i) - 1
-        j = int(j) - 1
-        adjmatrix[i, j] = outdtype(aij)
-        if not directed:
-            adjmatrix[j, i] = outdtype(aij)
-
-        # 2.5) Read the rest of the file and fill-in the adjacency matrix
-        for line in pajekfile:
-            i, j, aij = line.split()
-            i = int(i) - 1
-            j = int(j) - 1
-            adjmatrix[i, j] = outdtype(aij)
-            if not directed:
-                adjmatrix[j, i] = adjmatrix[i, j]
-
-    # 3) CLOSE FILE AND RETURN RESULTS
-    pajekfile.close()
-
-    if getlabels:
-        return adjmatrix, labels
-    else:
-        return adjmatrix
-
-def Save2Pajek(filepath, adjmatrix, labels=[], directed=False, weighted=False):
-    """Saves a network into a text file with Pajek format.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network.
-    filepath : string
-        The target file in which the partition is to be saved.
-    labels : list, optional
-        A list containing the labels of each node.
-    directed : Boolean, optional
-        True if the network is directed, False otherwise.
-    weighted : Boolean, optional
-        If 'True', the weights of the links will be included in the file.
-        Otherwise, it assumes the network is binary and it saves only the
-        adjacency list, without information on the link weights.
-
-    See Also
-    --------
-    LoadFromPajek : Loads a network from file in Pajek format.
-    """
-    # 0) SECURITY CHECK
-    N = len(adjmatrix)
-    if labels:
-        assert len(labels) == N, 'List of labels not aligned with network size'
-
-    # 1) OPEN THE TARGET FILE
-    outfile = open(filepath, 'w')
-
-    # 2) SAVE INFORMATION OF THE NODES
-    print >> outfile, '*Vertices', N
-
-    # Wrie the list of nodes if labels have been given
-    if labels:
-        for i in xrange(N):
-            # line = '%d "%s"' %(i+1, labels[i])
-            line = '%d\t"%s"' % (i + 1, labels[i])
-            print >> outfile, line
-
-    # 3) SAVE THE LINKS
-    # Save the links AND their WEIGHTS
-    if weighted:
-        # 3.1) Find whether weights are integers or floats
-        if adjmatrix[0, 0].dtype in [np.uint8, np.uint, np.int8, np.int]:
-            formatstring = '%d %d %d'
-        elif adjmatrix[0, 0].dtype in [np.float32, np.float, np.float64]:
-            formatstring = '%d %d %f'
-
-        # 3.2) Save the ARCS if directed
-        if directed:
-            print >> outfile, '*Arcs'
-            for i in xrange(N):
-                neighbours = adjmatrix[i].nonzero()[0]
-                for j in neighbours:
-                    line = formatstring % (i + 1, j + 1, adjmatrix[i, j])
-                    print >> outfile, line
-
-        # 3.2) Save the EDGES, if undirected
-        else:
-            print >> outfile, '*Edges'
-            for i in xrange(N):
-                neighbours = adjmatrix[i].nonzero()[0]
-                for j in neighbours:
-                    if j > i:
-                        line = formatstring % (i + 1, j + 1, adjmatrix[i, j])
-                        print >> outfile, line
-
-    # Save ONLY the adjacency list
-    else:
-        formatstring = '%d %d'
-
-        # 3.1) Save the ARCS if directed
-        if directed:
-            print >> outfile, '*Arcs'
-            for i in xrange(N):
-                neighbours = adjmatrix[i].nonzero()[0]
-                for j in neighbours:
-                    line = formatstring % (i + 1, j + 1)
-                    print >> outfile, line
-
-        # 3.1) Save the EDGES, if undirected
-        else:
-            print >> outfile, '*Edges'
-            for i in xrange(N):
-                neighbours = adjmatrix[i].nonzero()[0]
-                for j in neighbours:
-                    if j > i:
-                        line = formatstring % (i + 1, j + 1)
-                        print >> outfile, line
-
-    # 4) CLOSE FILE AND FINISH
-    outfile.close()
-
 def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
     """Returns the sub-matrix composed by a set of nodes.
 
@@ -452,9 +461,9 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
     # 0) CHECK WHETHER LISTS OF NODES ARE GIVEN AS ARRAYS. OTHERWISE, CONVERT.
     # Check nodelist1
     if type(nodelist1) != np.ndarray:
-        warnings.simplefilter('once', UserWarning)
-        warnings.warn("Prefered type for parameter 'nodelist1' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
-                    stacklevel=2)
+        # warnings.simplefilter('once', UserWarning)
+        # warnings.warn("Prefered type for parameter 'nodelist1' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
+        #             stacklevel=2)
 
         if type(nodelist1) == set:
             nodelist1 = list(nodelist1)
@@ -485,7 +494,7 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
         xindices[startidx:endidx] = node
 
     yindices = np.zeros(N1*N2, np.int)
-    for n in xrange(N1):
+    for n in range(N1):
         startidx = n*N2
         endidx = startidx + N2
         yindices[startidx:endidx] = nodelist2
@@ -507,7 +516,8 @@ def SymmetriseMatrix(adjmatrix):
     An adjacency matrix of the same shape, of dype=float, with values
     """
 
-    if galib.Reciprocity(adjmatrix) == 1:
+    if galib.metrics.Reciprocity(adjmatrix) == 1:
+    # if Reciprocity(adjmatrix) == 1:
         return adjmatrix
     else:
         return 0.5 * (adjmatrix + adjmatrix.T)
@@ -616,7 +626,8 @@ def HammingDistance(array1, array2, normed=False):
     flat_array2 = array2.flatten()
 
     # 0.2) Security check
-    assert len(flat_array1) == len(flat_array2), 'Arrays are not aligned'
+    if len(flat_array1) != len(flat_array2):
+        raise ValueError( "Arrays are not aligned" )
 
     # 1) COUNT THE NUMBER OF COINCIDENCES
     similarity = (flat_array1 == flat_array2)
@@ -638,10 +649,10 @@ def HammingDistance(array1, array2, normed=False):
 
         # Estimate the expected number of random coincidences
         length = len(flat_array1)
-        exp_nc = 1. / length * (n_1 * n_2 + (length - n_1) * (length - n_2))
+        exp_nc = 1.0 / length * (n_1 * n_2 + (length - n_1) * (length - n_2))
 
         # The expected Hamming distance
-        exp_hdist = 1. - exp_nc / float(length)
+        exp_hdist = 1.0 - exp_nc / float(length)
 
         return h_dist, exp_hdist
 
@@ -721,7 +732,7 @@ def CumulativeDistribution(data, nbins, range=None, normed=True, centerbins=Fals
         xdata += dif
 
     if normed:
-        norm = 1. / ydata[-1]
+        norm = 1.0 / ydata[-1]
         ydata *= norm
 
         return xdata[:-1], ydata
@@ -733,14 +744,14 @@ def Factorial(x):
     """Computes the factorial of an integer number.
     """
     # 0) SECURITY CHECK
-    assert isinstance(x, int), "'Factorial' function only accepts integers"
+    if not isinstance(x, int):
+        raise ValueError( "'Factorial' function only accepts integers" )
 
     # 1) COMPUTE THE FACTORIAL
     if x == 0 or x == 1:
         return 1
-
     else:
-        return reduce(lambda x, y: x * y, xrange(1, x + 1))
+        return functools.reduce(lambda x, y: x * y, range(1, x + 1))
 
 def BinomialCoefficient(n, m):
     """Computes the binomial coefficient of n over m.
@@ -755,19 +766,9 @@ def BinomialCoefficient(n, m):
         ma = max(n - m, m)
         mi = min(n - m, m)
 
-        enum = reduce(lambda x, y: x * y, xrange(ma + 1, n + 1), 1)
+        enum = functools.reduce(lambda x, y: x * y, range(ma + 1, n + 1), 1)
 
         return enum / Factorial(mi)
-
-def StdDeviation(data):
-    """Returns the mean value and the standard deviation of an array of data.
-    It is a simple wrapper using the numpy ufuncs a.mean() and a.dev().
-    """
-    if type(data) == np.ndarray:
-        return data.mean(), data.std()
-    else:
-        data = np.array(data)
-        return data.mean(), data.std()
 
 def Quartiles(data):
     """
@@ -854,7 +855,7 @@ def AllCombinations(data, comblength):
 
     Examples
     --------
-    >>> AllCombinations((1,2,3,4), 2)
+    >>>
     >>> [(1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4)]
     >>>
     >>> AllCombinations((1,2,3,4), 3)
@@ -912,12 +913,12 @@ def AllBipartitions(data, comblength=None):
     # 0) PREPARE FOR CALCULATIONS
     Ndata = len(data)
     iseven = Ndata % 2 == 0
-    Nmax = Ndata / 2
+    Nmax = Ndata // 2
     setdata = set(data)
 
     # Security check, avoid confusing comblength=0 with None
-    assert comblength != 0, \
-        "'comblength' out of range. 0 < comblength < len(data)."
+    if comblength == 0:
+        raise ValueError( "'comblength' out of range, please make sure 0 < comblength < len(data)." )
 
     ########################################################################
     # 1) DEFINE THE TWO FUNCTIONS THAT WILL DO THE ACTUAL JOB
@@ -926,7 +927,7 @@ def AllBipartitions(data, comblength=None):
         """
         # 1) FIND ALL THE COMBINATIONS UP TO LENGTH < len(data)/2
         bipartitions = []
-        for n in xrange(1, Nmax):
+        for n in range(1, Nmax):
             # 1.1) Find all combinations of given size out of dataset
             combinations = [c for c in itertools.combinations(data, n)]
             # 1.2) Sort and find complementary sets
@@ -940,9 +941,9 @@ def AllBipartitions(data, comblength=None):
         # 2.2) Sort and find complementary sets
         ncombs = len(combinations)
         # Ignore repeated combinations if both subsets are of size = Nmax
-        if iseven: ncombs = ncombs/2
+        if iseven: ncombs = ncombs // 2
 
-        for i in xrange(ncombs):
+        for i in range(ncombs):
             comb = combinations[i]
             combset = set(comb)
             complementary = setdata - combset
@@ -957,10 +958,8 @@ def AllBipartitions(data, comblength=None):
         """
         # 0) SECURITY CHECKS
         comblength = int(comblength)
-        assert 0 < comblength, \
-            "'comblength' out of range. 0 < comblength < len(data)."
-        assert comblength < Ndata, \
-            "'comblength' out of range. 0 < comblength < len(data)."
+        if (comblength < 1 or comblength >= Ndata):
+            raise ValueError( "'comblength' out of range, please make sure 0 < comblength < len(data)." )
 
         # 1) FIND ALL THE COMBINATIONS OF SIZE 'comblength'
         combinations = [c for c in itertools.combinations(data, comblength)]
@@ -972,7 +971,7 @@ def AllBipartitions(data, comblength=None):
         # Nmax, then we need to remove repeated combinations
         if iseven and comblength == Nmax:
             ncombs = len(combinations)
-            for i in xrange(ncombs/2):
+            for i in range(ncombs // 2):
                 comb = combinations[i]
                 combset = set(comb)
                 complementary = setdata - combset
@@ -1016,11 +1015,14 @@ def MeanCorrelation(data, tolerance=10**(-15)):
         Mean value of correlation in the range (-1,1).
     """
     # Security checks and data preparation
-    assert len(np.shape(data)) == 1, 'Only 1D arrays or lists of data accepted'
     dataset = np.array(data, np.float64)
+    if len(np.shape(dataset)) > 1:
+        dataset = dataset.flatten()
 
-    assert dataset.max() < 1.0 + tolerance, 'Correlation values larger than 1.0 in data'
-    assert dataset.min() > -1.0 - tolerance, 'Correlation values smaller than -1.0 in data'
+    if dataset.max() > 1.0 + tolerance:
+        raise ValueError( "Correlation values larger than 1.0 in data" )
+    if dataset.min() < -1.0 - tolerance:
+        raise ValueError( "Correlation values smaller than -1.0 in data" )
 
     # Remove extremal values to avoid infinite values in the arctanh(x).
     idx = np.where(data >= 1.0)
@@ -1037,3 +1039,5 @@ def MeanCorrelation(data, tolerance=10**(-15)):
     newdata = np.where(newdata==-np.inf, -10,newdata)
 
     return np.tanh(newdata.mean())
+
+#

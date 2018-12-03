@@ -1,44 +1,6 @@
-# pyGAlib – Graph Analysis library in Python / NumPy
-
-
-pyGAlib is a library to generate and study graphs and complex networks in Python. It treats networks as adjacency matrices in order to take advantage of faster NumPy
-array manipulations. The library is easy to install, use, modify and extend.
-
-Main features...
-
-- networks represented as adjacency matrices (rank-2 ndarrays);
-- extensive use of NumPy for high performance over pure Python code;
-- Some functions further boosted using Numba;
-- transparent and flexible: find which part of the code is doing what;
-- Python 2.7 and 3.X compatible.
-
-... and some limitations:
-
-- limited management of large networks due to NumPy dependence,
-- no graph visualization tools.
-
-
-### INSTALLATION
-
-*RE-WRITE THIS!!*
-
-Installation of pyGAlib is very simple, it only requires to manually copying the modules of the library into a special folder named "site-packages" and creating a pointer for python to know where to find the library.
-
-Requirements: Python 2.7, NumPy, SciPy, Numba (optional):
-
-1) Locate the "site-packages" folder for the Python 2.7 distribution in which GAlib will be installed. For example, **Canopy** users will find it in:  "*/~/Library/Enthought/Canopy_64bit/User/lib/python2.7/site-packages/*"
-**Anaconda** users with a Python 2.7 environment installed (e.g. named as 'py2') will find the folder in, for example:
-"*/anaconda3/envs/py2/lib/python2.7/site-packages/.*"
-2) Visit the GitHub repository for [pyGAlib](https://github.com/gorkazl/pyGAlib) and download the library clicking on the "Clone or Download" button (in green). Select "Download ZIP".
-3) Unzip and remane the folder as "pyGAlib" (drop the "-master").
-4) Move this folder into the "site-packages" folder previously identified.
-5) Using a text editor create an empty file named *pyGAlib.pth* and save it in the "site-packages" folder. Add one line to this file containing the path to the pyGAlib library.
-6)	Check installation opening an interactive python session and typing `import galib`.
-
-
 ### USING pyGAlib
 
-The library is organised in the following modules: 
+The library is organised in the following modules:
 
 - *metrics.py*: Common graph metrics (degrees, clustering, graph distance, etc)
 - *models.py*: Generation of synthetic networks and randomization.
@@ -47,7 +9,7 @@ The library is organised in the following modules:
 - *models_numba.py*: Uses the Numba package to accelerate generation of some graph models.
 - *extra.py*: Additional measures and functionalities related to network analysis.
 
-#### Getting started 
+#### Getting started
 
 Since pyGAlib depends on NumPy, it is recommended to import NumPy first. Although
 this is not necessary for loading pyGAlib, NumPy functionalities and array
@@ -56,17 +18,17 @@ manipulation will be often needed. Try importing pyGAlib:
 	>>> import numpy as np
 	>>> import galib
 
-> **NOTE**: Importing galib imports also all functions in module *metrics.py* into its namespace. The rest of modules are imported separately. Therefore, if the import is relative those functions can be called as, e.g., 
- 
+> **NOTE**: Importing galib imports also all functions in module *metrics.py* into its namespace. The rest of modules are imported separately. Therefore, if the import is relative those functions can be called as, e.g.,
+
 	>>> import galib
-	>>> ... 
+	>>> ...
 	>>> deg = galib.Degree(net)
 	>>> C, Cnodes = galib.Clustering(net)
-	
+
 > See that we did not have to call `galib.metrics.Degree(net)`. In the case of an absolute import (using an asterisk `*`) all functions in *metrics.py* are imported to the base namespace:
 
 	>>> from galib import *
-	>>> ... 
+	>>> ...
 	>>> deg = Degree(net)
 	>>> C, Cnodes = Clustering(net)
 
@@ -165,48 +127,3 @@ For IPython and Jupyter notebook users the help command is replaced by a questio
 	>>> functionname?
 
 For questions, bug reports, etc, please write to <galib@Zamora-Lopez.xyz>, or open an issue in GitHub.
-
-
-### FUTURE DEVELOPMENTS
-
-See the TODO.md file. 
-**Collaborations to extend pyGAlib are welcome.** If you have experience using the *scipy.sparse* module, please contact me. 
-
-
-### LICENSE
-Copyright 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this software except in compliance with the License.
-You may obtain a copy of the License at
-
-[http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-> **Note:** Please, use the logos provided in the Branding/ folder whenever possible.
-
------------------------------------------------------------------
-### WHAT IS NEW
-
-##### December 3, 2018
-Release of Version 1.0.0 of pyGAlib. The library is now shaped as a proper Python package and is installable using standard tools. The structure of the package has been renewed and contains the following modules: 
-
-- *metrics.py*: Common graph metrics (degrees, clustering, graph distance, etc)
-- *models.py*: Generation of synthetic networks and randomization.
-- *tools.py*: Miscelaneous helper functions.
-- *metrics_numba.py*: Uses the Numba package to accelerate calculation of some metrics.
-- *models_numba.py*: Uses the Numba package to accelerate generation of some graph models.
-- *extra.py*: Additional measures and functionalities related to network analysis.
- 
-See the file *CHANGES.md* for a complete history of changes.
-
-
-
-
-
-

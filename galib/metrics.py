@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+#
+# Released under the Apache License, Version 2.0 (the "License");
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+
 """
-==========================
 GRAPH ANALYSIS DESCRIPTORS
 ==========================
 
@@ -10,7 +18,7 @@ ignore the weights unless explicitely specified. Support for weighted
 measures will be added to GAlib in future releases.
 
 BASIC CONNECTIVITY DESCRIPTORS
-==============================
+------------------------------
 Density
     Returns the density of links in a network.
 Degree
@@ -31,7 +39,7 @@ MatchingIndex
     Computes the number of common neighbours of every pair of nodes.
 
 PATHS AND GRAPH DISTANCE FUNCTIONS
-==================================
+----------------------------------
 FloydWarshall
     Computes the pathlength between all pairs of nodes in a network.
 PathsAllinOne
@@ -40,7 +48,7 @@ AllShortestPaths
     Finds all the shortest paths between two nodes.
 
 COMMUNITIES, COMPONENTS, K-CORES, ...
-=====================================
+-------------------------------------
 AssortativityMatrix
     Returns the assortativity matrix of network given a partition of nodes.
 ConnectedComponents
@@ -53,7 +61,7 @@ K_Shells
     Returns the K-shells of a network for all k from kmin to kmax.
 
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
-====================================================
+----------------------------------------------------
 GlobalHubness
     Computes the global hubness of all nodes in a network.
 LocalHubness
@@ -72,17 +80,17 @@ ParticipationIndex_GA
    Returns the participation index as defined by Guimera & Amaral.
 Hubness_GA
     Returns the within-module degree defined by Guimera & Amaral.
-"""
 
-__author__ = "Gorka Zamora-Lopez"
-__email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2018"
-__license__ = "GPL"
-__update__="30/06/2018"
+
+...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+
+"""
+from __future__ import division, print_function, absolute_import
 
 import types
 import numpy as np
-import gatools
+
+from . import tools
 
 
 ############################################################################
@@ -141,7 +149,7 @@ def Degree(adjmatrix, directed=False):
         return indegree, outdegree
 
     else:
-        degree= adjmatrix.sum(axis=1)
+        degree = adjmatrix.sum(axis=1)
         return degree
 
 def Intensity(adjmatrix, directed=False):
@@ -335,13 +343,15 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     """
 
     # 0) Security checks and prepare data for calculations
-    assert knntype in ('undirected', 'outin',  'outout', 'inout', \
-    'inin', 'average'), "Please enter a proper 'knntype'"
+    keylist = ('undirected', 'outin',  'outout', 'inout', 'inin', 'average')
+    if knntype not in keylist:
+        raise KeyError("Enter a valid knntype:", keylist)
 
     N = len(adjmatrix)
 
     if knntype == 'undirected':
-        assert Reciprocity(adjmatrix) == 1.0, 'Please insert an undirected adjacency matrix'
+        if Reciprocity(adjmatrix) < 1.0:
+            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
         indegree, outdegree = Degree(adjmatrix, True)
     elif knntype == 'outin':
         indegree, outdegree = Degree(adjmatrix, True)
@@ -371,10 +381,14 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
             kdict[kout].append(kinneigh)
 
     # 2) Compute the av. degree for all neighbours of nodes with degree k'
-    klist = np.sort(kdict.keys())
+    klist = np.sort(list(kdict.keys()))
+    # klist = (kdict.keys()).sort()
     AvKnn = np.zeros((3,len(klist)), np.float)
     for count, k in enumerate(klist):
-        avk, devk = gatools.StdDeviation(np.array(kdict[k]))
+        dummy = np.array(kdict[k])
+        avk = dummy.mean()
+        devk = dummy.std()
+
         AvKnn[0,count] = k
         AvKnn[1,count] = avk
         AvKnn[2,count] = devk
@@ -432,8 +446,8 @@ def Clustering(adjmatrix, checkdirected=True):
 
     # 0) SECURITY CHECKS
     if checkdirected:
-        assert Reciprocity(adjmatrix) == 1, \
-            'Please introduce an undirected graph.'
+        if Reciprocity(adjmatrix) < 1.0:
+            raise TypeError("Please introduce an undirected adjacency matrix.")
 
     # Remove diagonal entries, in case there is any self-loop
     adjmatrix[np.diag_indices(len(adjmatrix))] = 0
@@ -441,7 +455,7 @@ def Clustering(adjmatrix, checkdirected=True):
     # 1) COMPUTE THE NUMBER OF TRIANGLES EACH NODE PARTICIPATES IN
     pow2matrix = np.dot(adjmatrix,adjmatrix)
     ntriangles = np.zeros(N, np.float64)
-    for i in xrange(N):
+    for i in range(N):
         ntriangles[i] = (adjmatrix[i] * pow2matrix[i]).sum()
 
     # 2) COMPUTE THE NUMBER OF DIADS EACH NODE PARTICIPATES IN
@@ -498,8 +512,9 @@ def RichClub(adjmatrix, rctype='undirected'):
         of the network.
     """
     # 0) SECURITY CHECKS
-    assert rctype in('undirected', 'outdegree', 'indegree', 'average'), \
-           "Please enter a proper 'rctype': 'undirected', 'outdegree', 'indegree' or 'average'."
+    keylist = ('undirected', 'outdegree', 'indegree', 'average')
+    if rctype not in keylist:
+        raise KeyError("Enter a valid rctype:", keylist)
 
     # Convert the network in binary
     adjmatrix = adjmatrix.astype('bool')
@@ -507,7 +522,8 @@ def RichClub(adjmatrix, rctype='undirected'):
     # Select the proper data
     indegree, outdegree = Degree(adjmatrix, True)
     if rctype == 'undirected':
-        assert Reciprocity(adjmatrix) == 1, "Directed network, incompatible with rctype='undirected' option"
+        if Reciprocity(adjmatrix) < 1.0:
+            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
         degree = outdegree
     elif rctype == 'outdegree':
         degree = outdegree
@@ -528,7 +544,7 @@ def RichClub(adjmatrix, rctype='undirected'):
 
     # 2) Compute the k-density of all degrees
     klist = np.unique( np.round((degree+0.000001)) )
-    for k in xrange(1,kmax+1):
+    for k in range(1,kmax+1):
         # Avoid unnecessary iterations
         if k in klist:
             # 2.1) Remove the links of all nodes with degree = k
@@ -591,9 +607,9 @@ def MatchingIndex(adjmatrix, normed=True):
 
     MImatrix = np.identity(N, np.float64)
 
-    for i in xrange(N):
+    for i in range(N):
         ineighbours = set(adjmatrix[i].nonzero()[0])
-        for j in xrange(i,N):
+        for j in range(i,N):
             jneighbours = set(adjmatrix[j].nonzero()[0])
 
             # Intersection and union of the sets
@@ -651,9 +667,9 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
     N = len(adjmatrix)
     # Run the Floyd-Warshall algorithm - Undirected networks
     if recip == 1.0:
-        for k in xrange(N):
-            for i in xrange(N):
-                for j in xrange(i,N):
+        for k in range(N):
+            for i in range(N):
+                for j in range(i,N):
                     d = distmatrix[i,k] + distmatrix[k,j]
                     if distmatrix[i,j] > d:
                         distmatrix[i,j] = d
@@ -661,9 +677,9 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
 
     # Run the Floyd-Warshall algorithm - directed networks
     else:
-        for k in xrange(N):
-            for i in xrange(N):
-                for j in xrange(N):
+        for k in range(N):
+            for i in range(N):
+                for j in range(N):
                     d = distmatrix[i,k] + distmatrix[k,j]
                     if distmatrix[i,j] > d:
                         distmatrix[i,j] = d
@@ -718,9 +734,9 @@ def PathsAllinOne(adjmatrix):
     where n is the number of nodes in the cycle, e.g., [1,3,4], [4,1,3] and
     [3,1,4]. If adjmatrix is directed, cycles might appear an unpredictable
     number of times or only once. Use function CleanCycles() in
-    gatools module to remove repeated cycles.
+    galib.tools module to remove repeated cycles.
     2. If adjmatrix is undirected every path is saved twice, in the opposite
-    direction, e.g. [1,3,4] and [4,3,1]. Use CleanPaths() in gatools module
+    direction, e.g. [1,3,4] and [4,3,1]. Use CleanPaths() in galib.tools module
     to remove duplicated paths from undirected graphs.
     """
     # 0) PREPARE FOR THE CALCULATIONS
@@ -735,7 +751,7 @@ def PathsAllinOne(adjmatrix):
     # at the cost of the memory it costs to host the network again.
     allpaths[1] = []
     dicnet = {}
-    for i in xrange(N):
+    for i in range(N):
         neighs = adjmatrix[i].nonzero()[0]
         dicnet[i] = neighs.tolist()
         for j in neighs:
@@ -743,7 +759,7 @@ def PathsAllinOne(adjmatrix):
             distmatrix[i,j] = 1
 
     # 2) FIND THE REST OF THE PATHS
-    for length in xrange(2,N):
+    for length in range(2,N):
 
         # 2.0) Check if the algorithm has already finished. If so, end
         if not allpaths[length-1]:
@@ -965,8 +981,9 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     ParticipationMatrix : Probability of nodes to belong to a community.
     """
     # Security check
-    assert norm in [None, 'linkfraction', 'linkprobability'], \
-        "Give a correct norm parameter: None, 'linkfraction' or 'linkprobability'"
+    keylist = [None, 'linkfraction', 'linkprobability']
+    if norm not in keylist:
+        raise KeyError("Enter a valid norm:", keylist)
 
     N = len(adjmatrix)
     Ncoms = len(partition)
@@ -975,11 +992,11 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     assortmatrix = np.zeros((Ncoms,Ncoms), np.float)
 
     if norm == 'linkprobability':
-        for c1 in xrange(Ncoms):
+        for c1 in range(Ncoms):
             com1 = partition[c1]
-            for c2 in xrange(Ncoms):
+            for c2 in range(Ncoms):
                 com2 = partition[c2]
-                submat = gatools.ExtractSubmatrix(adjmatrix, com1, com2)
+                submat = tools.ExtractSubmatrix(adjmatrix, com1, com2)
                 assortmatrix[c1,c2] = submat.sum()
                 # Normalise, avoiding self-loops
                 if c1 == c2:
@@ -989,9 +1006,9 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
                     assortmatrix[c1,c2] /= (maxweight * len(com1) * len(com2))
 
     else:
-        for c1 in xrange(Ncoms):
-            for c2 in xrange(Ncoms):
-                submat = gatools.ExtractSubmatrix(adjmatrix, partition[c1], \
+        for c1 in range(Ncoms):
+            for c2 in range(Ncoms):
+                submat = tools.ExtractSubmatrix(adjmatrix, partition[c1], \
                                                   partition[c2])
                 assortmatrix[c1,c2] = submat.sum()
 
@@ -1003,7 +1020,7 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
 
     return assortmatrix
 
-def Modularity(adjmatrix, partition, degree=None):
+def Modularity(adjmatrix, partition):
     """Computes the Newman modularity given a partition of nodes.
 
     It computes modularity for both weighted or unweighted and for directed
@@ -1018,11 +1035,6 @@ def Modularity(adjmatrix, partition, degree=None):
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
-    degree : list or tuple, optional
-        If the degree of the network has been previously computed, it can be
-        passed to speed up performance. Must be a list or a tuple of the
-        form: 'degree = (indegree, outdegree)'. If matrix is undirected,
-        then pass 'degree = (degree, degree)'.
 
     Returns
     -------
@@ -1043,18 +1055,13 @@ def Modularity(adjmatrix, partition, degree=None):
     Ncoms = len(partition)
     L = adjmatrix.sum()
 
-    if type(degree) == types.NoneType:
-        indegree, outdegree = Intensity(adjmatrix, directed=True)
-    else:
-        assert len(degree) == 2, \
-            "'degree' has to be a tuple or list of the following [indegree,outdegree]"
-        indegree, outdegree = degree[0], degree[1]
+    indegree, outdegree = Intensity(adjmatrix, directed=True)
 
     # Compute the modularity
     Q = 0.0
     L_norm = 1./L
     for s, community in enumerate(partition):
-        submat = gatools.ExtractSubmatrix(adjmatrix, community)
+        submat = tools.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
         Q += float(submat.sum()) * L_norm
         # Minus the expected fraction of links
@@ -1117,9 +1124,8 @@ def K_Core(adjmatrix, kmin):
         # 'nodelist' is already empty before end of loop.
         degree = Degree(adjmatrix)
         try:
-            newkmin = gatools.NonZeroMin(degree)
+            newkmin = tools.NonZeroMin(degree)
         except ValueError:
-            #print "ValueError of 'NonzeroMin()' catched and passed"
             done = True
 
         # If all remaining nodes have degree > kmin, finish,
@@ -1167,7 +1173,7 @@ def K_Shells(adjmatrix):
 
     # Find the smallest non-zero degree to start from
     degree = Degree(adjmatrix)
-    kmin = gatools.NonZeroMin(degree)
+    kmin = tools.NonZeroMin(degree)
 
     # 1) Start computing the k-shells
     kshells = {}
@@ -1192,9 +1198,8 @@ def K_Shells(adjmatrix):
             # 'nodelist' is already empty before end of loop
             degree = Degree(adjmatrix)
             try:
-                newkmin = gatools.NonZeroMin(degree)
+                newkmin = tools.NonZeroMin(degree)
             except ValueError:
-                #print "ValueError of 'NonzeroMin()' catched and passed"
                 kshells[kmin] = shell
                 done = True
 
@@ -1215,8 +1220,7 @@ def GlobalHubness(adjmatrix):
 
     Hubness is the degree of a node weighted by the expected degree
     distribution in random graphs of same size and density. See Equation (4)
-    of Klim et al. "Individual node's contribution to the mesoscale of
-    complex networks" New J. Phys. 16:125006 (2014).
+    of Klimm et al. New J. Phys. 16:125006 (2014).
 
     Parameters
     ----------
@@ -1236,6 +1240,13 @@ def GlobalHubness(adjmatrix):
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
     NodeRoles :
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     """
     N = len(adjmatrix)
 
@@ -1251,8 +1262,7 @@ def LocalHubness(adjmatrix, partition):
 
     Hubness is the degree of a node weighted by the expected degree
     distribution in random graphs of same size and density. e Equation (4)
-    of Klim et al. "Individual node's contribution to the mesoscale of
-    complex networks" New J. Phys. 16:125006 (2014).
+    of Klim et al. New J. Phys. 16:125006 (2014).
     Local hubness is the hubness applied to the subgraph formed by the
     community the node belongs to.
 
@@ -1277,6 +1287,13 @@ def LocalHubness(adjmatrix, partition):
     NodeParticipation : Participation index of every node given a partition of the network.
     NodeDispersion : Dispersion index of every node given a partition of the network.
     NodeRoles :
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     """
     N = len(adjmatrix)
     ncoms = len(partition)
@@ -1288,7 +1305,7 @@ def LocalHubness(adjmatrix, partition):
         if len(com) == 1: continue
 
         # Compute the hubness of nodes in the isolated community
-        subnet = gatools.ExtractSubmatrix(adjmatrix,com)
+        subnet = tools.ExtractSubmatrix(adjmatrix,com)
         hubness = GlobalHubness(subnet)
 
         if np.isnan(hubness.min()): continue
@@ -1324,13 +1341,20 @@ def ParticipationMatrix(adjmatrix, partition):
     NodeParticipation : Participation index of every node given a partition of the network.
     NodeDispersion : Dispersion index of every node given a partition of the network.
     RolesNode :
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     """
     N = len(adjmatrix)
     ncomms = len(partition)
     partitionmatrix = np.zeros((N,ncomms), np.uint)
 
     # 1) CONSTRUCT THE PARTITION MATRIX, S (1 if node in module c, 0 otherwise)
-    for c in xrange(ncomms):
+    for c in range(ncomms):
         partitionmatrix[partition[c],c] = 1
 
     # 2) COMPUTE THE PARTICIPATION MATRIX
@@ -1370,6 +1394,13 @@ def ParticipationVectors(adjmatrix, partition):
     NodeDispersion : Dispersion index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     RolesNode :
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     """
     N = len(adjmatrix)
     ncomms = len(partition)
@@ -1378,7 +1409,7 @@ def ParticipationVectors(adjmatrix, partition):
 
     # 1) COMPUTE FIRST THE PARTICIPATION MATRIX
     # 1.1) Construct the partition matrix
-    for c in xrange(ncomms):
+    for c in range(ncomms):
         partitionmatrix[partition[c],c] = 1
         commsizes[c] = len(partition[c])
 
@@ -1388,10 +1419,10 @@ def ParticipationVectors(adjmatrix, partition):
 
     # 2) NOW COMPUTE THE PARTICIPATION VECTORS
     pmatrix = pmatrix.astype(np.float64)
-    for i in xrange(N):
+    for i in range(N):
         # 2.1) The fraction of neighbours node i connects with,
         # in every module
-        for c in xrange(ncomms):
+        for c in range(ncomms):
             if partitionmatrix[i,c]:
                 pmatrix[i,c] /= (commsizes[c] - 1.0)
             else:
@@ -1408,8 +1439,7 @@ def NodeParticipation(adjmatrix, partition):
     Computes the participation index of every node. If a node is only
     connected to other nodes of the same community, then pi = 0. If the
     node is equally likely connected with ALL the communities, then pi = 1.
-    For a detailed definition see Equation (7) of Klimm et al. "Individual
-    node's contribution to the mesoscale of complex networks" New J. Phys.
+    For a detailed definition see Equation (7) of Klimm et al. New J. Phys.
     16:125006 (2014).
 
     Parameters
@@ -1432,6 +1462,13 @@ def NodeParticipation(adjmatrix, partition):
     NodeDispersion : Dispersion index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     """
     # 1) Compute first the participation vectors
     particvectors = ParticipationVectors(adjmatrix,partition)
@@ -1450,8 +1487,7 @@ def NodeDispersion(adjmatrix, partition):
     is missaclassified. If a node is only connected to nodes in the same
     community, then di = 0. If the node is equally likely connected with two
     of more communities, then pi = 1.
-    For a detailed definition see Equation (7) of Klimm et al. "Individual
-    node's contribution to the mesoscale of complex networks" New J. Phys.
+    For a detailed definition see Equation (7) of Klimm et al. New J. Phys.
     16:125006 (2014).
 
     Parameters
@@ -1474,6 +1510,13 @@ def NodeDispersion(adjmatrix, partition):
     NodeParticipation : Participation index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     """
     N = len(adjmatrix)
     # 1) Compute first the participation vectors
@@ -1481,7 +1524,7 @@ def NodeDispersion(adjmatrix, partition):
 
     # 2) Reduce the vector of each node into a single normalised scalar
     nodedispersion = np.zeros(N, np.float64)
-    for i in xrange(N):
+    for i in range(N):
         idx = particvectors[i].nonzero()[0]
         vector = particvectors[i,idx]
         ncomms = np.float64(len(vector))
@@ -1493,11 +1536,10 @@ def NodeDispersion(adjmatrix, partition):
 def RolesNodes(adjmatrix, partition):
     """Computes all four parameters to characterise the roles of nodes.
 
-    Following the definitions in Klimm et al. "Individual node's
-    contribution to the mesoscale of complex networks" New J. Phys.
-    16:125006 (2014), it computes the four parameters that characterise
-    the roles that nodes take in a network given a partition of its nodes
-    into communites, classes or any predefined categories.
+    Following the definitions in Klimm et al. New J. Phys. 16:125006 (2014),
+    it computes the four parameters that characterise the roles that nodes
+    take in a network given a partition of its nodes into communites, classes
+    or any predefined categories.
 
     Parameters
     ----------
@@ -1525,6 +1567,13 @@ def RolesNodes(adjmatrix, partition):
     NodeParticipation : Participation index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     """
     N = len(adjmatrix)
     ncomms = len(partition)
@@ -1548,7 +1597,7 @@ def RolesNodes(adjmatrix, partition):
         if len(com) == 1: continue
 
         # Compute the hubness of nodes in the isolated community
-        subnet = gatools.ExtractSubmatrix(adjmatrix,com)
+        subnet = tools.ExtractSubmatrix(adjmatrix,com)
         hubness = GlobalHubness(subnet)
 
         if np.isnan(hubness.min()): continue
@@ -1557,8 +1606,8 @@ def RolesNodes(adjmatrix, partition):
     # 3) COMPUTE THE PARTICIPATION VECTORS
     particvectors = np.dot(adjmatrix.astype(bool), partitionmatrix)
     particvectors = particvectors.astype(np.float64)
-    for i in xrange(N):
-        for c in xrange(ncomms):
+    for i in range(N):
+        for c in range(ncomms):
             if partitionmatrix[i,c]:
                 particvectors[i,c] /= (commsizes[c] - 1.0)
             else:
@@ -1574,7 +1623,7 @@ def RolesNodes(adjmatrix, partition):
 
     # The dispersion index
     nodedispersion = np.zeros(N, np.float64)
-    for i in xrange(N):
+    for i in range(N):
         idx = particvectors[i].nonzero()[0]
         vector = particvectors[i,idx]
         ncomms = np.float64(len(vector))
@@ -1622,11 +1671,11 @@ def ParticipationIndex_GA(participmatrix):
     N, npart = np.shape(participmatrix)
     participindex = np.zeros(N, np.float)
 
-    for i in xrange(N):
+    for i in range(N):
         a = participmatrix[i].sum()
         if a > 0: norm_i = 1./a
         else: norm_i = 0.
-        for c in xrange(npart):
+        for c in range(npart):
             participindex[i] += (norm_i*participmatrix[i][c])**2
 
     participindex = 1. - participindex
@@ -1675,3 +1724,5 @@ def Hubness_GA(participmatrix, partition):
         zscore[community] = (participmatrix[community,s] - avklist) / devklist
 
     return zscore
+
+#

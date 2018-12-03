@@ -1,15 +1,23 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+#
+# Released under the Apache License, Version 2.0 (the "License");
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+
 """
 ==========================
 ADDITIONAL FUNCTIONALITIES
 ==========================
 
-This module exists to host code for functionalities and measures I have
-developed and published during my research, which might be of interest for
-some users and which do not fully fit in the original goals of GAlib,
-intended as a library for the analysis of complex networks.
-The module also includes my own adaptation into Python of third-party
-functions and measures I needed for my research, or merely for comparison.
-
+This module hosts functionalities and measures related to the study of complex
+networks which do not fit in the more strict classification of graph metrics,
+models and tools. These correspond to functionalities I have developed and
+published during my research, which might be of interest for some users or
+readers. It also contains adaptation into Python of measures published by
+third-party authors which I needed for my own research.
 
 ESTIMATION OF EXPECTED CROSS-CORRELATION
 ========================================
@@ -28,18 +36,18 @@ NeuralComplexity
     Calculates the neural complexity of a correlation(-like) matrix.
 NeuralComplexity_Sampled
     Calculates the neural complexity of a correlation(-like) matrix (Faster).
-"""
 
-__author__ = "Gorka Zamora-Lopez"
-__email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2018"
-__license__ = "GPL"
-__update__="30/03/2018"
+
+...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+
+"""
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
 import numpy.random
 import scipy.linalg
-import gatools
+
+from . import tools
 
 
 ############################################################################
@@ -72,6 +80,12 @@ def TopologicalSimilarity(adjmatrix, coupling):
     --------
     ExponentialMapping : Expected cross-correlation matrix of a given network.
     CovarianceLinearGaussian : Covariance matrix of an Ornstein-Uhlenbeck process.
+
+    Citation
+    --------
+    R.G. Bettinardi, G. Deco et al. "How structure sculpts function: Unveiling
+    the contribution of anatomical connectivity to the brain’s spontaneous
+    correlation structure" Chaos 27, 047409 (2017).
     """
     # 0) Security check on the dtype
     if adjmatrix.dtype not in ['float32','float64','float']:
@@ -124,6 +138,13 @@ def ExponentialMapping(adjmatrix, coupling, partialcorr=False):
     --------
     TopologicalSimilarity : Expected cross-correlation matrix of a given network.
     CovarianceLinearGaussian : Covariance matrix of an Ornstein-Uhlenbeck process.
+
+    Citation
+    --------
+    G. Zamora-Lopez, Y. Chen, G. Deco, M.L. Kringelbach & C.S. Zhou,
+    "Functional complexity emerging from anatomical constraints in the brain:
+    the significance of network modularity and Rich-clubs." Scientific Reports,
+    6:38424 (2016).
     """
     # 0) Security check on the dtype
     if adjmatrix.dtype not in ['float32','float64','float']:
@@ -225,7 +246,8 @@ def CovarianceLinearGaussian(adjmatrix, coupling, noiselevel=1.0, noisearray=[])
     # 1) Construct the uncorrelated noise vector (diagonal matrix)
     N = len(adjmatrix)
     if len(noisearray) > 0:
-        assert len(noisearray) == N, "'noisearray' not aligned with 'adjmatrix'"
+        if len(noisearray) != N:
+            raise ValueError( "'noisearray' not aligned with 'adjmatrix'" )
         R = np.array(noisearray, np.float64) * np.identity(N).astype(np.float64)
     else:
         R = noiselevel * np.identity(N).astype(np.float64)
@@ -306,14 +328,22 @@ def FunctionalComplexity(corrmatrix, nbins=50, datarange=[0,1]):
     --------
     NeuralComplexity : Measure of complexity by Tononi, Sporns and Edelmann.
     NeuralComplexity_Sampled : Measure of complexity by Tononi, Sporns et al.
+
+    Citation
+    --------
+    G. Zamora-Lopez, Y. Chen, G. Deco, M.L. Kringelbach & C.S. Zhou,
+    "Functional complexity emerging from anatomical constraints in the brain:
+    the significance of network modularity and Rich-clubs." Scientific Reports,
+    6:38424 (2016).
+
     """
     # 0) Security checks
-    assert len(np.shape(corrmatrix)) == 2, \
-        'Input data not a correlation matrix. Data not alligned.'
-    assert corrmatrix.min() >= datarange[0], \
-        'Input data not in range. Values smaller than range found.'
-    assert corrmatrix.max() <= datarange[1], \
-        'Input data not in range. Values larger than range found.'
+    if len(np.shape(corrmatrix)) != 2:
+        raise ValueError('Input data not a correlation matrix. Data not alligned.')
+    if corrmatrix.min() < datarange[0]:
+        raise ValueError('Input data not in range. Values smaller than range found.')
+    if corrmatrix.max() > datarange[1]:
+        raise ValueError('Input data not in range. Values larger than range found.')
 
     # 1) Use only the upper triangular values of the correlation matrix
     N = len(corrmatrix)
@@ -364,31 +394,32 @@ def NeuralComplexity(corrmatrix, bipartitions=None):
 
     # Find all possible bipartitions in a set of N nodes
     if not bipartitions:
-        bipartitions = gatools.AllBipartitions(np.arange(N))
+        bipartitions = tools.AllBipartitions(np.arange(N))
 
-    nmax = N / 2
+    nmax = N // 2
     detcorrmat = scipy.linalg.det(corrmatrix)
 
     # 1) Calculate the mutual information, for all bipartitions of all sizes
     counter = 0
     avmibips = np.zeros(nmax+1, np.float64)
-    for n in xrange(1,nmax+1):
+    for n in range(1,nmax+1):
         # Number of bipartitions for set of size n and (N-n)
-        nbips = gatools.Factorial(N) / (gatools.Factorial(n) * gatools.Factorial(N-n))
+        nbips = tools.Factorial(N) / (tools.Factorial(n) * tools.Factorial(N-n))
 
         # Correct nbips if N is even and if nbips = nmax
         if n == nmax and 2*n == N:
             nbips /= 2
 
         # Calculate mutual information for all bipartitions of sizes n, (N-n)
+        nbips = int(nbips)
         mibips = np.zeros(nbips, np.float64)
-        for i in xrange(nbips):
+        for i in range(nbips):
             # Choose a bipartition
             set1, set2 = bipartitions[counter+i]
 
             # Extract the submatrices for each bipartition
-            submat1 = gatools.ExtractSubmatrix(corrmatrix, set1)
-            submat2 = gatools.ExtractSubmatrix(corrmatrix, set2)
+            submat1 = tools.ExtractSubmatrix(corrmatrix, set1)
+            submat2 = tools.ExtractSubmatrix(corrmatrix, set2)
 
             # Compute the determinant of the submatrices
             detsubmat1 = scipy.linalg.det(submat1)
@@ -436,15 +467,15 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
     # 0) GET READY FOR THE CALCULATIONS
     N = len(corrmatrix)
 
-    nmax = N / 2
+    nmax = N // 2
     detcorrmat = scipy.linalg.det(corrmatrix)
-    factorialN = gatools.Factorial(N)
+    factorialN = tools.Factorial(N)
     nodelist = np.arange(N)
 
     # 1) Calculate the mutual information, for all bipartitions of all sizes
     avmibips = np.zeros(nmax+1, np.float64)
-    for n in xrange(1,nmax+1):
-        nbips = factorialN / (gatools.Factorial(n) * gatools.Factorial(N-n))
+    for n in range(1,nmax+1):
+        nbips = factorialN / (tools.Factorial(n) * tools.Factorial(N-n))
 
         # Correct nbips is N is even and if nbips = nmax
         if n == nmax and 2*n == N:
@@ -452,16 +483,17 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
 
         # Average of all bipartitions of size n, if nbips is small
         if nbips <= maxiter:
+            nbips = int(nbips)
             mibips = np.zeros(nbips, np.float64)
             # Create all the bipartitions of size n
-            bipartitions = gatools.AllBipartitions(nodelist, n)
-            for i in xrange(nbips):
+            bipartitions = tools.AllBipartitions(nodelist, n)
+            for i in range(nbips):
                 # Choose a bipartition
                 set1, set2 = bipartitions[i]
 
                 # Extract the submatrices for each bipartition
-                submat1 = gatools.ExtractSubmatrix(corrmatrix, set1)
-                submat2 = gatools.ExtractSubmatrix(corrmatrix, set2)
+                submat1 = tools.ExtractSubmatrix(corrmatrix, set1)
+                submat2 = tools.ExtractSubmatrix(corrmatrix, set2)
 
                 # Compute the determinant of the submatrices
                 detsubmat1 = scipy.linalg.det(submat1)
@@ -474,15 +506,15 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
         else:
             # print 'Sampling... n:', n
             mibips = np.zeros(maxiter, np.float64)
-            for i in xrange(maxiter):
+            for i in range(maxiter):
                 # Generate a random bipartition of sizes n and N-n
                 numpy.random.shuffle(nodelist)
                 set1 = nodelist[:n]
                 set2 = nodelist[n:]
 
                 # Extract the submatrices for each bipartition
-                submat1 = gatools.ExtractSubmatrix(corrmatrix, set1)
-                submat2 = gatools.ExtractSubmatrix(corrmatrix, set2)
+                submat1 = tools.ExtractSubmatrix(corrmatrix, set1)
+                submat2 = tools.ExtractSubmatrix(corrmatrix, set2)
 
                 # Compute the determinant of the submatrices
                 detsubmat1 = scipy.linalg.det(submat1)

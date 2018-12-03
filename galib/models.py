@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+#
+# Released under the Apache License, Version 2.0 (the "License");
+# you may not use this software except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+
 """
-============================
 SYNTHETIC NETWORK GENERATORS
 ============================
 
@@ -7,7 +15,7 @@ This module contains functions to generate typical synthetic networks,
 including random networks and methods to rewire networks.
 
 RANDOM NETWORK GENERATORS
-=========================
+-------------------------
 Lattice1D
     Generates regular ring lattices (all nodes have same degree).
 Lattice1D_FixLinks
@@ -24,14 +32,14 @@ ScaleFreeGraph
     Generates scale-free graphs of given size and exponent.
 
 NETWORK REWIRING/RANDOMIZATION ALGORITHMS
-=========================================
+-----------------------------------------
 RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
 ModularityPreservingGraph
     Randomises an input graph conserving its modular structure.
 
 HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
-============================================
+--------------------------------------------
 ModularHeterogeneousGraph
     Generates random modular networks of given module sizes and densities.
 HMpartition
@@ -45,19 +53,18 @@ HMCentralisedGraph
     connectivity through local hubs.
 RavaszBarabasiModel
     Generates hierarchical networks after the Ravasz & Barabasi model.
-"""
 
-__author__ = "Gorka Zamora-Lopez"
-__email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2018"
-__license__ = "GPL"
-__update__="30/06/2018"
+
+...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+
+"""
+from __future__ import division, print_function, absolute_import
 
 import types
 import numpy as np
 import numpy.random
-import gatools
-import galib
+from .metrics import Reciprocity
+from .tools import ExtractSubmatrix
 
 
 ############################################################################
@@ -86,7 +93,8 @@ def Lattice1D(N,z):
     Lattice1D_FixLinks : Generates ring lattices with desired number of links.
     """
     # 0) SECURITY CHECK
-    assert z <= int(N/2), 'Largest possible z in N/2: %d' %(N/2)
+    if z > N//2:
+        raise ValueError("Largest possible z = N/2 =", N//2 )
 
     if z == 0:
         return np.zeros((N,N), np.uint8)
@@ -99,7 +107,7 @@ def Lattice1D(N,z):
     adjmatrix[0,-z:] = 1
 
     # 1.2) Use numpy.roll() to copy rotated version of the first row
-    for i in xrange(1,N):
+    for i in range(1,N):
         adjmatrix[i] = np.roll(adjmatrix[0],i)
 
     return adjmatrix
@@ -129,7 +137,8 @@ def Lattice1D_FixLinks(N,L):
     Lattice1D : Generates regular ring lattices (all nodes have same degree)
     """
     # 0) SECURITY CHECK
-    assert L <= int(0.5*N*(N-1)), 'Maximum number of links is 0.5*N*N(-1)'
+    if L > int(0.5*N*(N-1)):
+        raise ValueError( "Largest number of links 1/2 * N*(N-1) =", int(0.5*N*(N-1)) )
 
     if L == 0:
         return np.zeros((N,N), np.uint8)
@@ -139,12 +148,12 @@ def Lattice1D_FixLinks(N,L):
     # 1.2) Use numpy.roll() to copy rotated version of a pattern row
     counter = 0
     finished = False
-    for k in xrange(1,N):
+    for k in range(1,N):
         if finished: break
         row = np.zeros(N,np.uint8)
         row[k] = 1
 
-        for i in xrange(N):
+        for i in range(N):
             adjmatrix[i] += np.roll(row,i)
             counter += 1
             if counter == L:
@@ -207,23 +216,26 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
     """
 
     # 0) SECURITY CHECKS
-    assert prew >= 0 and prew <= 1, \
-        "Probability 'prew' out of bounds. Insert value between 0 and 1"
+    if (prew < 0 or prew > 1):
+        raise ValueError( "Probability 'prew' out of bounds. Insert value between 0 and 1" )
 
     # 1) CREATE OR CHECK THE VALIDITY OF THE INITIAL RING-LATTICE
-    if type(lattice) == types.NoneType:
-        assert z <= int(N/2), 'Largest possible z in N/2: %d' %(N/2)
+    # if type(lattice) == types.NoneType:
+    if lattice == None:
+        if z > N//2:
+            raise ValueError("Largest possible z = N/2 =", N//2 )
         adjmatrix = Lattice1D(N,z)
     else:
         Nlatt = len(lattice)
-        assert N == Nlatt, 'Size N not aligned with size of given lattice.'
+        if N != Nlatt:
+            raise ValueError( "N and size of given lattice od not match." )
         adjmatrix = lattice.copy()
 
     # 2) REWIRE THE LINKS CLOCKWISE AND BY RANK OF NEIGHBOURHOOD
     # For each rank of neighbourhood...
-    for k in xrange(1,z+1):
+    for k in range(1,z+1):
         # Choose every node in clockwise direction
-        for i in xrange(N):
+        for i in range(N):
             # 2.1) Rewire the link with neighbour i+k with probability prew
             if numpy.random.rand() <= prew:
                 done = False
@@ -278,8 +290,8 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
     RandomGraph : Random graphs with specified number of links
     """
     # 0) SECURITY CHECKS. Make sure that adequate parameters are given.
-    assert p >= 0 and p <= 1, \
-        "Probability 'p' out of bounds. Insert value between 0 and 1"
+    if (p < 0.0 or p > 1.0):
+        raise ValueError( "Probability p out of bounds. Insert value between 0 and 1" )
 
     # 1) FOR DIRECTED GRAPHS
     # 1.1) Create a random matrix with normally distributed values
@@ -339,21 +351,21 @@ def RandomGraph(N, L, directed=False, selfloops=False):
     if directed:
         if selfloops:
             maxL = N**2
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = N**2 = %d' %maxL
+            if L > maxL:
+                raise ValueError( "L out of bounds, max(L) = N**2 =", maxL )
         else:
             maxL = N*(N-1)
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = N*(N-1) = %d' %maxL
+            if L > maxL:
+                raise ValueError( "L out of bounds, max(L) = N*(N-1) =", maxL )
     else:
         if selfloops:
             maxL = 0.5*N*(N+1)
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = 1/2*N*(N+1) = %d' %maxL
+            if L > maxL:
+                raise ValueError( "L out of bounds, max(L) = 1/2*N*(N+1) =", maxL )
         else:
             maxL = 0.5*N*(N-1)
-            assert L <= maxL, \
-                'L out of bounds. For the options given, max(L) = 1/2*N*(N-1) = %d' %maxL
+            if L > maxL:
+                raise ValueError( "L out of bounds, max(L) = 1/2*N*(N-1) =", maxL )
 
     # 1) INITIATE THE MATRIX AND HELPERS
     adjmatrix = np.zeros((N,N), np.uint8)
@@ -412,10 +424,10 @@ def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
 
     # 2) PERFORM THE PREFERENTIAL ATTACHMENT GROWTH
     # 2.0) Create a list initially containing the hubs ki times
-    nodelist = range(m+1)*m
+    nodelist = list(range(m+1))*m
 
-    # 2.1) Incude a new node
-    for i in xrange(m+1,N):
+    # 2.1) Add a new node
+    for i in range(m+1,N):
         counter = 0
         neighbours = []
         while counter < m:
@@ -470,8 +482,8 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
     nodes are correlated, e.g., input hubs are also output hubs.
     """
     # 0) SECURITY CHECKS
-    assert density >= 0 and density <= 1, \
-        'Density value out of bounds. Values between 0 and 1 accepted.'
+    if (density < 0.0 or density > 1.0):
+        raise ValueError("Density out of bounds, please enter a value between 0 and 1." )
 
     # 1) GENERATE AN EMPTY NETWORK
     adjmatrix = np.zeros((N,N), np.uint8)
@@ -481,7 +493,7 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
         L = round(0.5*density*N*(N-1))
 
     # 2) CREATE DEGREE SEQUENCE
-    alpha = 1./(exponent - 1.0)
+    alpha = 1.0/(exponent - 1.0)
     nodeweights = (np.arange(N) +1)**-alpha
     nodeweights /= nodeweights.sum()    # Probability of a node to be chosen
     nodecumprobability = nodeweights.cumsum()
@@ -571,7 +583,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     # 0) PREPARE FOR THE CALCULATIONS
     # 0.1) Check the conditions for the rewiring process
     if directed==None:
-        recip = galib.Reciprocity(adjmatrix)
+        recip = Reciprocity(adjmatrix)
         if recip == 1.0: directed = False
         else: directed = True
     if weighted:
@@ -692,7 +704,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
     # Check if the original network is directed or undirected
     if directed == None:
-        if galib.Reciprocity(adjmatrix) == 1: directed = False
+        if Reciprocity(adjmatrix) == 1: directed = False
         else: directed = True
 
     # Check if the original network accepts self-loops
@@ -710,7 +722,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
         N1 = len(com1)
 
         # 2.1) Seed the random links within the module
-        submatrix = gatools.ExtractSubmatrix(adjmatrix, com1)
+        submatrix = ExtractSubmatrix(adjmatrix, com1)
         Lblock = submatrix.astype('bool').sum()
         if not directed:
             Lblock = int( round(np.float32(Lblock / 2)) )
@@ -735,13 +747,13 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
             counter += 1
 
         # 2.2) Seed the random links across modules
-        for c2 in xrange(ncoms):
+        for c2 in range(ncoms):
             if not directed and c2 < c1: continue
             if c1 == c2: continue
 
             com2 = partition[c2]
             N2 = len(com2)
-            subnet = gatools.ExtractSubmatrix(adjmatrix,com1,com2)
+            subnet = ExtractSubmatrix(adjmatrix,com1,com2)
             Lblock = subnet.astype('bool').sum()
             counter = 0
             while counter < Lblock:
@@ -818,12 +830,13 @@ def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
     ErdosRenyiGraph : Generates random graphs with given link probability.
     """
     # 0) SECURITY CHECKS
-    assert len(Nsizelist) == len(pintlist), 'Nsizelist and pintlist not aligned.'
-    assert pext >= 0.0 and pext <= 1.0, \
-        "Probability 'pext' out of bounds. Insert value between 0 and 1"
-    for c in xrange(len(pintlist)):
-        assert pintlist[c] >= 0.0 and pintlist[c] <= 1.0, \
-            "Probability 'pintlist' out of bounds. Insert values between 0 and 1"
+    if len(Nsizelist) != len(pintlist):
+        raise TypeError( "Parameters 'Nsizelist' and 'pintlist' not aligned." )
+    if (pext < 0.0 or pext > 1.0):
+        raise ValueError("Probability 'pext' out of bounds, insert value between 0 and 1" )
+    for c in range(len(pintlist)):
+        if (pintlist[c] < 0.0 or pintlist[c] > 1.0):
+            raise ValueError( "Probability 'pintlist' out of bounds. Insert values between 0 and 1" )
 
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.add.reduce(Nsizelist)
@@ -833,7 +846,7 @@ def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
     # Define the partition
     counter = 0
     partition = []
-    for c in xrange(ncommunities):
+    for c in range(ncommunities):
         com = np.arange(counter,counter+Nsizelist[c])
         partition.append(com)
         counter += Nsizelist[c]
@@ -895,7 +908,7 @@ def HMpartition(HMshape):
     nlevels = len(HMshape)
 
     partitions = []
-    for level in xrange(nlevels):
+    for level in range(nlevels):
         # 2.1.1) Find the number of blocks per hierarchical level
         if level == 0: continue
 
@@ -903,9 +916,9 @@ def HMpartition(HMshape):
         partitionmatrix = np.zeros((N,nblocks), np.uint8)
 
         # 2.2) For each block in the hierarchical level
-        for b in xrange(nblocks):
+        for b in range(nblocks):
             # 2.2.1) Find the indices for the block
-            Nblock = N / nblocks
+            Nblock = N // nblocks
             iminblock = b*Nblock
             imaxblock = (b+1)*Nblock
 
@@ -999,7 +1012,8 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
         """This is a helper subfunction that seeds links at random.
         """
         # 0) SSECURITY CHECK
-        assert len(partition) > 1, 'Partition needs to have at least 2 communities'
+        if len(partition) < 2.0:
+            raise TypeError( "Partition needs to have at least 2 communities" )
 
         ncoms = len(partition)
         Ncoms = len(partition[0])
@@ -1030,9 +1044,10 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
 
     #______________________________________________________________________
     # 0) SECURITY CHECKS
-    assert len(HMshape) == len(avklist), 'HMshape and plist not aligned.'
-    assert HMshape[0] > 1, \
-        'HMshape[0] <= 1. First hierarchical level must contain more than one module.'
+    if len(HMshape) != len(avklist):
+        raise ValueError( "HMshape and plist not aligned." )
+    if HMshape[0] < 1:
+        raise ValueError("HMshape[0] <= 1. First hierarchical level must contain more than one module." )
 
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
@@ -1041,7 +1056,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
 
     # 2) CREATE THE HM NETWORK BY SEEDING LINKS AT DIFFERENT SCALES
     # 2.1) For each hierarchical level
-    for level in xrange(nlevels):
+    for level in range(nlevels):
         # 2.1.1) Find the number of blocks per hierarchical level
         if HMshape[level] == 1: continue
 
@@ -1049,18 +1064,18 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
         else: nblocks = int(np.multiply.reduce(HMshape[:level]))
 
         # 2.2) For each block in the hierarchical level
-        for b in xrange(nblocks):
+        for b in range(nblocks):
             # 2.2.1) Find the indices for the block
-            Nblock = N / nblocks
+            Nblock = N // nblocks
             iminblock = b*Nblock
             imaxblock = (b+1)*Nblock
 
             # 2.2.2) Create the partition of nodes into communities within
             # the current block in the current hierarchical level
             ncoms = HMshape[level]
-            Ns = Nblock / ncoms
+            Ns = Nblock // ncoms
             partition = []
-            for p in xrange(ncoms):
+            for p in range(ncoms):
                 partition.append(range(iminblock + p*Ns,iminblock + (p+1)*Ns))
 
             # 3) SEED THE LINKS AT RANDOM BETWEEN COMMUNITIES
@@ -1175,7 +1190,8 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
         """This is a helper function which generates the modules at a given
         hierachical level.
         """
-        assert len(partition) > 1, 'Trying to generate a random graph'
+        if len(partition) < 1:
+            raise ValueError( "No modules given, Generating a random graph" )
 
         ncoms = len(partition)
         Ns = len(partition[0])
@@ -1244,11 +1260,11 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
 
     #______________________________________________________________________
     # 0) SECURITY CHECKS
-    assert len(HMshape) == len(avklist), \
-        'HMshape and avklist are not alighned'
+    if len(HMshape) != len(avklist):
+        raise ValueError( "HMshape and avklist are not alighned." )
     if gammalist:
-        assert len(gammalist) == len(HMshape), \
-            'HMshape and gammalist are not alighned'
+        if len(gammalist) != len(HMshape):
+            raise ValueError( "HMshape and gammalist are not alighned." )
 
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
@@ -1260,10 +1276,10 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     if not gammalist:
         alpha = np.ones(nlevels, float)
     else:
-        alpha = 1. / (np.array(gammalist,float) - 1.0)
+        alpha = 1.0 / (np.array(gammalist,float) - 1.0)
 
     # 2) CREATE THE HM NETWORK BY SEEDING LINKS AT DIFFERENT SCALES
-    for level in xrange(nlevels-1):
+    for level in range(nlevels-1):
         # 2.1) Find the number of blocks, communities and nodes
         # Number of blocks
         if HMshape[level] == 1: continue
@@ -1275,19 +1291,19 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
         # Number of communities per block
         ncoms = HMshape[level]
         # Number of nodes per community
-        Ncom = Nblock / ncoms
+        Ncom = Nblock // ncoms
 
         # 2.2) Define typical partition for the current hierarchical level
         partition = np.zeros((ncoms,Ncom), np.uint)
-        for i in xrange(ncoms):
+        for i in range(ncoms):
             partition[i] = np.arange(i*Ncom,(i+1)*Ncom, dtype=np.uint)
 
         # 2.3) Define the typical node selection probabilities within a block
         if level < nlevels - 2:
             nodeweights = np.ones(Ncom,np.float)
             ncomsnext = HMshape[level+1]
-            Ncomnext = Ncom / ncomsnext
-            for i in xrange(ncomsnext):
+            Ncomnext = Ncom // ncomsnext
+            for i in range(ncomsnext):
                 nodeweights[i*Ncomnext:(i*Ncomnext+Ncomnext)] = \
                     ((np.arange(Ncomnext)+1).astype(float))**-alpha[level]
             # Probability of a node to be chosen
@@ -1307,7 +1323,7 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
             Lblock = 0.5 * Nblock * avklist[level]
 
         # 2.5) Seed intercommunity links in the current hierarchical level
-        for b in xrange(nblocks):
+        for b in range(nblocks):
             minidx = b*Nblock
             maxidx = (b+1)*Nblock
             adjmatrix[minidx:maxidx,minidx:maxidx] = \
@@ -1316,7 +1332,7 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     # 3) CREATE THE LAST HIERARCHICAL LEVEL
     # 3.1 ) Find the number communities and nodes per community
     Ncom = HMshape[-1]
-    ncoms = len(adjmatrix) / Ncom
+    ncoms = len(adjmatrix) // Ncom
 
     # 3.2) Define the typical node selection probabilities within a community
     nodeweights = ((np.arange(Ncom)+1).astype(np.float))**(-alpha[-1])
@@ -1330,7 +1346,7 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
         Lcom = 0.5 * Ncom * avklist[-1]
 
     # 3.4) Seed intercommunity links in the current hierarchical level
-    for i in xrange(ncoms):
+    for i in range(ncoms):
         minidx = i*Ncom
         maxidx = (i+1)*Ncom
 
@@ -1338,3 +1354,5 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
             SkewedRandomGraph(Lcom, cumprobability, directed)
 
     return adjmatrix
+
+#
