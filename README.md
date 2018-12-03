@@ -43,7 +43,7 @@ Do not forget the "." at the end which means "*look for the setup.py file in the
 
 **- The lazy installation**: If [git](https://git-scm.com) is also installed in your computer, then open a terminal and type:
 
-	$ pip install git+https://github.com/gorkazl/pyGAlib.git@gmaster
+	$ pip install git+https://github.com/gorkazl/pyGAlib.git@master
 
 This will install the package, that is, the content in the folder *galib/*. Other files (Examples/, README.md, LICENSE.txt, etc.) need to be downloaded manually, if wanted.
 
