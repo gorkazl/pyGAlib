@@ -56,9 +56,12 @@ array manipulation will be often needed. Try importing pyGAlib: ::
     >>> import numpy as np
     >>> import galib
 
-**NOTE**: Importing galib imports also all functions in module *metrics.py*
-into its namespace. The rest of modules are imported separately. Therefore, if
-the import is relative those functions can be called as, e.g., ::
+..note::
+    Importing galib imports also all functions in module *metrics.py*
+    into its namespace. The rest of modules are imported separately. Therefore,
+    if the import is relative those functions can be called as, e.g.,
+
+::
 
     >>> import galib
     >>> ...
@@ -126,10 +129,11 @@ rank 2):  ::
 	>>> avlen
 	2.248080808080808
 
-**NOTE:** For calculating the distance matrix of larger networks please use
-the version of the function located in the module *metrics_numba.py*. Here, the
-function ``FloydWarshall_Numba()`` works the same but makes use of the Numba
-library to significantly speed the calculation.
+.. note::
+    For calculating the distance matrix of larger networks please use
+    the version of the function located in the module *metrics_numba.py*. Here,
+    the function ``FloydWarshall_Numba()`` works the same but makes use of the
+    Numba library to significantly speed the calculation.
 
 Most network generators and graph metrics in pyGAlib work with directed graphs
 as well. Check for the optional parameter ``directed``. Following the example
@@ -201,7 +205,8 @@ You may obtain a copy of the License at
 
 or see the LICENSE.txt file.
 
-NOTE: Please, use the logos provided in the Branding/ folder whenever possible.
+.. note::
+    Please, use the logos provided in the Branding/ folder whenever possible.
 
 """
 from __future__ import absolute_import
