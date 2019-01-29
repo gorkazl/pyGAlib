@@ -51,8 +51,8 @@ HMCentralisedGraph
     Generates random hierarchical and modular networks of desired number
     of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
-RavaszBarabasiModel
-    Generates hierarchical networks after the Ravasz & Barabasi model.
+RavaszBarabasiGraph
+    Generates hierarchical networks following the Ravasz & Barabasi model.
 
 
 ...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
@@ -1352,6 +1352,89 @@ def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
 
         adjmatrix[minidx:maxidx,minidx:maxidx] = \
             SkewedRandomGraph(Lcom, cumprobability, directed)
+
+    return adjmatrix
+
+def RavaszBarabasiGraph(Nmotif=4, hlevels=3, hublinks=True):
+    """Generates a Ravasz-Barabasi hierarchical graph.
+
+    The Ravasz-Barabasi graph is a pseudo-fractal network that starts from a
+    basic motif, a complete graph of size 'Nmotif'. Further hierarchical levels
+    are constructed replicating the original motif, by making each of the nodes
+    in original motif as the central node of the new replicated motif. All new
+    'peripheral' vertices link
+
+    The network is claimed to produce scale-free-like degree distribution but
+    modular structure is rather unclear. Two different versions of the model
+    where published. In Ref. [science2002], the hubs of each hierarchical level
+    are connected forming a ring graph. Note, however, that these links
+    between the hubs do not lead to a rich-club. The model in Ref. [pre2003],
+    ignored the connections among the local hubs at same hierarchical level hubs.
+    This function creates both versions, controled by parameter 'hublinks'.
+
+    Parameters
+    ----------
+    Nmotif : integer
+        Size of the basic motif.
+    hlevels : integer
+        Number of hierarchical levels. Notice that hlevels = 1 will return the
+        basic motif, a complete graph of size Nmotif.
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2.
+        The adjacency matrix of the generated scale-free network. The size of
+        the final network is N = Nmotif^hlevels.
+
+    References
+    ----------
+    [science2002] E. Ravasz, A.L. Somera, D.A. Mongru, Z.N. Oltvai and A.L.
+    Barabasi "Hierarchical organization of modularity in metabolic networks."
+    Science 297, 1551-1555 (2002).
+    [pre2003] E. Ravasz and A. Barabasi "Hierarchical organization in complex
+    networks" Phys. Rev. E 67, 026112 (2003).
+    """
+    # 0) SECURITY CHECKS
+    if Nmotif < 4:
+        raise ValueError('Basic motif needs at least four nodes, Nmotif > 3.')
+    if hlevels < 1:
+        raise ValueError('Number of hirarchical levels needs to be positive, hlevels > 0.')
+
+    # The number of nodes of one module in three different scales
+    N = Nmotif**(hlevels)
+    adjmatrix = np.zeros((N,N), np.uint8)
+
+    # 1) DEFINE THE BASIC MOTIF
+    adjmatrix[:Nmotif,:Nmotif] = 1
+    adjmatrix[np.diag_indices(Nmotif)] = 0
+
+    # 2) GROW AND CONNECT THE NETWORK
+    for lev in range(1,hlevels):
+        hublist = np.arange(Nmotif**lev,Nmotif**(lev+1),Nmotif**lev)
+
+        # 2.1) Link the hubs at the new level forming a ring
+        if hublinks:
+            for i in range(Nmotif-2):
+                node1 = hublist[i]
+                node2 = hublist[i+1]
+                adjmatrix[node1,node2] = 1
+                adjmatrix[node2,node1] = 1
+            adjmatrix[hublist[0],hublist[-1]] = 1
+            adjmatrix[hublist[-1],hublist[0]] = 1
+
+        # 2.2) Define the basis motif for the current level
+        motif = adjmatrix[:Nmotif**lev,:Nmotif**lev]
+        newNmotif = len(motif)
+
+        # 2.3) Make copies of the motif at each hub location
+        for hub in hublist:
+            adjmatrix[hub:hub+newNmotif,hub:hub+newNmotif] = motif
+
+        # 2.4) Connect all new peripheral nodes with the central hub
+        for i in range(Nmotif**lev,Nmotif**(lev+1)):
+            if i not in hublist:
+                adjmatrix[0,i] = 1
+                adjmatrix[i,0] = 1
 
     return adjmatrix
 
