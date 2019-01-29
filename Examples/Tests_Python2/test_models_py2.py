@@ -80,6 +80,7 @@ modnet, newpart = ModularHeterogeneousGraph([100,200,400], [0.2,0.1,0.05], 0.02,
 # testpart = HMpartition([100,200,400])
 hmrnet = HMRandomGraph([2,3,100], [2,10,20], directed=True)
 hmcnet = HMCentralizedGraph([2,3,100], [2,10,20], [1.8,2.5,3.0], directed=False)
+rbnet = RavaszBarabasiGraph()
 
 
 time2 = timer()

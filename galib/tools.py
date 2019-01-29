@@ -545,9 +545,11 @@ def LaplacianMatrix(adjmatrix):
     driven by their outputs, not by their inputs. We recommend to introduce
     adjmatrix.T into the function.
     """
-    length = len(adjmatrix)
+    if adjmatrix.dtype in [np.uint, np.uint0, np.uint8, np.uint16, np.uint32, np.uint64]:
+        adjmatrix = adjmatrix.astype(int)
+    N = len(adjmatrix)
 
-    laplacianmatrix = np.identity(length, dtype=adjmatrix.dtype) * adjmatrix.sum(axis=1)
+    laplacianmatrix = np.identity(N, dtype=adjmatrix.dtype) * adjmatrix.sum(axis=1)
     laplacianmatrix -= adjmatrix
 
     return laplacianmatrix
