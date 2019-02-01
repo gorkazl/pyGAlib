@@ -873,7 +873,7 @@ def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloo
 
     # 3) IF GRAPH SHOULD BE UNDIRECTED...
     if not directed:
-        adjmatrix[np.tril_indices(N, k=1)] = 0
+        adjmatrix[np.tril_indices(N, k=-1)] = 0
         adjmatrix += adjmatrix.T
 
     # 4) Remove the diagonal if no self-loops are desired
