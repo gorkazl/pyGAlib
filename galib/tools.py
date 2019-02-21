@@ -475,9 +475,9 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
         nodelist2 = nodelist1.copy()
     else:
         if type(nodelist2) != np.ndarray:
-            warnings.simplefilter('module', UserWarning)
-            warnings.warn("Prefered type for parameter 'nodelist2' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
-                            stacklevel=2)
+            # warnings.simplefilter('once', UserWarning)
+            # warnings.warn("Prefered type for parameter 'nodelist2' is numpy.ndarray. Lists, tuples and sets are allowed but are converted to ndarrays.", \
+            #                 stacklevel=2)
 
             if type(nodelist2) == set:
                 nodelist2 = list(nodelist2)
@@ -624,19 +624,22 @@ def HammingDistance(array1, array2, normed=False):
     """
     # 0) PREPARE FOR CALCULATIONS
     # 0.1) Convert the arrays into rank-1 arrays
-    flat_array1 = array1.flatten()
-    flat_array2 = array2.flatten()
+    if len(np.shape(array1)) > 1:
+        array1 = array1.reshape(-1)
+    if len(np.shape(array2)) > 1:
+        array2 = array2.reshape(-1)
 
     # 0.2) Security check
-    if len(flat_array1) != len(flat_array2):
+    if len(array1) != len(array2):
         raise ValueError( "Arrays are not aligned" )
 
     # 1) COUNT THE NUMBER OF COINCIDENCES
-    similarity = (flat_array1 == flat_array2)
+    similarity = (array1 == array2)
     n_equal = similarity.sum()
 
     # 2) COMPUTE THE HAMMING DISTANCE
-    h_dist = 1. - float(n_equal) / len(flat_array1)
+    length = len(array1)
+    h_dist = 1. - float(n_equal) / length
 
     # 3) RETURN RESULT ACCORDING TO OPTIONS
     # Standard Hamming distance
@@ -646,11 +649,10 @@ def HammingDistance(array1, array2, normed=False):
     # Normalized Hamming distance
     else:
         # Count the number of ones in the two arrays
-        n_1 = len(flat_array1.nonzero()[0])
-        n_2 = len(flat_array2.nonzero()[0])
+        n_1 = len(array1.nonzero()[0])
+        n_2 = len(array2.nonzero()[0])
 
         # Estimate the expected number of random coincidences
-        length = len(flat_array1)
         exp_nc = 1.0 / length * (n_1 * n_2 + (length - n_1) * (length - n_2))
 
         # The expected Hamming distance

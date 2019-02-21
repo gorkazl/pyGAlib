@@ -1089,7 +1089,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
 
     return adjmatrix
 
-def HMCentralizedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.uint8):
+def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.uint8):
     """    Generates random hierarchical and modular networks of desired number
     of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
