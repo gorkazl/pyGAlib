@@ -31,7 +31,7 @@ config = {
     'author': 'Gorka Zamora-Lopez',
     'author_email': 'galib@Zamora-Lopez.xyz',
     'url': 'https://github.com/gorkazl/pyGAlib',
-    'version': '1.0.1',
+    'version': '1.0.2',
     'license': 'Apache License 2.0',
     'install_requires': REQS,
     'packages': find_packages(exclude=['doc', '*tests*']),
