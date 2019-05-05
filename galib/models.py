@@ -449,7 +449,7 @@ def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
 
     return adjmatrix
 
-def ScaleFreeGraph(N, density, exponent, directed=False):
+def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
     """Generates scale-free graphs of given size and exponent.
 
     It follows the method proposed by Goh, Kahng & Kim 'Universal Behaviour
@@ -461,9 +461,9 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
     ----------
     N : integer
         Number of nodes of the final network.
-    density : float between 0 and 1.
-        Density of links of the graph or the digraph.
-    exponent : float
+    L : integer
+        Number of links of the resulting random network.
+    exponent : float (optional)
         The exponent (in positive) of the degree-distribution of the resulting
         networks. Recommended values between 2 and 3.
     directed : boolean, optional
@@ -482,41 +482,44 @@ def ScaleFreeGraph(N, density, exponent, directed=False):
     nodes are correlated, e.g., input hubs are also output hubs.
     """
     # 0) SECURITY CHECKS
-    if (density < 0.0 or density > 1.0):
-        raise ValueError("Density out of bounds, please enter a value between 0 and 1." )
-
-    # 1) GENERATE AN EMPTY NETWORK
-    adjmatrix = np.zeros((N,N), np.uint8)
     if directed:
-        L = round(density*N*(N-1))
+        maxL = N*(N-1)
+        if L > maxL:
+            raise ValueError( "L out of bounds, max(L) = N*(N-1) =", maxL )
     else:
-        L = round(0.5*density*N*(N-1))
+        maxL = 0.5*N*(N-1)
+        if L > maxL:
+            raise ValueError( "L out of bounds, max(L) = 1/2*N*(N-1) =", maxL )
 
-    # 2) CREATE DEGREE SEQUENCE
+    # 1) PREPARE FOR THE CALCULATIONS
+    adjmatrix = np.zeros((N,N), np.uint8)
+
+    # Create a degree sequence
     alpha = 1.0/(exponent - 1.0)
     nodeweights = (np.arange(N) +1)**-alpha
-    nodeweights /= nodeweights.sum()    # Probability of a node to be chosen
+    # Probability of a node to be chosen
+    nodeweights /= nodeweights.sum()
     nodecumprobability = nodeweights.cumsum()
     del nodeweights
 
-    # 3) CONNECT THE NETWORK
+    # 2) CONNECT THE NETWORK
     counter = 1
     while counter <= L:
 
-        # 3.1) Choose two nodes to connect
+        # 2.1) Choose two nodes to connect
         xhead = numpy.random.rand()     # A random number between 0 and 1
-        xsum = sum(np.sign(nodecumprobability-xhead))
+        xsum = np.sum(np.sign(nodecumprobability-xhead))
         head = int(0.5*(N-xsum))
 
         xtail = numpy.random.rand()
-        xsum = sum(np.sign(nodecumprobability-xtail))
+        xsum = np.sum(np.sign(nodecumprobability-xtail))
         tail = int(0.5*(N-xsum))
 
-        # 3.2) Do not allow self loops and multiple edges
+        # 2.2) Do not allow self loops and multiple edges
         if head == tail: continue
         if adjmatrix[head,tail]: continue
 
-        # 3.3) If conditions are satisfied, make the link
+        # 2.3) If conditions are satisfied, make the link
         adjmatrix[head,tail] = 1
         if not directed:
             adjmatrix[tail,head] = 1
@@ -1208,12 +1211,12 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
 
             # 2) Choose two nodes to connect given the cumulative probabilities
             x = numpy.random.rand()     # A random number between 0 and 1
-            xsum = sum(np.sign(cumprobability-x))
+            xsum = np.sum(np.sign(cumprobability-x))
             idx = int(0.5*(Ns-xsum))
             head = com1idx * Ns + idx
 
             x = numpy.random.rand()
-            xsum = sum(np.sign(cumprobability-x))
+            xsum = np.sum(np.sign(cumprobability-x))
             idx = int(0.5*(Ns-xsum))
             tail = com2idx * Ns + idx
 
@@ -1239,11 +1242,11 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
         while counter < L:
             # 1) Choose two nodes to connect given the cumulative probabilities
             x = numpy.random.rand()
-            xsum = sum(np.sign(cumprobability-x))
+            xsum = np.sum(np.sign(cumprobability-x))
             head = int(0.5*(Ncom-xsum))
 
             x = numpy.random.rand()
-            xsum = sum(np.sign(cumprobability-x))
+            xsum = np.sum(np.sign(cumprobability-x))
             tail = int(0.5*(Ncom-xsum))
 
             # 3.2) Do not allow self loops and multiple edges
