@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013 - 2019, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013 - 2019, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -14,9 +14,9 @@ from __future__ import division, print_function
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@zamora-lopez.xyz"
-__copyright__ = "Copyright 2013-2018"
+__copyright__ = "Copyright 2013-2019"
 __license__ = "Apache Lincense 2.0"
-__update__="02/12/2018"
+__update__="13/06/2019"
 
 # Standard library imports
 import os, os.path
