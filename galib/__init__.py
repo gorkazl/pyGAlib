@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013 - 2019, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -195,7 +195,7 @@ open an issue in GitHub.
 License
 -------
 
-Copyright (c) 2013 - 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+Copyright (c) 2013 - 2019, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 
 Released under the Apache License, Version 2.0 (the "License");
 you may not use this software except in compliance with the License.
@@ -217,10 +217,10 @@ from .metrics import*
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2018"
+__copyright__ = "Copyright 2013-2019"
 __license__ = "Apache License version 2.0"
-__version__ = "1.0.2"
-__update__="05/05/2019"
+__version__ = "1.0.3"
+__update__="15/06/2019"
 
 
 

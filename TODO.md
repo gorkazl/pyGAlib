@@ -1,18 +1,24 @@
 ## TODO list for GAlib
 
 
-### Priority...
+### Priorities...
+
+1. Add functions for community detection (please help!).
+2. Add functionalities for graph visualization.
 
 
-1. Identify and modify all functions whose unweighted version could be improved using Boolean operators: ``ReciprocalDegree()``, ``RichClub()``, ``MatchingIndex()``, ``ConnectedComponents()``, ``K_Core()``, ``K_Shells()``, ``Modularity()``, etc.
-2. Identify further functions which could be accelarated using Numba package, and write the Numba-based duplicates.
-3. Write a function for the Dijkstra algorithm.
-4. Support for weighted network metrics (ACHTUNG!! I won't accept just any algorithm for weighted networks, since many do not make sense.
-4. I/O support to more graph formats: igraph, graphML (.xml), DOT (.dot), etc. 
-5. Write tests for all methods
-6. *Please, suggest your own…*
+### This and that...
 
-### Would be nice to ...
+1. Identify further functions which could be accelarated using Numba package, and write the Numba-based duplicates.
+2. Write a function for the Dijkstra algorithm.
+3. Identify and modify all functions whose unweighted version could be improved using Boolean operators: ``ReciprocalDegree()``, ``RichClub()``, ``MatchingIndex()``, ``ConnectedComponents()``, ``K_Core()``, ``K_Shells()``, ``Modularity()``, etc.
+4. Support for weighted network metrics (ACHTUNG!! I won't accept just any algorithm for weighted networks, since many do not make sense.)
+5. I/O support to more graph formats: igraph, graphML (.xml), DOT (.dot), etc. 
+6. Write tests for all functions.
+7. *Please, suggest your own…*
+
+
+### It would be nice to ...
 
 * Finish documentation (use Sphinx for that).
 * Check compatibility with scipy.sparse module.

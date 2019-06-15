@@ -14,19 +14,26 @@ Main features...
 
 ... and some limitations:
 
-- limited management of large networks due to NumPy dependence,
+- management of large networks due to NumPy dependence,
 - no graph visualization tools.
 
 
 ### INSTALLATION
 
-Installation of pyGAlib is simple. An existing python distribution and the [pip](https://github.com/pypa/pip) package manager need to be installed. If Python was installed via the [Canopy](https://www.enthought.com/product/canopy/) or the [Anaconda](https://www.anaconda.com) distributions, then pip is surely installed. To check, open a terminal and type:
+Installation of pyGAlib is simple. An existing python distribution and the [pip](https://github.com/pypa/pip) package manager need to be installed. If Python was installed via the [Canopy](https://www.enthought.com/product/canopy/) or the [Anaconda](https://www.anaconda.com) distributions, then `pip` is surely installed. To check, open a terminal and type:
 
 	$ pip --help
 
-pyGAlib is still not registered in PyPI (the Python Packages Index) and installation follows directly from GitHub. However, pip will automatically take care of the  dependencies (see the *requirements.txt* file). There are two alternative manners to install: the easy and the lazy. 
+**- The simple installation**: pyGAlib is registered in [PyPI](https://pypi.org/project/galib/) (the Python Packages Index), therefore installation from the terminal is straight forward. `pip` will automatically take care of the  dependencies (see the *requirements.txt* file). Simply type:
 
-**- The easy installation**: Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
+	$ pip install galib 
+
+To confirm the installation open an interactive session and try to import the library by typing `import galib`.
+
+> **NOTE:** If you are using Python 2 and Python 3 environments, pyGAlib needs to be installed in each of the environments separately.
+
+
+**- Installation from GitHub (full download)**: Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
 
 	$ cd ~/Downloads/pyGAlib-master/
 
@@ -34,21 +41,18 @@ Once on the folder that contains the *setup.py* file, type the following
 
 	$ pip install .
 
-Do not forget the "." at the end which means "*look for the setup.py file in the current directory*." This will check for the dependencies and install pyGAlib. To confirm the installation open an interactive session and try to import the library by typing `import galib`, or run one of the test scripts in the *Examples/* folder, e.g.,
+Do not forget the "." at the end which means "*look for the setup.py file in the current directory*." This will check for the dependencies and install pyGAlib. To confirm installation, try running one of the  test scripts in the *Examples/* folder, e.g.,
 
 	$ cd Examples/Test_Python2/
 	$ python test_metrics_py2.py
 
 > **NOTE**: After installation the current folder "*~/Downloads/pyGAlib-master/*" can be safely deleted, or moved somewhere else if you want to conserve the examples and the tests.
 
-**- The lazy installation**: If [git](https://git-scm.com) is also installed in your computer, then open a terminal and type:
+**- Installation from GitHub (lazy version)**: If [git](https://git-scm.com) is also installed in your computer, then open a terminal and type:
 
 	$ pip install git+https://github.com/gorkazl/pyGAlib.git@master
 
 This will install the package, that is, the content in the folder *galib/*. Other files (Examples/, README.md, LICENSE.txt, etc.) need to be downloaded manually, if wanted.
-
-
-> **NOTE:** If you are using Python 2 and Python 3 environments, pyGAlib needs to be installed in each of the environments.
 
 
 
@@ -186,7 +190,7 @@ For questions, bug reports, etc, please write to <galib@Zamora-Lopez.xyz>, or op
 ### FUTURE DEVELOPMENTS
 
 See the TODO.md file. 
-**Collaborations to extend pyGAlib are welcome.** If you have experience using the *scipy.sparse* module, please contact me. 
+**Collaborations to extend pyGAlib are welcome.** If you have experience using *scipy.sparse*, developing community detection methods or coding graph visualization, please, please, contact me. 
 
 
 ### LICENSE
@@ -208,6 +212,9 @@ limitations under the License.
 
 -----------------------------------------------------------------
 ### WHAT IS NEW
+
+##### June 15, 2019
+GAlib has been registered in PYPI ([https://pypi.org/project/galib/](https://pypi.org/project/galib/)). Direct installation and version management using `pip` is thus available.
 
 ##### January 29, 2019
 New in Version 1.0.1:
