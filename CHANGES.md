@@ -1,5 +1,14 @@
 ### HISTORY OF CHANGES
 
+##### June 15, 2019
+GAlib has been registered in PYPI ([https://pypi.org/project/galib/](https://pypi.org/project/galib/)). Direct installation and version management using `pip` is thus available.
+
+##### January 29, 2019
+New in Version 1.0.1:
+
+- Minor corrections overall.
+- Function to generate Ravasz-Barabási hierarchical networks added to *models.py* module.
+
 ##### December 3, 2018
 Release of Version 1.0.0 of pyGAlib. The library is now shaped as a proper Python package and is installable using standard tools. The structure of the package has been renewed and contains the following modules: 
 
