@@ -33,8 +33,10 @@ AvNeighboursDegree
     Average neighbours' degree of nodes with given degree k, for all k.
 Clustering
     Returns the clustering coefficient and the local clustering of every node.
+k_Density
+    Computes the density of subnetworks with degree >= k', for all k' = 0 to kmax.
 RichClub
-    Computes the density of subnetworks with degree > k', for k' = 0 to kmax.
+    Identifies the subset of hubs with dense interconnectivity.
 MatchingIndex
     Computes the number of common neighbours of every pair of nodes.
 
@@ -479,13 +481,19 @@ def Clustering(adjmatrix, checkdirected=True):
 
     return coefficient, cnodes
 
-def RichClub(adjmatrix, rctype='undirected'):
-    """Computes the density of subnetworks with degree > k', for k' = 0 to kmax.
+def k_Density(adjmatrix, rctype='undirected'):
+    """Computes the density of subnetworks with degree >= k', for all k' = 0 to kmax.
 
-    The k-density (phi(k)) is the density of the network for all nodes with
-    k' < k. See original paper by S. Zhou and R.J. Modragon, IEEE Communication
-    Letters 8(3), 180-182 (2004). The function accepts weighted adjacency
-    matrices but it ignores the weights of the links.
+    The k-density (phi(k)) is the density of the subnetwork formed by all nodes
+    with degree k > k'. The calculation of k-density implies an iterative
+    process. At each step, all nodes with degree k' < k are removed from the
+    network (adjmatrix) and the density of the remaining subgraph is calculated.
+    See original paper by S. Zhou and R.J. Modragon, IEEE Communication
+    Letters 8(3), 180-182 (2004).
+    This function returns the k-density for all values of k', from k' = 0
+    (corresponding to the original graph) to k' = kmax, with kmax being the
+    degree of the most connected node. It accepts weighted adjacency matrices
+    but it ignores the weights of the links.
 
     Parameters
     ----------
@@ -510,6 +518,10 @@ def RichClub(adjmatrix, rctype='undirected'):
     kdensity : ndarray of dtype=float
         An array of length k_max containing, for each index k, the k-density
         of the network.
+
+    See Also
+    --------
+    RichClub : Identifies the subset of hubs with dense interconnectivity.
     """
     # 0) SECURITY CHECKS
     keylist = ('undirected', 'outdegree', 'indegree', 'average')
@@ -567,6 +579,106 @@ def RichClub(adjmatrix, rctype='undirected'):
             kdensity[k] = kdensity[k-1]
 
     return kdensity
+
+def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
+    """Identifies the subset of hubs with dense interconnectivity.
+
+    Conceptually, a network is said to have a rich-club when it contains hubs
+    (largely connected nodes) and those hubs are densely interconnected
+    forming a cluster (or community).
+    The identification of a rich-club relies on the k-density, a metric that
+    iteratively calculates the density of the subnetwork formed by the nodes
+    with degree larger than (or equal to) k', for all k' from 0 to kmax.
+    See original paper by S. Zhou and R.J. Modragon, IEEE Communication
+    Letters 8(3), 180-182 (2004).
+
+    NOTE
+    Unfortunately, rich-club identification also implies a few arbitrary choices
+    and no strict criteria are commonly agreed. This function returns as the
+    rich-club the set of nodes remaining in the graph at the point when
+    k-density first reaches a given threshold: 'kdensthreshold'. The rich-club
+    will be empty if k-density does not reach the value. 'kdensthreshold' is
+    an optional parameter. Initially 'kdensthreshold' is set to 0.8, which is a
+    very large density, rarely achieved as the internal density by communities
+    found in empirical networks by community detection methods. However, we
+    recommend the user to explore different values of threshold and, specially,
+    to always study the evolution of k-density as a function of degree k,
+    information that is also returned by the function.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network.
+    kdensthreshold : float
+        The value k-density needs to arrive, for the presence of a rich-club to
+        be is considered. Real value bounded between 0 and 1.
+    rctype : string, optional
+        Defines how to make use of the degrees depending on whether the
+        network is directed or undirected.
+        - 'undirected' only if the network is undirected. Raises an error if
+        selected with a directed input adjmatrix.
+        - 'outdegree', if the network is directed, the k-density is computed
+        considering the nodes with output degree out-k' > k.
+        - 'indegree', if the network is directed, the k-density is computed
+        considering the nodes with input degree in-k' > k.
+        - 'average', if the network is directed, the k-density is computed
+        considering that the degree of the nodes is k' = 1/2 (in-k + out-k).
+        Only use 'average' when the input and output degrees of the network
+        are reasonably symmetric.
+
+    Returns
+    -------
+    kdensity : ndarray of dtype=float
+        An array of length k_max containing, for each index k, the k-density
+        of the network.
+    kdecision : integer
+        The degree at which k-density overcomes value 'kdensthreshold'.
+
+    See Also
+    --------
+    k_Density : Iterative density of subnetworks with degree > k', from k' = 0
+                to kmax.
+    """
+    # 0) SECURITY CHECKS
+    if kdensthreshold < 0.0 or kdensthreshold > 1.0:
+        raise ValueError("kdensthreshold parameter out of bounds. Please enter a value between 0 and 1.")
+    keylist = ('undirected', 'outdegree', 'indegree', 'average')
+    if rctype not in keylist:
+        raise KeyError("Enter a valid rctype:", keylist)
+
+    # 1) PREPARE FOR THE CALCULATIONS
+    # Convert the network in binary
+    adjmatrix = adjmatrix.astype('bool')
+
+    # Select the proper data
+    indegree, outdegree = Degree(adjmatrix, True)
+    if rctype == 'undirected':
+        if Reciprocity(adjmatrix) < 1.0:
+            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
+        degree = outdegree
+    elif rctype == 'outdegree':
+        degree = outdegree
+    elif rctype == 'indegree':
+        degree = indegree
+    elif rctype == 'average':
+        degree = 0.5 * (indegree + outdegree)
+
+    # 1) DO THE CALCULATIONS
+    N = len(adjmatrix)
+    # Compute the k-density for all values of k, from 0 to kmax
+    kdensity = k_Density(adjmatrix, rctype=rctype)
+
+    if kdensity.max() >= kdensthreshold:
+        # Identify the degree at which k-density overcomes the given threshold
+        kdecision = np.where(kdensity >= kdensthreshold)[0][0]
+        # Identify indices of the nodes forming the rich-club
+        richclub = np.where(degree >= kdecision)[0]
+    else:
+        # If kdensity does not reach threshold for any k, return an empty set.
+        kdecision = np.NaN
+        richclub = np.empty(0, dtype=np.int)
+
+    return (kdensity, kdecision, richclub)
 
 def MatchingIndex(adjmatrix, normed=True):
     """Computes the number of common neighbours of every pair of nodes.
