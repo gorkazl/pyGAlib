@@ -214,8 +214,8 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2019"
 __license__ = "Apache License version 2.0"
-__version__ = "1.0.3"
-__update__="15/06/2019"
+__version__ = "1.0.4"
+__update__="06/07/2019"
 
 
 
