@@ -14,12 +14,21 @@ SYNTHETIC NETWORK GENERATORS
 This module contains functions to generate typical synthetic networks,
 including random networks and methods to rewire networks.
 
-RANDOM NETWORK GENERATORS
--------------------------
+DETERMINISTIC AND CLASSIC GRAPH MODELS
+--------------------------------------
+PathGraph
+    Returns a path graph (line or chain graph) of size N.
+StarGraph
+    Generates a star graph of size N.
+CompleteGraph
+    Generates an all-to-all connected graph of size N.
 Lattice1D
     Generates regular ring lattices (all nodes have same degree).
 Lattice1D_FixLinks
     Generates ring lattices with desired number of links.
+
+RANDOM NETWORK GENERATORS
+-------------------------
 WattsStrogatzGraph
     Generates small-world networks as in the Watts & Strogatz model.
 ErdosRenyiGraph
@@ -68,7 +77,82 @@ from .tools import ExtractSubmatrix
 
 
 ############################################################################
-"""RANDOM NETWORK GENERATORS"""
+"""DETERMINISTIC AND CLASSIC GRAPH MODELS"""
+def PathGraph(N, directed=False):
+    """Returns a path graph (line or chain graph) of size N.
+
+    Parameters
+    ----------
+    N : integer
+        Size of the network (number of nodes).
+    directed : Boolean (optional)
+        True if a directed graph is desired. False, for an undirected graph.
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2 and integer type.
+        The adjacency matrix of the path graph.
+
+    See Also
+    --------
+    Lattice1D : Generates regular ring lattices (all nodes have same degree).
+    Lattice1D_FixLinks : Generates ring lattices with desired number of links.
+    """
+    # 0) SECURITY CHECK
+    if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
+
+    # 1) CREATE THE NETWORK
+    adjmatrix = np.eye(N,k=1,dtype=np.uint8)
+    if not directed:
+        adjmatrix += adjmatrix.T
+
+    return adjmatrix
+
+def StarGraph(N):
+    """Generates a star graph of size N.
+
+    Parameters
+    ----------
+    N : integer
+        Size of the network (number of nodes).
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2 and integer type.
+        The adjacency matrix of the star graph.
+    """
+    # 0) SECURITY CHECK
+    if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
+
+    # 1) CREATE THE NETWORK
+    adjmatrix = np.zeros((N,N), np.uint8)
+    adjmatrix[0,1:] = 1
+    adjmatrix[1:,0] = 1
+
+    return adjmatrix
+
+def CompleteGraph(N):
+    """Generates an all-to-all connected graph of size N.
+
+    Parameters
+    ----------
+    N : integer
+        Size of the network (number of nodes).
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2 and integer type.
+        The adjacency matrix of the complete graph.
+    """
+    # 0) SECURITY CHECK
+    if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
+
+    # 1) CREATE THE NETWORK
+    adjmatrix = np.ones((N,N), np.uint8)
+    adjmatrix[np.diag_indices(N)] = 0
+
+    return adjmatrix
+
 def Lattice1D(N,z):
     """Generates regular ring lattices.
 
@@ -162,6 +246,9 @@ def Lattice1D_FixLinks(N,L):
 
     return adjmatrix + adjmatrix.T
 
+
+############################################################################
+"""RANDOM NETWORK GENERATORS"""
 def WattsStrogatzGraph(N, z, prew, lattice=None):
     """Generates small-world networks as in the Watts & Strogatz model.
 
@@ -180,7 +267,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
         For a given z, every node has degree k = 2*z in the resulting lattice.
     prew : float, between 0 and 1.
         Probability that links of the 1D lattice to be rewired.
-    lattice : ndarray of rank-2, optional.
+    lattice : ndarray of rank-2 (optional).
         The adjacency matrix of a 1D lattice that has to be rewired.
         When several realizations of the model are desired, the initial
         lattice, usually the output of Lattice1D() function, can be passed
@@ -274,9 +361,8 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
         The size of the network (number of nodes).
     p : float between 0 and 1
         Probability of links.
-    directed : Boolean
-        True if a directed graph is desired, False if an undirected graph is
-        desired.
+    directed : Boolean (optional)
+        True if a directed graph is desired. False, for an undirected graph.
     selfloops: Boolean
         True if self-loops are allowed, False otherwise.
 
@@ -327,9 +413,9 @@ def RandomGraph(N, L, directed=False, selfloops=False):
         The size of the network (number of nodes).
     L : integer
         Number of links of the resulting random network.
-    directed : Boolean
+    directed : Boolean (optional)
         True if a directed graph is desired. False, for an undirected graph.
-    selfloops: Boolean
+    selfloops: Boolean (optional)
         True if self-loops are allowed, False otherwise.
 
     Returns
@@ -407,7 +493,7 @@ def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
         Number of nodes of the final network.
     m : integer
         Number of links that each new node makes during the growing process.
-    outdtype : numpy compatible data type, optional.
+    outdtype : numpy compatible data type (optional).
         The data type of the resulting adjacency matrix of the scale-free
         network.
 
@@ -466,7 +552,7 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
     exponent : float (optional)
         The exponent (in positive) of the degree-distribution of the resulting
         networks. Recommended values between 2 and 3.
-    directed : boolean, optional
+    directed : boolean (optional)
         False if a graph is desired, True if digraphs are desired. In case
         of digraphs, both the input and the output degrees follow a scale-
         free distribution but uncorrelated between them.
@@ -543,9 +629,9 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     adjmatrix : ndarray of rank-2
         The adjacency matrix of the network to be rewired. 'adjmatrix' itself
         won't be rewired but a new matrix is returned.
-    prewire : float, optional
+    prewire : float (optional)
         Fraction of links to be rewired. See Usage for further instructions.
-    directed : Boolean, optional
+    directed : Boolean (optional)
         Specifies the directedness of the returned network. If 'directed' is
         None (default), the function checks the directedness of the input
         network and performs the rewiring accordingly. To save computational
@@ -557,7 +643,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
         when 'adjmatrix' is undirected. DO NOT set 'directed = False' when
         'adjmatrix' is a directed network, degress won't be conserved and the
         function won't raise an error.
-    weighted : Boolean, optional
+    weighted : Boolean (optional)
         Specifies whether the weights of the links are conserved.
         If 'weighted' is False, a binary network is returned.
         If 'weighted' is True, links are switched conserving their weights.
@@ -958,10 +1044,10 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
         submodule they belong to, 3 links with the rest of neighbours at the
         submodule they belong to at the second level, and 1 link with any
         node at any community of the rest of the network.
-    directed : boolean, optional.
+    directed : boolean (optional).
         If true, the resulting network will be directed, else, it will be
         undirected.
-    outdtype : data type, optional
+    outdtype : data type (optional)
         Data-type of the resulting adjacency matrix. Default: uint8.
 
     Returns
@@ -1135,10 +1221,10 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
         Internally, the four submodules are scale-free-like networks with
         exponent gamma = 3.0. The links between modules are seeded at random
         but
-    directed : boolean, optional.
+    directed : boolean (optional).
         If true, the resulting network will be directed, else, it will be
         undirected.
-    outdtype : data type, optional
+    outdtype : data type (optional)
         Data-type of the resulting adjacency matrix. Default: uint8.
 
     Returns

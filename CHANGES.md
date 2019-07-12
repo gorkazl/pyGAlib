@@ -1,5 +1,11 @@
 ### HISTORY OF CHANGES
 
+##### July 12, 2019
+Version 1.1.0 released. Section for classic and deterministic graphs added to the *models.py* module. New generators `PathGraph()`, `StarGraph()` and `CompletGraph()` included.
+
+##### July 6, 2019
+For clarity, function `RichClub()` has been splitted into two functions: `RichClub()`and `k_Density()`. The reason is that the output of old `RichClub()` was basically the k-density for all degrees, from 0 to kmax. Now this is done by `k_Density()` and the new `RichClub()` function identifies the set of nodes (hubs) for which k-density overcomes a given value.
+
 ##### June 15, 2019
 GAlib has been registered in PYPI ([https://pypi.org/project/galib/](https://pypi.org/project/galib/)). Direct installation and version management using `pip` is thus available.
 
