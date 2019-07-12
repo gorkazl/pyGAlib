@@ -9,7 +9,7 @@ with open("requirements.txt") as reqs_file:
 setup(
     name = 'galib',
     description = 'A library for graph analysis in Python / NumPy.',
-    version = '1.0.4',
+    version = '1.1.0',
     url = 'https://github.com/gorkazl/pyGAlib',
     license = 'Apache License 2.0',
 
