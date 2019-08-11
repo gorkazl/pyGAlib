@@ -662,7 +662,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     Usage
     -----
     The parameter 'prewire' is not a probability, but a parameter that
-    controls the number of iterations the link swithching procedure happens.
+    controls the number of iterations the link switching procedure happens.
     At each iteration two links are switched, therefore for a given value of
     'prewire', prewire*L links are rewired in 1/2*prewire*L iterations, where
     L in the number of links. To make sure that all structure of the network

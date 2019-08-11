@@ -219,7 +219,7 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2019"
 __license__ = "Apache License version 2.0"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __update__="11/07/2019"
 
 
