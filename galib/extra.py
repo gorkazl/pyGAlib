@@ -101,6 +101,7 @@ def TopologicalSimilarity(adjmatrix, coupling):
     normmatrix = np.outer(norms, norms.T)
 
     corrmatrix = corrmatrix / normmatrix
+    corrmatrix = corrmatrix.clip(0,1)
     return corrmatrix
 
 def ExponentialMapping(adjmatrix, coupling, partialcorr=False):
