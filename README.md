@@ -213,6 +213,9 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
+##### June 15, 2020
+Docstrings corrected. Function `k_DensityW()` was added in module *metrics.py* to calculate the k-density in networks with weighted links, which is needed to evaluate potential formation of rich-club structures in weigthed networks.
+
 ##### July 12, 2019
 Version 1.1.0 released. Section for classic and deterministic graphs added to the *models.py* module. New generators `PathGraph()`, `StarGraph()` and `CompleteGraph()` included.
 
