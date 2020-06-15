@@ -217,10 +217,10 @@ from .metrics import*
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2019"
+__copyright__ = "Copyright 2013-2020"
 __license__ = "Apache License version 2.0"
-__version__ = "1.1.1"
-__update__="11/07/2019"
+__version__ = "1.1.2"
+__update__="15/06/2020"
 
 
 
