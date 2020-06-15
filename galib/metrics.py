@@ -38,6 +38,9 @@ k_Density
     for all k' = 0 to kmax.
 RichClub
     Identifies the subset of hubs with dense interconnectivity.
+k_DensityW
+    Computes the ratio of link weights among the nodes with strength > s',
+    for s' = 0 to s' = smax.
 MatchingIndex
     Computes the number of common neighbours of every pair of nodes.
 
@@ -683,6 +686,137 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         richclub = np.empty(0, dtype=np.int)
 
     return (kdensity, kdecision, richclub)
+
+def k_DensityW(adjmatrix, nbins=50, maxweight=None, rctype='undirected'):
+    """Computes the ratio of link weights among the nodes with strength > s',
+    for s' = 0 to s' = smax.
+
+    In the original version for unweighted networks, k-density is defined as
+    the density of links of the subnetwork made of nodes with degree k > k'.
+    Where the density of a network of N nodes is calculated as the fraction
+    between the number of existing links, L, and the maximum number of links
+    that the network could posibly host: Lo = 1/2 N(N-1) if the network is
+    undirected and Lo = N(N-1) if the network is directed.
+
+    Following the original concept, here the k-density for weighted networks
+    calculates the fraction between the weights of the links found among the
+    nodes with strength s > s', and the maximum possible weights they could
+    accumulate. That is, if the nodes with s' > s where all-to-all connected and
+    each link carried the largest weight.
+
+    The calculation of k-density implies an iterative process. At each step,
+    the nodes with strength s <= s' are removed from the network and the total
+    weight carried by the links of this remaining subnetwork is calculated.
+
+    This function returns the k-density for all values of s, from s = 0
+    (the original network) to s = smax, with smax being the strength of the
+    most connected node.
+
+    NOTE: Since link weights can take arbitrary real numbers, the strength of
+    nodes can be real valued, in contrast to the discrete nature of the
+    unweighted degrees. Therefore, instead of iterating over node degrees one
+    by one, from k=0 to k=kmax, here the iteration along the range of
+    values from s=0 to s=smax is discretised into 'nbins' steps.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network.
+    nbins : integer
+        The number of bins in which the range s=0 to s=smax will be divided.
+    maxweight : scalar, optional
+        The largest value that the weight of links can take. Depending on what
+        real system the network represents, link values could take different
+        ranges. If a maximum value is known, e.g., 1.0 for correlation matrices,
+        this information can be passed. The default 'maxweigth=None' implies
+        that 'maxweight' is set to the largest value in 'adjmatrix'.
+    rctype : string, optional
+        Defines how to iterate over the node strengths, depending on whether the
+        network is directed or undirected.
+        - 'undirected' only if the network is undirected. Raises an error if
+        selected but 'adjmatrix' represents a non-symmetric network.
+        - 'outputs', if the network is asymmetric, the k-density is computed
+        considering the nodes with output strength out-s > s'.
+        - 'inputs', if the network is directed, the k-density is computed
+        considering the nodes with input strength in-s > s'.
+        - 'average', if the network is directed, the k-density is computed
+        considering that the strength of the nodes is s = 1/2 (in-s + out-s).
+        Only use 'average' when the input and output degrees of the network
+        are reasonably symmetric.
+
+    Returns
+    -------
+    strengthlist: ndarray of length 'nbins'
+        The values of node strength, from s=0 to s=smax, in 'nbins' steps.
+    kdensity : ndarray of length 'nbins'
+        An array of length 'nbins' containing, at each index i, the weighted
+        k-density for the subnetwork formed by the nodes with strength s >= s',
+        where s' = strengthlist[i].
+
+    See Also
+    --------
+    k_Density : Calculates the k-density in unweighted graphs.
+    """
+    # 0) SECURITY CHECKS
+    keylist = ('undirected', 'outputs', 'inputs', 'average')
+    if rctype not in keylist:
+        raise KeyError("Enter a valid rctype:", keylist)
+    if maxweight == None:
+        maxweight = adjmatrix.max()
+
+    # Select the proper data
+    indegree, outdegree = Intensity(adjmatrix, True)
+    if rctype == 'undirected':
+        if Reciprocity(adjmatrix) < 1.0:
+            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
+        degree = outdegree
+    elif rctype == 'outputs':
+        degree = outdegree
+    elif rctype == 'inputs':
+        degree = indegree
+    elif rctype == 'average':
+        degree = 0.5 * (indegree + outdegree)
+
+    # 1) Prepare for calculations
+    adjmatrix = adjmatrix.copy()
+    N = len(adjmatrix)
+
+    smax = degree.max()
+    strengthlist = np.linspace(0,smax, nbins)
+
+    # 2) Compute the k-density across node strengths
+    kdensity = np.zeros(nbins, np.float64)
+
+    # Density of the original network
+    L0 = adjmatrix.sum() - adjmatrix.trace()
+    kdensity[0] = L0 / (maxweight * N*(N-1))
+
+    # Iterate over node strengths, in discrete steps
+    for i in range(1,nbins):
+        s = strengthlist[i]
+        slast = strengthlist[i-1]
+        # 2.1) Remove from the network all nodes with strength <= s
+        nodes = np.logical_and(degree > slast, degree <= s)
+        nodes = np.where(nodes==True)[0]
+
+        # Skip calculating the same as in the previous step, if not needed
+        if len(nodes) == 0:
+            kdensity[i] = kdensity[i-1]
+            continue
+
+        # Else, convert the input or output links of removed nodes into 0s
+        adjmatrix[nodes] = 0
+        adjmatrix[:,nodes] = 0
+        degree[nodes] = 0
+
+        # 2.2 Compute the average weight of links in the remaining subnetwork
+        Ls = adjmatrix.sum() - adjmatrix.trace()
+        Ns = len(degree.nonzero()[0])
+
+        if Ns > 1:
+            kdensity[i] = Ls / (maxweight * Ns*(Ns-1))
+
+    return strengthlist, kdensity
 
 def MatchingIndex(adjmatrix, normed=True):
     """Computes the number of common neighbours of every pair of nodes.
