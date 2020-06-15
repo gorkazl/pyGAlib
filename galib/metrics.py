@@ -34,7 +34,8 @@ AvNeighboursDegree
 Clustering
     Returns the clustering coefficient and the local clustering of every node.
 k_Density
-    Computes the density of subnetworks with degree >= k', for all k' = 0 to kmax.
+    Computes the density of subnetworks made of nodes with degree >= k',
+    for all k' = 0 to kmax.
 RichClub
     Identifies the subset of hubs with dense interconnectivity.
 MatchingIndex
@@ -482,11 +483,12 @@ def Clustering(adjmatrix, checkdirected=True):
     return coefficient, cnodes
 
 def k_Density(adjmatrix, rctype='undirected'):
-    """Computes the density of subnetworks with degree >= k', for all k' = 0 to kmax.
+    """Computes the density of subnetworks made of nodes with degree >= k',
+    for all k' = 0 to kmax.
 
     The k-density (phi(k)) is the density of the subnetwork formed by all nodes
     with degree k > k'. The calculation of k-density implies an iterative
-    process. At each step, all nodes with degree k' < k are removed from the
+    process. At each step, all nodes with degree k' <= k are removed from the
     network (adjmatrix) and the density of the remaining subgraph is calculated.
     See original paper by S. Zhou and R.J. Modragon, IEEE Communication
     Letters 8(3), 180-182 (2004).
@@ -504,9 +506,9 @@ def k_Density(adjmatrix, rctype='undirected'):
         network is directed or undirected.
         - 'undirected' only if the network is undirected. Raises an error if
         selected with a directed input adjmatrix.
-        - 'outdegree', if the network is directed, the k-density is computed
+        - 'outputs', if the network is directed, the k-density is computed
         considering the nodes with output degree out-k' > k.
-        - 'indegree', if the network is directed, the k-density is computed
+        - 'inputs', if the network is directed, the k-density is computed
         considering the nodes with input degree in-k' > k.
         - 'average', if the network is directed, the k-density is computed
         considering that the degree of the nodes is k' = 1/2 (in-k + out-k).
@@ -524,7 +526,7 @@ def k_Density(adjmatrix, rctype='undirected'):
     RichClub : Identifies the subset of hubs with dense interconnectivity.
     """
     # 0) SECURITY CHECKS
-    keylist = ('undirected', 'outdegree', 'indegree', 'average')
+    keylist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
     if rctype not in keylist:
         raise KeyError("Enter a valid rctype:", keylist)
 
@@ -537,9 +539,9 @@ def k_Density(adjmatrix, rctype='undirected'):
         if Reciprocity(adjmatrix) < 1.0:
             raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
         degree = outdegree
-    elif rctype == 'outdegree':
+    elif rctype == 'outputs' or rctype == 'outdegree':
         degree = outdegree
-    elif rctype == 'indegree':
+    elif rctype == 'inputs' or rctype == 'indegree':
         degree = indegree
     elif rctype == 'average':
         degree = 0.5 * (indegree + outdegree)
