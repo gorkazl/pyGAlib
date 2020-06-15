@@ -619,9 +619,9 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         network is directed or undirected.
         - 'undirected' only if the network is undirected. Raises an error if
         selected with a directed input adjmatrix.
-        - 'outdegree', if the network is directed, the k-density is computed
+        - 'outputs', if the network is directed, the k-density is computed
         considering the nodes with output degree out-k' > k.
-        - 'indegree', if the network is directed, the k-density is computed
+        - 'inputs', if the network is directed, the k-density is computed
         considering the nodes with input degree in-k' > k.
         - 'average', if the network is directed, the k-density is computed
         considering that the degree of the nodes is k' = 1/2 (in-k + out-k).
@@ -646,7 +646,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     # 0) SECURITY CHECKS
     if kdensthreshold < 0.0 or kdensthreshold > 1.0:
         raise ValueError("kdensthreshold parameter out of bounds. Please enter a value between 0 and 1.")
-    keylist = ('undirected', 'outdegree', 'indegree', 'average')
+    keylist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
     if rctype not in keylist:
         raise KeyError("Enter a valid rctype:", keylist)
 
@@ -660,9 +660,9 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         if Reciprocity(adjmatrix) < 1.0:
             raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
         degree = outdegree
-    elif rctype == 'outdegree':
+    elif rctype == 'outputs' or rctype == 'outdegree':
         degree = outdegree
-    elif rctype == 'indegree':
+    elif rctype == 'inputs' or rctype == 'indegree':
         degree = indegree
     elif rctype == 'average':
         degree = 0.5 * (indegree + outdegree)
