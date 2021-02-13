@@ -687,7 +687,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
 
     return (kdensity, kdecision, richclub)
 
-def k_DensityW(adjmatrix, nbins=50, maxweight=None, rctype='undirected'):
+def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
     """Computes the ratio of link weights among the nodes with strength > s',
     for s' = 0 to s' = smax.
 
@@ -730,6 +730,13 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, rctype='undirected'):
         ranges. If a maximum value is known, e.g., 1.0 for correlation matrices,
         this information can be passed. The default 'maxweigth=None' implies
         that 'maxweight' is set to the largest value in 'adjmatrix'.
+    maxstrength : scalar, optional
+        The largest node strength that the function should scan. This parameter
+        is useful when comparing a family of networks. Setting the largest
+        node strength, given the samne number of bins, the results are obtained
+        for the same range of strengths, and therefore, are directly comparable.
+        The default is 'maxstrength=None' so, if not given, the largest node
+        strength will be calculated from adjmatrix.
     rctype : string, optional
         Defines how to iterate over the node strengths, depending on whether the
         network is directed or undirected.
@@ -781,7 +788,10 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, rctype='undirected'):
     adjmatrix = adjmatrix.copy()
     N = len(adjmatrix)
 
-    smax = degree.max()
+    if maxstrength==None:
+        smax = degree.max()
+    else:
+        smax = maxstrength
     strengthlist = np.linspace(0,smax, nbins)
 
     # 2) Compute the k-density across node strengths
