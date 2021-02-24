@@ -1180,7 +1180,8 @@ def ConnectedComponents(distmatrix, directed=False, showall=True):
         newmatrix = newmatrix * newmatrix.T
 
     # 2) Sort the nodes into their components
-    nodelist = range(N)
+    # nodelist = range(N)
+    nodelist = np.arange(N).tolist()
     components = []
     while nodelist:
         # Take the first node. This helps keeping the output sorted
