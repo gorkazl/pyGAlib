@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2019, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
+# Copyright (c) 2013 - 2022, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -7,7 +7,8 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 
-"""This script is an example of how to compute and plot the roles of nodes
+"""
+This script is an example of how to compute and plot the roles of nodes
 according to the partition of a network into communities.
 
 Citation
@@ -22,9 +23,9 @@ from __future__ import division, print_function
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@zamora-lopez.xyz"
-__copyright__ = "Copyright 2013-2019"
+__copyright__ = "Copyright 2013-2022"
 __license__ = "Apache Lincese 2.0"
-__update__="13/06/2019"
+__update__="07/02/2022"
 
 # Standard library imports
 import os, os.path

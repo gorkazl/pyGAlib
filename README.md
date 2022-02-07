@@ -194,7 +194,7 @@ See the TODO.md file.
 
 
 ### LICENSE
-Copyright 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+Copyright 2018 - 2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this software except in compliance with the License.
@@ -212,6 +212,9 @@ limitations under the License.
 
 -----------------------------------------------------------------
 ### WHAT IS NEW
+
+##### February 7, 2022
+Minor bug fixes. A remaining Python 2 to Python 3 conversion error was fixed, since standard library function `range()` no longer returns a list, but an iterator object.
 
 ##### June 15, 2020
 Docstrings corrected. Function `k_DensityW()` was added in module *metrics.py* to calculate the k-density in networks with weighted links, which is needed to evaluate potential formation of rich-club structures in weigthed networks.

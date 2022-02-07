@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2019, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013 - 2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -213,14 +213,16 @@ from __future__ import absolute_import
 
 from . import metrics
 from .metrics import*
+from . import models
+from .models import*
 
 
 __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
-__copyright__ = "Copyright 2013-2020"
+__copyright__ = "Copyright 2013-2022"
 __license__ = "Apache License version 2.0"
-__version__ = "1.1.2"
-__update__="15/06/2020"
+__version__ = "1.1.3"
+__update__="07/02/2022"
 
 
 
