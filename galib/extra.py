@@ -8,7 +8,6 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 
 """
-==========================
 ADDITIONAL FUNCTIONALITIES
 ==========================
 
@@ -20,7 +19,7 @@ readers. It also contains adaptation into Python of measures published by
 third-party authors which I needed for my own research.
 
 ESTIMATION OF EXPECTED CROSS-CORRELATION
-========================================
+----------------------------------------
 TopologicalSimilarity
     Computes the expected cross-correlation matrix of a given network.
 ExponentialMapping
@@ -29,7 +28,7 @@ CovarianceLinearGaussian
     Approximated covariance matrix of a system of Gaussian noise sources.
 
 NETWORK (DYNAMICS) COMPLEXITY MEASURES
-=======================================
+--------------------------------------
 FunctionalComplexity
     Calculates the functional complexity of a correlation(-like) matrix.
 NeuralComplexity
