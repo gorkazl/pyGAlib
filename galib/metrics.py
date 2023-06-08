@@ -1282,7 +1282,7 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     return assortmatrix
 
 def Modularity(adjmatrix, partition):
-    """Computes the Newman modularity given a partition of nodes.
+    """Computes the Newman-Girvan modularity given a partition of nodes.
 
     It computes modularity for both weighted or unweighted and for directed
     or undirected networks after a generalization of the modularity measure
@@ -1308,12 +1308,11 @@ def Modularity(adjmatrix, partition):
     the usual degree, the function returns the unweighted modularity.
     If 'adjmatrix' is a weighted adjacency matrix and 'degree' its weighted
     degree or intensity, it returns the weighted modularity.
-    The algorithm authomatically computes modularity for both directed and
+    The algorithm automatically computes modularity for both directed and
     undirected networks according to input 'matrix'.
     """
     # Prepare for calculations
     N = len(adjmatrix)
-    Ncoms = len(partition)
     L = adjmatrix.sum()
 
     indegree, outdegree = Intensity(adjmatrix, directed=True)
@@ -1324,12 +1323,12 @@ def Modularity(adjmatrix, partition):
     for s, community in enumerate(partition):
         submat = tools.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
-        Q += float(submat.sum()) * L_norm
+        Q += float(submat.sum())
         # Minus the expected fraction of links
         productsubmat = np.outer(outdegree[community], indegree[community])
-        Q -= productsubmat.sum() * L_norm**2
+        Q -= productsubmat.sum() * L_norm
 
-    return Q
+    return Q * L_norm
 
 def K_Core(adjmatrix, kmin):
     """Finds the K-core of a network with degree k >= kmin.
