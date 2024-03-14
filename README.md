@@ -24,7 +24,12 @@ Installation of pyGAlib is simple. An existing python distribution and the [pip]
 
 	$ pip --help
 
-**- The simple installation**: pyGAlib is registered in [PyPI](https://pypi.org/project/galib/) (the Python Packages Index), therefore installation from the terminal is straight forward. `pip` will automatically take care of the  dependencies (see the *requirements.txt* file). Simply type:
+
+#### 1) The simple installation
+
+> **WARNING:** At this moment PyPI has the outdated version v1.1.3 of *pyGAlib*. I recommend installation of the latest version by using the methods 2) and 3) described below, until I can update to the new PyPI packaging and uploading system.
+
+pyGAlib is registered in [PyPI](https://pypi.org/project/galib/) (the Python Packages Index), therefore installation from the terminal is straight forward. `pip` will automatically take care of the  dependencies (see the *requirements.txt* file). Simply type:
 
 	$ pip install galib 
 
@@ -33,7 +38,18 @@ To confirm the installation open an interactive session and try to import the li
 > **NOTE:** If you are using Python 2 and Python 3 environments, pyGAlib needs to be installed in each of the environments separately.
 
 
-**- Installation from GitHub (full download)**: Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
+#### 2) Installation from GitHub (lazy version)
+
+If [git](https://git-scm.com) is installed in your computer, then open a terminal and type:
+
+	$ pip install git+https://github.com/gorkazl/pyGAlib.git@master
+
+This will install the package, that is, the content in the folder *galib/*. Other files (Examples/, README.md, LICENSE.txt, etc.) need to be downloaded manually, if wanted.
+
+
+#### 3) Installation from GitHub (full download)
+
+Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
 
 	$ cd ~/Downloads/pyGAlib-master/
 
@@ -48,11 +64,6 @@ Do not forget the "." at the end which means "*look for the setup.py file in the
 
 > **NOTE**: After installation the current folder "*~/Downloads/pyGAlib-master/*" can be safely deleted, or moved somewhere else if you want to conserve the examples and the tests.
 
-**- Installation from GitHub (lazy version)**: If [git](https://git-scm.com) is also installed in your computer, then open a terminal and type:
-
-	$ pip install git+https://github.com/gorkazl/pyGAlib.git@master
-
-This will install the package, that is, the content in the folder *galib/*. Other files (Examples/, README.md, LICENSE.txt, etc.) need to be downloaded manually, if wanted.
 
 
 
