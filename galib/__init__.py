@@ -221,8 +221,8 @@ __author__ = "Gorka Zamora-Lopez"
 __email__ = "galib@Zamora-Lopez.xyz"
 __copyright__ = "Copyright 2013-2022"
 __license__ = "Apache License version 2.0"
-__version__ = "1.1.3"
-__update__="07/02/2022"
+__version__ = "1.1.4"
+__update__="14/03/2024"
 
 
 

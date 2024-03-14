@@ -223,7 +223,7 @@ def Reciprocity(adjmatrix):
         # Rest = np.abs(adjmatrix - adjmatrix.T)
         Rest = np.abs(adjmatrix ^ adjmatrix.T)
         Lsingle = 0.5*Rest.sum()
-        reciprocity = np.float(L-Lsingle) / L
+        reciprocity = float(L-Lsingle) / L
 
     return reciprocity
 
@@ -281,9 +281,9 @@ def ReciprocalDegree(adjmatrix, normed=False):
         degminus = indegree - recipdegree
         degplus = outdegree - recipdegree
 
-        return 2.0 * recipdegree.astype(np.float) / (indegree+outdegree), \
-               degminus.astype(np.float)/indegree, \
-               degplus.astype(np.float)/outdegree
+        return 2.0 * recipdegree.astype(np.float64) / (indegree+outdegree), \
+               degminus.astype(np.float64)/indegree, \
+               degplus.astype(np.float64)/outdegree
 
     else:
         # The reciprocal degree of the nodes
@@ -319,12 +319,12 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
 
     Returns
     --------
-    AvKnn : ndarray of dtype 'float'. AvKnn has three rows:
+    AvKnn : ndarray of dtype 'float64'. AvKnn has three rows:
             Row-0: the (output) degree, k'
             Row-1: average (input) degree of all neighbours of nodes with
             degree k = k'
             Row-2: the standard deviation of the average in row-1
-    alldata : ndarray with two rows of dtype float or integer.
+    alldata : ndarray with two rows of dtype float64 or integer.
         The list of all node's degree k and all their neighbours' degree k'.
             Row-0: the degree k of a node
             Row-1: the degree k' of one of its neighbours
@@ -389,7 +389,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     # 2) Compute the av. degree for all neighbours of nodes with degree k'
     klist = np.sort(list(kdict.keys()))
     # klist = (kdict.keys()).sort()
-    AvKnn = np.zeros((3,len(klist)), np.float)
+    AvKnn = np.zeros((3,len(klist)), np.float64)
     for count, k in enumerate(klist):
         dummy = np.array(kdict[k])
         avk = dummy.mean()
@@ -402,8 +402,8 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     if fulloutput:
         L = indegree.sum()
         # Convert the kdict into a 2D array for plotting purposes
-        if knntype == 'Mixed': neighkarray = np.zeros((2,L),np.float)
-        else: neighkarray = np.zeros((2,L),np.int)
+        if knntype == 'Mixed': neighkarray = np.zeros((2,L),np.float64)
+        else: neighkarray = np.zeros((2,L),np.int64)
 
         counter = 0
         for k in kdict:
@@ -437,7 +437,7 @@ def Clustering(adjmatrix, checkdirected=True):
     A tuple containing two elements:
     C : Scalar between 0 and 1.
         The clustering coefficient of the network (2 * Ntriangles / Ntriads).
-    ClustNodes : ndarray of dtype=float.
+    ClustNodes : ndarray of dtype=float64.
         An array of length N with the clustering of every node.
 
     Notes
@@ -448,7 +448,7 @@ def Clustering(adjmatrix, checkdirected=True):
     useful for an further statistical analysis.
     """
     N = len(adjmatrix)
-    adjmatrix = np.where(adjmatrix,1,0).astype(np.float32)
+    adjmatrix = np.where(adjmatrix,1,0).astype(np.float64)
 
     # 0) SECURITY CHECKS
     if checkdirected:
@@ -475,7 +475,7 @@ def Clustering(adjmatrix, checkdirected=True):
     Ndiads = ndiads.sum()
     if Ndiads == 0:
         coefficient = 0
-        cnodes = np.zeros(N,float)
+        cnodes = np.zeros(N, np.float64)
     # Compute clustering if at least one triad has been found
     else:
         coefficient = ntriangles.sum() / Ndiads
@@ -520,7 +520,7 @@ def k_Density(adjmatrix, rctype='undirected'):
 
     Returns
     -------
-    kdensity : ndarray of dtype=float
+    kdensity : ndarray of dtype=float64
         An array of length k_max containing, for each index k, the k-density
         of the network.
 
@@ -633,7 +633,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
 
     Returns
     -------
-    kdensity : ndarray of dtype=float
+    kdensity : ndarray of dtype=float64
         An array of length k_max containing, for each index k, the k-density
         of the network.
     kdecision : integer
@@ -683,7 +683,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     else:
         # If kdensity does not reach threshold for any k, return an empty set.
         kdecision = np.NaN
-        richclub = np.empty(0, dtype=np.int)
+        richclub = np.empty(0, dtype=np.int64)
 
     return (kdensity, kdecision, richclub)
 
@@ -883,7 +883,7 @@ def MatchingIndex(adjmatrix, normed=True):
                 if j in union: norm -= 1
                 # Normalize and save the value avoiding ZeroDivision errors
                 if norm > 0:
-                    mi = float(mi) / norm
+                    mi = np.float64(mi) / norm
                     MImatrix[i,j] = mi
                     MImatrix[j,i] = mi
 
@@ -1002,7 +1002,7 @@ def PathsAllinOne(adjmatrix):
     # 0) PREPARE FOR THE CALCULATIONS
     N = len(adjmatrix)
     distmatrix = np.where(adjmatrix, 1, np.inf)
-    betweenness = np.zeros(N, np.int)
+    betweenness = np.zeros(N, np.int64)
     allpaths = {}
     allcycles = {}
 
@@ -1069,7 +1069,7 @@ def PathsAllinOne(adjmatrix):
     # also all undirected paths that run inversely and are duplicated.
     recip = Reciprocity(adjmatrix)
     if recip == 1:
-        betweenness = (0.5*betweenness).astype(np.int)
+        betweenness = (0.5*betweenness).astype(np.int64)
 
 
     # 4) CLEAN TRASH AND FINISH
@@ -1228,7 +1228,7 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
 
     Returns
     -------
-    assortmatrix : ndarray of rank-2 and dtype=float
+    assortmatrix : ndarray of rank-2 and dtype=float64
         Assortativity matrix of shape Nc x Nc, where Nc is the number of
         subsets of nodes in 'partition'.
 
@@ -1250,7 +1250,7 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     Ncoms = len(partition)
 
     # Calculate the assortativity matrix
-    assortmatrix = np.zeros((Ncoms,Ncoms), np.float)
+    assortmatrix = np.zeros((Ncoms,Ncoms), np.float64)
 
     if norm == 'linkprobability':
         for c1 in range(Ncoms):
@@ -1323,7 +1323,7 @@ def Modularity(adjmatrix, partition):
     for s, community in enumerate(partition):
         submat = tools.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
-        Q += float(submat.sum())
+        Q += np.float64(submat.sum())
         # Minus the expected fraction of links
         productsubmat = np.outer(outdegree[community], indegree[community])
         Q -= productsubmat.sum() * L_norm
@@ -1558,7 +1558,7 @@ def LocalHubness(adjmatrix, partition):
     N = len(adjmatrix)
     ncoms = len(partition)
 
-    localhubness = np.zeros(N,np.float64)
+    localhubness = np.zeros(N, np.float64)
     for n, com in enumerate(partition):
 
         # Skip nodes of only one node
@@ -1611,7 +1611,7 @@ def ParticipationMatrix(adjmatrix, partition):
     """
     N = len(adjmatrix)
     ncomms = len(partition)
-    partitionmatrix = np.zeros((N,ncomms), np.uint)
+    partitionmatrix = np.zeros((N,ncomms), np.uint64)
 
     # 1) CONSTRUCT THE PARTITION MATRIX, S (1 if node in module c, 0 otherwise)
     for c in range(ncomms):
@@ -1665,7 +1665,7 @@ def ParticipationVectors(adjmatrix, partition):
     N = len(adjmatrix)
     ncomms = len(partition)
     commsizes = np.zeros(ncomms, np.float64)
-    partitionmatrix = np.zeros((N,ncomms), np.uint8)
+    partitionmatrix = np.zeros((N,ncomms), np.uint64)
 
     # 1) COMPUTE FIRST THE PARTICIPATION MATRIX
     # 1.1) Construct the partition matrix
@@ -1846,9 +1846,9 @@ def RolesNodes(adjmatrix, partition):
     globalhubness = invnorm * (degree - (N-1)*dens)
 
     # 2) COMPUTE THE LOCAL HUBNESS AND CREATE THE PARTITION MATRIX
-    localhubness = np.zeros(N,np.float64)
-    commsizes = np.zeros(ncomms,np.float64)
-    partitionmatrix = np.zeros((N,ncomms), np.uint)
+    localhubness = np.zeros(N, np.float64)
+    commsizes = np.zeros(ncomms, np.float64)
+    partitionmatrix = np.zeros((N,ncomms), np.uint64)
     for c, com in enumerate(partition):
         commsizes[c] = len(partition[c])
         partitionmatrix[com,c] = 1
@@ -1929,7 +1929,7 @@ def ParticipationIndex_GA(participmatrix):
     LocalHubness_GA : Returns the z-score of node's local degree.
     """
     N, npart = np.shape(participmatrix)
-    participindex = np.zeros(N, np.float)
+    participindex = np.zeros(N, np.float64)
 
     for i in range(N):
         a = participmatrix[i].sum()
@@ -1975,7 +1975,7 @@ def Hubness_GA(participmatrix, partition):
     """
     N, ncoms = np.shape(participmatrix)
 
-    zscore = np.zeros(N, np.float)
+    zscore = np.zeros(N, np.float64)
     for s, community in enumerate(partition):
         klist = participmatrix[community,s]
         avklist = klist.mean()

@@ -213,6 +213,13 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
+##### March 14, 2024
+Small bugs fixed:
+
+- Normalization of `galib.metrics.Modularity()` function corrected.
+- Fixed the new  aliases for `int` and `float` in *Numpy*. All arrays are now declared as `np.int64` or `np.float64`, and individual numbers as standard Python `int` or `float`. 
+
+
 ##### February 7, 2022
 Minor bug fixes. A remaining Python 2 to Python 3 conversion error was fixed, since standard library function `range()` no longer returns a list, but an iterator object.
 

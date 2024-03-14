@@ -203,11 +203,11 @@ def LoadFromPajek(filepath, getlabels=False):
     elif len(line) == 3:
         # 2.3) Find whether link weights are integer or floating poing
         i, j, aij = line
-        outdtype = np.int
+        outdtype = np.int64
         try:
             outdtype(aij)
         except ValueError:
-            outdtype = np.float
+            outdtype = np.float64
 
         # 2.4) Declare the adjacency matrix and include the first link
         adjmatrix = np.zeros((N, N), outdtype)
@@ -279,9 +279,9 @@ def Save2Pajek(filepath, adjmatrix, labels=[], directed=False, weighted=False):
     # Save the links AND their WEIGHTS
     if weighted:
         # 3.1) Find whether weights are integers or floats
-        if adjmatrix[0, 0].dtype in [np.uint8, np.uint, np.int8, np.int]:
+        if adjmatrix[0, 0].dtype in [np.uint8, np.uint, np.int8, int]:
             formatstring = '%d %d %d'
-        elif adjmatrix[0, 0].dtype in [np.float16, np.float32, np.float, np.float64]:
+        elif adjmatrix[0, 0].dtype in [np.float16, np.float32, float, np.float64]:
             formatstring = '%d %d %f'
 
         # 3.2) Save the ARCS if directed
@@ -468,7 +468,7 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
         if type(nodelist1) == set:
             nodelist1 = list(nodelist1)
         if type(nodelist1) in [list, tuple]:
-            nodelist1 = np.array(nodelist1,np.int)
+            nodelist1 = np.array(nodelist1,np.int64)
 
     # Check nodelist2
     if len(nodelist2) == 0:
@@ -482,18 +482,18 @@ def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
             if type(nodelist2) == set:
                 nodelist2 = list(nodelist2)
             if type(nodelist2) in [list, tuple]:
-                nodelist2 = np.array(nodelist2,np.int)
+                nodelist2 = np.array(nodelist2,np.int64)
 
     # 1) CREATE LISTS OF INDICES FOR SLICING
     N1 = len(nodelist1)
     N2 = len(nodelist2)
-    xindices = np.zeros(N1*N2, np.int)
+    xindices = np.zeros(N1*N2, np.int64)
     for ncounter, node in enumerate(nodelist1):
         startidx = ncounter*N2
         endidx = startidx + N2
         xindices[startidx:endidx] = node
 
-    yindices = np.zeros(N1*N2, np.int)
+    yindices = np.zeros(N1*N2, np.int64)
     for n in range(N1):
         startidx = n*N2
         endidx = startidx + N2

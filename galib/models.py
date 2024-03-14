@@ -814,7 +814,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
         submatrix = ExtractSubmatrix(adjmatrix, com1)
         Lblock = submatrix.astype('bool').sum()
         if not directed:
-            Lblock = int( round(np.float32(Lblock / 2)) )
+            Lblock = int( round(float(Lblock / 2)) )
         counter = 0
         while counter < Lblock:
             # Pick up two nodes at random
@@ -1363,9 +1363,9 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     # 1.1) If no hub parameters given, connect modules at random.
     # This case returns the same networks as 'HMRandomGraph' function.
     if not gammalist:
-        alpha = np.ones(nlevels, float)
+        alpha = np.ones(nlevels, np.float64)
     else:
-        alpha = 1.0 / (np.array(gammalist,float) - 1.0)
+        alpha = 1.0 / (np.array(gammalist, np.float64) - 1.0)
 
     # 2) CREATE THE HM NETWORK BY SEEDING LINKS AT DIFFERENT SCALES
     for level in range(nlevels-1):
@@ -1383,24 +1383,24 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
         Ncom = Nblock // ncoms
 
         # 2.2) Define typical partition for the current hierarchical level
-        partition = np.zeros((ncoms,Ncom), np.uint)
+        partition = np.zeros((ncoms,Ncom), np.uint64)
         for i in range(ncoms):
-            partition[i] = np.arange(i*Ncom,(i+1)*Ncom, dtype=np.uint)
+            partition[i] = np.arange(i*Ncom,(i+1)*Ncom, dtype=np.uint64)
 
         # 2.3) Define the typical node selection probabilities within a block
         if level < nlevels - 2:
-            nodeweights = np.ones(Ncom,np.float)
+            nodeweights = np.ones(Ncom, np.float64)
             ncomsnext = HMshape[level+1]
             Ncomnext = Ncom // ncomsnext
             for i in range(ncomsnext):
                 nodeweights[i*Ncomnext:(i*Ncomnext+Ncomnext)] = \
-                    ((np.arange(Ncomnext)+1).astype(float))**-alpha[level]
+                    ((np.arange(Ncomnext)+1).astype(np.float64))**-alpha[level]
             # Probability of a node to be chosen
             nodeweights /= nodeweights.sum()
             cumprobability = nodeweights.cumsum()
         else:
-            nodeweights = np.ones(Ncom,np.float)
-            nodeweights = ((np.arange(Ncom)+1).astype(float))**-alpha[level]
+            nodeweights = np.ones(Ncom, np.float64)
+            nodeweights = ((np.arange(Ncom)+1).astype(np.float64))**-alpha[level]
             # Probability of a node to be chosen
             nodeweights /= nodeweights.sum()
             cumprobability = nodeweights.cumsum()
@@ -1424,7 +1424,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     ncoms = len(adjmatrix) // Ncom
 
     # 3.2) Define the typical node selection probabilities within a community
-    nodeweights = ((np.arange(Ncom)+1).astype(np.float))**(-alpha[-1])
+    nodeweights = ((np.arange(Ncom)+1).astype(np.float64))**(-alpha[-1])
     nodeweights /= nodeweights.sum()    # Probability of a node to be chosen
     cumprobability = nodeweights.cumsum()
 

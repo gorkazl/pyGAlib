@@ -277,10 +277,10 @@ def Covmat2Corrmat(covmatrix):
     """
     # 0) Prepare for calculation
     if covmatrix.dtype not in ['float32','float64','float']:
-        covmatrix = covmatrix.astype(np.float)
+        covmatrix = covmatrix.astype(np.float64)
 
     # 1) Calculate the normalization factor for each pair
-    diagvalues = np.diag(covmatrix).astype(np.float)
+    diagvalues = np.diag(covmatrix).astype(np.float64)
     normmatrix = np.sqrt(np.outer(diagvalues,diagvalues))
 
     # 2) Return result
@@ -358,7 +358,7 @@ def FunctionalComplexity(corrmatrix, nbins=50, datarange=[0,1]):
 
     # 3) Compute functional complexity
     normfactor = 0.5 * float(nbins) / (nbins-1)
-    uniformdistrib = 1./nbins * np.ones(nbins, np.float)
+    uniformdistrib = 1./nbins * np.ones(nbins, np.float64)
     fcomplexity = 1. - normfactor * np.add.reduce(abs(ydata - uniformdistrib))
     # fcomplexity = 1. - normfactor * (abs(ydata - uniformdistrib)).sum()
 
