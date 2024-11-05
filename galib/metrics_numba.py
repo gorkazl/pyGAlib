@@ -91,7 +91,7 @@ def MatchingIndex_Numba(adjmatrix, normed=True):
     # Convert the adjacency matrix into a boolean matrix
     adjmatrix = adjmatrix.astype(np.bool)
 
-    MImatrix = np.identity(N, np.float64)
+    MImatrix = np.identity(N, float)
 
     for i in range(N):
         for j in range(i,N):
@@ -108,12 +108,12 @@ def MatchingIndex_Numba(adjmatrix, normed=True):
 
                 # Normalize and save the value avoiding ZeroDivision errors
                 if norm > 0:
-                    mi = np.float64(mi) / norm
+                    mi = float(mi) / norm
                     MImatrix[i,j] = mi
                     MImatrix[j,i] = mi
             else:
                 # Save the value
-                mi = np.float64(mi)
+                mi = float(mi)
                 MImatrix[i,j] = mi
                 MImatrix[j,i] = mi
 
