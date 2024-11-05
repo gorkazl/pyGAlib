@@ -88,7 +88,7 @@ def TopologicalSimilarity(adjmatrix, coupling):
     """
     # 0) Security check on the dtype
     if adjmatrix.dtype not in ['float32','float64','float']:
-        adjmatrix = adjmatrix.astype(np.float64)
+        adjmatrix = adjmatrix.astype(float)
 
     # 1) Compute the communicability matrix
     Cmatrix = scipy.linalg.expm(coupling*adjmatrix).T
@@ -148,7 +148,7 @@ def ExponentialMapping(adjmatrix, coupling, partialcorr=False):
     """
     # 0) Security check on the dtype
     if adjmatrix.dtype not in ['float32','float64','float']:
-        adjmatrix = adjmatrix.astype(np.float64)
+        adjmatrix = adjmatrix.astype(float)
 
     # 1) Compute the node-to-node influence
     Qmatrix = scipy.linalg.expm(coupling*adjmatrix)
@@ -241,19 +241,19 @@ def CovarianceLinearGaussian(adjmatrix, coupling, noiselevel=1.0, noisearray=[])
     """
     # 0) Security checks and preparations
     if adjmatrix.dtype not in ['float32', 'float64']:
-        adjmatrix = adjmatrix.astype(np.float64)
+        adjmatrix = adjmatrix.astype(float)
 
     # 1) Construct the uncorrelated noise vector (diagonal matrix)
     N = len(adjmatrix)
     if len(noisearray) > 0:
         if len(noisearray) != N:
             raise ValueError( "'noisearray' not aligned with 'adjmatrix'" )
-        R = np.array(noisearray, np.float64) * np.identity(N).astype(np.float64)
+        R = np.array(noisearray, float) * np.identity(N).astype(float)
     else:
-        R = noiselevel * np.identity(N).astype(np.float64)
+        R = noiselevel * np.identity(N).astype(float)
 
     # 2.2) Compute the Q matrix
-    Qmatrix = scipy.linalg.inv(np.identity(N,np.float64) - coupling*adjmatrix)
+    Qmatrix = scipy.linalg.inv(np.identity(N,float) - coupling*adjmatrix)
     Qt = Qmatrix.T
 
     # 2.3) Compute the covariance matrix
@@ -277,10 +277,10 @@ def Covmat2Corrmat(covmatrix):
     """
     # 0) Prepare for calculation
     if covmatrix.dtype not in ['float32','float64','float']:
-        covmatrix = covmatrix.astype(np.float64)
+        covmatrix = covmatrix.astype(float)
 
     # 1) Calculate the normalization factor for each pair
-    diagvalues = np.diag(covmatrix).astype(np.float64)
+    diagvalues = np.diag(covmatrix).astype(float)
     normmatrix = np.sqrt(np.outer(diagvalues,diagvalues))
 
     # 2) Return result
@@ -352,13 +352,13 @@ def FunctionalComplexity(corrmatrix, nbins=50, datarange=[0,1]):
 
     # 2) Compute the distribution of the correlation values
     # Convert corrvalues to 'float32' to avoid numerical issues. Don't ask me why.
-    ydata, xdata = np.histogram(corrvalues.astype(np.float32), nbins, datarange, density=True)
+    ydata, xdata = np.histogram(corrvalues.astype(float), nbins, datarange, density=True)
     # Normalize probability. histogram() does not properly normalize.
     ydata /= ydata.sum()
 
     # 3) Compute functional complexity
     normfactor = 0.5 * float(nbins) / (nbins-1)
-    uniformdistrib = 1./nbins * np.ones(nbins, np.float64)
+    uniformdistrib = 1./nbins * np.ones(nbins, float)
     fcomplexity = 1. - normfactor * np.add.reduce(abs(ydata - uniformdistrib))
     # fcomplexity = 1. - normfactor * (abs(ydata - uniformdistrib)).sum()
 
@@ -401,7 +401,7 @@ def NeuralComplexity(corrmatrix, bipartitions=None):
 
     # 1) Calculate the mutual information, for all bipartitions of all sizes
     counter = 0
-    avmibips = np.zeros(nmax+1, np.float64)
+    avmibips = np.zeros(nmax+1, float)
     for n in range(1,nmax+1):
         # Number of bipartitions for set of size n and (N-n)
         nbips = tools.Factorial(N) / (tools.Factorial(n) * tools.Factorial(N-n))
@@ -412,7 +412,7 @@ def NeuralComplexity(corrmatrix, bipartitions=None):
 
         # Calculate mutual information for all bipartitions of sizes n, (N-n)
         nbips = int(nbips)
-        mibips = np.zeros(nbips, np.float64)
+        mibips = np.zeros(nbips, float)
         for i in range(nbips):
             # Choose a bipartition
             set1, set2 = bipartitions[counter+i]
@@ -473,7 +473,7 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
     nodelist = np.arange(N)
 
     # 1) Calculate the mutual information, for all bipartitions of all sizes
-    avmibips = np.zeros(nmax+1, np.float64)
+    avmibips = np.zeros(nmax+1, float)
     for n in range(1,nmax+1):
         nbips = factorialN / (tools.Factorial(n) * tools.Factorial(N-n))
 
@@ -484,7 +484,7 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
         # Average of all bipartitions of size n, if nbips is small
         if nbips <= maxiter:
             nbips = int(nbips)
-            mibips = np.zeros(nbips, np.float64)
+            mibips = np.zeros(nbips, float)
             # Create all the bipartitions of size n
             bipartitions = tools.AllBipartitions(nodelist, n)
             for i in range(nbips):
@@ -505,7 +505,7 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
         # If nbips is large, the average of randomly sampled bipartitions
         else:
             # print 'Sampling... n:', n
-            mibips = np.zeros(maxiter, np.float64)
+            mibips = np.zeros(maxiter, float)
             for i in range(maxiter):
                 # Generate a random bipartition of sizes n and N-n
                 numpy.random.shuffle(nodelist)

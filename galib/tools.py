@@ -207,7 +207,7 @@ def LoadFromPajek(filepath, getlabels=False):
         try:
             outdtype(aij)
         except ValueError:
-            outdtype = np.float64
+            outdtype = float
 
         # 2.4) Declare the adjacency matrix and include the first link
         adjmatrix = np.zeros((N, N), outdtype)
@@ -281,7 +281,7 @@ def Save2Pajek(filepath, adjmatrix, labels=[], directed=False, weighted=False):
         # 3.1) Find whether weights are integers or floats
         if adjmatrix[0, 0].dtype in [np.uint8, np.uint, np.int8, int]:
             formatstring = '%d %d %d'
-        elif adjmatrix[0, 0].dtype in [np.float16, np.float32, float, np.float64]:
+        elif adjmatrix[0, 0].dtype in [np.float16, np.float32, float, float]:
             formatstring = '%d %d %f'
 
         # 3.2) Save the ARCS if directed
@@ -1019,7 +1019,7 @@ def MeanCorrelation(data, tolerance=10**(-15)):
         Mean value of correlation in the range (-1,1).
     """
     # Security checks and data preparation
-    dataset = np.array(data, np.float64)
+    dataset = np.array(data, float)
     if len(np.shape(dataset)) > 1:
         dataset = dataset.flatten()
 
