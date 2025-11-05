@@ -5,10 +5,11 @@
 
 1. Drop support for Python 2.
 2. Clean-up the library files. Remove unnecessary comments, copyright duplicates, etc.
-3. Update to the newer packaging and PyPI release standards.
-4. Integrate PathLims into pyGAlib.
-5. Bring weighted network generation and randomization from SiReNetA.
-6. Add the generation of random graphs with specified degree(-degree) correlations. 
+3. f" … " string formatting.
+4. Update to the newer packaging and PyPI release standards.
+5. Integrate PathLims into pyGAlib.
+6. Bring weighted network generation and randomization from SiReNetA.
+7. Add the generation of random graphs with specified degree(-degree) correlations. 
 
 
 ### This and that...
