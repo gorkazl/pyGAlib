@@ -682,7 +682,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         richclub = np.where(degree >= kdecision)[0]
     else:
         # If kdensity does not reach threshold for any k, return an empty set.
-        kdecision = np.NaN
+        kdecision = np.nan
         richclub = np.empty(0, dtype=np.int64)
 
     return (kdensity, kdecision, richclub)
