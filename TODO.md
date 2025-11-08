@@ -8,9 +8,10 @@
 3. f" … " string formatting.
 4. Update to the newer packaging and PyPI release standards.
 5. What should I do with the Examples/ and Branding/ folders when packaging? Should I integrate them to the wheel, or should I let users to download the examples separately (manually) from the GitHub page? 
-6. Integrate PathLims into pyGAlib.
-7. Bring weighted network generation and randomization from SiReNetA.
-8. Add the generation of random graphs with specified degree(-degree) correlations. 
+6. Clean and fix scripts in the Examples/ folder.
+7. Integrate PathLims into pyGAlib (?)
+8. Bring weighted network generation and randomization from SiReNetA.
+9. Add the generation of random graphs with specified degree(-degree) correlations. 
 
 
 ### This and that...
