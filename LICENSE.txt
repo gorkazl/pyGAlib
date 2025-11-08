@@ -1,7 +1,7 @@
 License
 =======
 
-Copyright 2018-2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+Copyright (c) 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this software except in compliance with the License.
@@ -206,7 +206,7 @@ limitations under the License.
           same "printed page" as the copyright notice for easier
           identification within third-party archives.
 
-       Copyright 2018-2022 Gorka Zamora-López
+       Copyright (c) 2018, Gorka Zamora-López
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.

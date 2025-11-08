@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -37,7 +37,7 @@ NeuralComplexity_Sampled
     Calculates the neural complexity of a correlation(-like) matrix (Faster).
 
 
-...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
 from __future__ import division, print_function, absolute_import
@@ -111,7 +111,7 @@ def ExponentialMapping(adjmatrix, coupling, partialcorr=False):
     source and that the "influence" of one node over another distributes over
     all possible paths but that the influence decays along the paths. This decay
     is estimated as the communicability matrix. See further details in our paper:
-    "Zamora-Lopez et al. Sci. Reps. 6:38424 (2016)."
+    "Zamora-López et al. Sci. Reps. 6:38424 (2016)."
 
     NOTE: The output of the Exponential Mapping is numerically the same as the
     output of the Topological Similarity measure, when the noise level for all
@@ -141,7 +141,7 @@ def ExponentialMapping(adjmatrix, coupling, partialcorr=False):
 
     Citation
     --------
-    G. Zamora-Lopez, Y. Chen, G. Deco, M.L. Kringelbach & C.S. Zhou,
+    G. Zamora-López, Y. Chen, G. Deco, M.L. Kringelbach & C.S. Zhou,
     "Functional complexity emerging from anatomical constraints in the brain:
     the significance of network modularity and Rich-clubs." Scientific Reports,
     6:38424 (2016).
@@ -203,7 +203,7 @@ def CovarianceLinearGaussian(adjmatrix, coupling, noiselevel=1.0, noisearray=[])
     of the adjacency matrix, it is highly recommended to provide as input the
     normalised version of the adjacency matrix. That is, the adjacency
     matrix divided by its spectral diameter. In that case, 'g' takes values
-    between 0 and 1. See "Zamora-Lopez et al. Front. Neuroinform. 4, (2010)".
+    between 0 and 1. See "Zamora-López et al. Front. Neuroinform. 4, (2010)".
 
     - NOTE 2: In case the network is directed, the covariance matrix is
     computed out of the transposed adjacency matrix, such that the dynamics of
@@ -300,7 +300,7 @@ def FunctionalComplexity(corrmatrix, nbins=50, datarange=[0,1]):
     each other. It takes value 1 when the elements or nodes are all fully
     correlated with each other. See definition, details and comparison
     to other measures in our paper:
-    "Zamora-Lopez et al. Sci. Reps. 6:38424 (2016)."
+    "Zamora-López et al. Sci. Reps. 6:38424 (2016)."
 
     NOTE: Functional complexity can be estimated out of any matrix of pair-wise
     statistical associations between the elements of a network or multi-
@@ -331,7 +331,7 @@ def FunctionalComplexity(corrmatrix, nbins=50, datarange=[0,1]):
 
     Citation
     --------
-    G. Zamora-Lopez, Y. Chen, G. Deco, M.L. Kringelbach & C.S. Zhou,
+    G. Zamora-López, Y. Chen, G. Deco, M.L. Kringelbach & C.S. Zhou,
     "Functional complexity emerging from anatomical constraints in the brain:
     the significance of network modularity and Rich-clubs." Scientific Reports,
     6:38424 (2016).

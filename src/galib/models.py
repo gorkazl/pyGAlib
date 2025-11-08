@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -64,7 +64,7 @@ RavaszBarabasiGraph
     Generates hierarchical networks following the Ravasz & Barabasi model.
 
 
-...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
 from __future__ import division, print_function, absolute_import
@@ -1195,7 +1195,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     set of hubs.
 
     For further details see reference:
-    - G. Zamora-Lopez, Y. Chen et al. "Functional complexity emerging from
+    - G. Zamora-López, Y. Chen et al. "Functional complexity emerging from
     anatomical constraints in the brain: the significance of network
     modularity and rich-clubs." Scientific Reports 6:38424 (2016).
 

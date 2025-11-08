@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -88,7 +88,7 @@ Hubness_GA
     Returns the within-module degree defined by Guimera & Amaral.
 
 
-...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
 from __future__ import division, print_function, absolute_import
@@ -1503,7 +1503,7 @@ def GlobalHubness(adjmatrix):
 
     Citation
     --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
 
@@ -1550,7 +1550,7 @@ def LocalHubness(adjmatrix, partition):
 
     Citation
     --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
 
@@ -1604,7 +1604,7 @@ def ParticipationMatrix(adjmatrix, partition):
 
     Citation
     --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
 
@@ -1657,7 +1657,7 @@ def ParticipationVectors(adjmatrix, partition):
 
     Citation
     --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
 
@@ -1725,7 +1725,7 @@ def NodeParticipation(adjmatrix, partition):
 
     Citation
     --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
 
@@ -1773,7 +1773,7 @@ def NodeDispersion(adjmatrix, partition):
 
     Citation
     --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
 
@@ -1830,7 +1830,7 @@ def RolesNodes(adjmatrix, partition):
 
     Citation
     --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-Lopez,
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
 

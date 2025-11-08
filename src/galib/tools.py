@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+# Copyright (c) 2013, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -66,7 +66,7 @@ MeanCorrelation
     Computes the Fisher-corrected mean value of correlation values.
 
 
-...moduleauthor:: Gorka Zamora-Lopez <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
 from __future__ import division, print_function, absolute_import

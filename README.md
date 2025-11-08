@@ -205,7 +205,7 @@ See the TODO.md file.
 
 
 ### LICENSE
-Copyright 2018 - 2022, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+Copyright (c) 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this software except in compliance with the License.
