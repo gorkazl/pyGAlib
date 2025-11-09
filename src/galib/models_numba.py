@@ -67,7 +67,7 @@ def RandomGraph_Numba(N, L, directed=False, selfloops=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2, size NxN and dtype = int.
+    adjmatrix : ndarray (2d) of size NxN and dtype = int.
         The adjacency matrix of the generated random graph.
 
     Notes
@@ -85,20 +85,20 @@ def RandomGraph_Numba(N, L, directed=False, selfloops=False):
         if selfloops:
             maxL = N**2
             if L > maxL:
-                raise ValueError("L out of bounds, max(L) = N**2 = %d" %maxL)
+                raise ValueError( f"L out of bounds, max(L) = N**2 = {maxL}" )
         else:
             maxL = N*(N-1)
             if L > maxL:
-                raise ValueError("L out of bounds, max(L) = N*(N-1) = %d" %maxL)
+                raise ValueError( f"L out of bounds, max(L) = N*(N-1) = {maxL}" )
     else:
         if selfloops:
             maxL = 0.5*N*(N+1)
             if L > maxL:
-                raise ValueError("L out of bounds, max(L) = 1/2*N*(N+1) = %d" %maxL)
+                raise ValueError( f"L out of bounds, max(L) = 1/2*N*(N+1) = {maxL}" )
         else:
             maxL = 0.5*N*(N-1)
             if L > maxL:
-                raise ValueError("L out of bounds. For the options given, max(L) = 1/2*N*(N-1) = %d" %maxL)
+                raise ValueError( f"L out of bounds. For the options given, max(L) = 1/2*N*(N-1) = {maxL}" )
 
     # 1) INITIATE THE MATRIX AND HELPERS
     adjmatrix = np.zeros((N,N), np.uint8)
