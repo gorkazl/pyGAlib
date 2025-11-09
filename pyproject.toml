@@ -14,7 +14,7 @@ description = "A library for graph analysis in Python / NumPy."
 readme = "README.md"
 license = "Apache-2.0"
 authors = [
-    { name = "Gorka Zamora-López", email = "galib@Zamora-Lopez.xyz" },
+    { name = "Gorka Zamora-López", email = "gorka@Zamora-Lopez.xyz" },
 ]
 
 keywords = [ "graph theory", "complex networks", "network analysis" ]
@@ -42,9 +42,9 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/gorkazl/pyGAlib"
-"Source Code" = "https://github.com/gorkazl/pyGAlib"
+"Source Code" = "https://github.com/gorkazl/pyGAlib/tree/master/src/galib"
 "Bug Tracker" = "https://github.com/gorkazl/pyGAlib/issues"
-Documentation = "https://github.com/gorkazl/pyGAlib/blob/main/README.md"
+Documentation = "https://github.com/gorkazl/pyGAlib/blob/master/README.md"
 
 
 #### Tool Configuration ##################################################ç
