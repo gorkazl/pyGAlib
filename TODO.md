@@ -3,21 +3,22 @@
 
 ### Priorities...
 
-1. Drop support for Python 2.
-2. Clean-up the library files. Remove unnecessary comments, copyright duplicates, etc.
-3. f" … " string formatting.
-4. Update to the newer packaging and PyPI release standards.
+1. ~~Drop support for Python 2.~~
+2. ~~Clean-up the library files. Remove unnecessary comments, copyright duplicates, etc.~~
+3. ~~f" … " string formatting~~. **Was not needed, actually**.
+4. ~~Replace runtime "prints" by proper warning and error detection.~~
+5. Update to the newer packaging and PyPI release standards.
     1. We will use Hatch, at least for now.
     2. Move Matploblib into optional dependencies. Only used to run the examples.
-        1. Add `try: import matplotlib` to example files.
+        1. Add `try: import matplotlib` clause to example files.
     3. Prepare GAlib for conda-sourceforge.
-    4. Add instractions for conda users (either `conda install galib` or, first install dependencies via conda and then `python -m pip install -e . --no-deps`. Or, release also a *yml* file with preinstallation of the dependencies.
-5. What should I do with the Examples/ and Branding/ folders when packaging? Should I integrate them to the wheel, or should I let users to download the examples separately (manually) from the GitHub page? **NO, do not include them into the wheel. Just leave them in the root of the repo, for independent download.**
-6. Clean and fix scripts in the Examples/ folder.
-7. Integrate PathLims into pyGAlib (?)
-8. Bring weighted network generation and randomization from SiReNetA.
-9. Add the generation of random graphs with specified degree(-degree) correlations. 
-10. Use some *linting* software to double check code.
+    4. Add instructions for conda users (either `conda install galib` or, first install dependencies via conda and then `python -m pip install -e . --no-deps`. Or, release also a *yml* file with preinstallation of the dependencies.
+6. What should I do with the Examples/ and Branding/ folders when packaging? Should I integrate them to the wheel, or should I let users to download the examples separately (manually) from the GitHub page? **NO, do not include them into the wheel. Just leave them in the root of the repo, for independent download.**
+7. Clean and fix scripts in the Examples/ folder.
+8. Integrate PathLims into pyGAlib (?) **LEARN: How to integrate a package to a packages?**
+9. Bring weighted network generation and randomization from SiReNetA.
+10. Add the generation of random graphs with specified degree(-degree) correlations. 
+11. Use some *linting* software to double check code.
 
 
 ### This and that...
