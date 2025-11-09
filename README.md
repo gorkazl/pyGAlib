@@ -205,7 +205,7 @@ See the TODO.md file.
 
 
 ### LICENSE
-Copyright (c) 2018, Gorka Zamora-López <gorka@Zamora-Lopez.xyz>
+Copyright (c) 2018, Gorka Zamora-López, <gorka@Zamora-Lopez.xyz>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this software except in compliance with the License.
@@ -262,7 +262,7 @@ Release of Version 1.0.0 of pyGAlib. The library is now shaped as a proper Pytho
 - *models_numba.py*: Uses the Numba package to accelerate generation of some graph models.
 - *extra.py*: Additional measures and functionalities related to network analysis.
  
-See the file *CHANGES.md* for a complete history of changes.
+See the file *CHANGELOG.md* for a complete history of changes.
 
 
 
