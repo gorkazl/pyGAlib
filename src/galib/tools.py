@@ -127,7 +127,7 @@ def LoadFromPajek(filepath, getlabels=False):
         line = pajekfile.readline()
         if line.split()[0] != '1':
             pajekfile.seek(1)
-            print('LoadFromPajek() warning: No labels found to read.')
+            warnings.warn( "No labels found to read.", category=RuntimeWarning )
 
         # If labels are in file continue reading the labels.
         else:
@@ -171,8 +171,7 @@ def LoadFromPajek(filepath, getlabels=False):
             elif 'Arcs' in line:
                 directed = True
             else:
-                print('Could not find whether network is directed or undirected')
-                break
+                raise ValueError( "Could not find whether network is directed or undirected")
             done = True
 
     # 2.2) Read the first line contining a link
