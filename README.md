@@ -1,5 +1,6 @@
 # pyGAlib – Graph Analysis Library in Python / NumPy
 
+> **Development branch**. Version 2 of pyGAlib under construction. Heavy changes expected in this branch. For download, please install the PyPI version or the one in the master branch of this repository. Both are installed via `pip`, see instructions in the corresponding README.md file. 
 
 pyGAlib is a library to generate and study graphs and complex networks in Python. It treats networks as adjacency matrices in order to take advantage of faster NumPy
 array manipulations. The library is easy to install, use, modify and extend.
