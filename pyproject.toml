@@ -1,0 +1,58 @@
+#### Build Configuration ##################################################
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+#### Project Configuration ################################################
+
+[project]
+name = "galib"
+dynamic = ["version"]
+description = "A library for graph analysis in Python / NumPy."
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    { name = "Gorka Zamora-López", email = "galib@Zamora-Lopez.xyz" },
+]
+
+keywords = [ "graph theory", "complex networks", "network analysis" ]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "numba",
+]
+
+[project.urls]
+Homepage = "https://github.com/gorkazl/pyGAlib"
+"Source Code" = "https://github.com/gorkazl/pyGAlib"
+"Bug Tracker" = "https://github.com/gorkazl/pyGAlib/issues"
+Documentation = "https://github.com/gorkazl/pyGAlib/blob/main/README.md"
+
+
+#### Tool Configuration ##################################################ç
+
+[tool.hatch.version]
+path = "src/galib/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/galib",
+]
