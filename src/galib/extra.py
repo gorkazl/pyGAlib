@@ -37,7 +37,7 @@ NeuralComplexity_Sampled
     Calculates the neural complexity of a correlation(-like) matrix (Faster).
 
 
-...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
 # Standard library imports

@@ -66,7 +66,7 @@ MeanCorrelation
     Computes the Fisher-corrected mean value of correlation values.
 
 
-...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
 # Standard library imports

@@ -33,7 +33,7 @@ FloydWarshall_Numba
     Computes the pathlength between all pairs of nodes in a network.
 
 
-...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
 # Standard library imports

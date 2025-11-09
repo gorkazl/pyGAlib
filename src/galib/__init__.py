@@ -189,7 +189,7 @@ question mark after the module's or function's name, e.g.:  ::
     >>> modulename?
     >>> functionname?
 
-For questions, bug reports, etc, please write to <galib@Zamora-Lopez.xyz>, or
+For questions, bug reports, etc, please write to <gorka@Zamora-Lopez.xyz>, or
 open an issue in GitHub.
 
 License

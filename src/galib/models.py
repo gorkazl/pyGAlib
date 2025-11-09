@@ -64,7 +64,7 @@ RavaszBarabasiGraph
     Generates hierarchical networks following the Ravasz & Barabasi model.
 
 
-...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
 # Standard library imports

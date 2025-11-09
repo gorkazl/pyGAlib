@@ -29,7 +29,7 @@ RandomGraph_Numba
     Generates random graphs with N nodes and L links.
 
 
-...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
+...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
 # Standard library imports
