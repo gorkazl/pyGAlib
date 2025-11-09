@@ -24,18 +24,6 @@ from galib.models_numba import RandomGraph_Numba
 ##################################################################
 # 0) READ THE DATA
 dataroot = '../Data/'
-net, labs = LoadFromPajek(dataroot + 'Cat53_cortex.net', getlabels=True)
-netsym = 0.5*(net+net.T)
-N = len(net)
-
-# Define the partition
-visual = arange(16)
-audit = arange(16,23)
-somatomotor = arange(23,39)
-frontolimbic = arange(39, 53)
-partition = [visual,audit,somatomotor,frontolimbic]
-ncoms = len(partition)
-
 
 time1 = timer()
 N = 5000
