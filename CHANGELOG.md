@@ -1,6 +1,6 @@
 ### HISTORY OF CHANGES
 
-##### March 14, 2024, version 
+##### March 14, 2024 (version 1.1.4)
 Small bugs fixed:
 
 - Normalization of `galib.metrics.Modularity()` function corrected.
