@@ -32,11 +32,12 @@ RandomGraph_Numba
 ...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
-from __future__ import division, print_function, absolute_import
-
+# Standard library imports
+# Third-partiy imports
 import numpy as np
 import numpy.random
 from numba import jit
+# Local imports
 
 
 ############################################################################

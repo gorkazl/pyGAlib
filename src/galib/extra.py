@@ -40,12 +40,12 @@ NeuralComplexity_Sampled
 ...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
-from __future__ import division, print_function, absolute_import
-
+# Standard library imports
+# Third party imports
 import numpy as np
 import numpy.random
 import scipy.linalg
-
+# Local imports
 from . import tools
 
 

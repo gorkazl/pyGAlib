@@ -69,16 +69,15 @@ MeanCorrelation
 ...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
-from __future__ import division, print_function, absolute_import
-
+# Standard library imports
 import itertools
 import types
 import re
 import warnings
 import functools
-
+# Third party imports
 import numpy as np
-
+# Local imports
 # from . import metrics
 import galib.metrics
 

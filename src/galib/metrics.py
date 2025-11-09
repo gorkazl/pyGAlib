@@ -91,11 +91,11 @@ Hubness_GA
 ...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
-from __future__ import division, print_function, absolute_import
-
+# Standard library imports
 import types
+# Third party imports
 import numpy as np
-
+# Local imports
 from . import tools
 
 

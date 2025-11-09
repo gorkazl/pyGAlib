@@ -36,13 +36,12 @@ FloydWarshall_Numba
 ...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
-from __future__ import division, print_function, absolute_import
-
+# Standard library imports
+# Third party imports
 import numpy as np
 from numba import jit
+# Local imports
 from . import metrics
-
-# __all__ = ['MatchingIndex_Numba', 'FloydWarshall_Numba']
 
 
 ############################################################################

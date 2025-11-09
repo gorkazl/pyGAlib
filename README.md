@@ -10,7 +10,7 @@ Main features...
 - extensive use of NumPy for high performance over pure Python code;
 - Some functions further boosted using Numba;
 - transparent and flexible: find which part of the code is doing what;
-- Python 2.7 and 3.X compatible.
+- Python 3 compatible.
 
 ... and some limitations:
 

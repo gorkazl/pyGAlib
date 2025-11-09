@@ -12,7 +12,7 @@ Graph Analysis Library
 ======================
 
 A package for the analysis of graphs and complex networks in Python.
-Compatible with Python 2.7 and 3.X
+Compatible with Python 3.
 
 GAlib treats networks as adjacency matrices, represented as 2D NumPy arrays,
 thus taking advantage of the faster operations over pure Pythen data types.
@@ -209,13 +209,16 @@ or see the LICENSE.txt file.
     Please, use the logos provided in the Branding/ folder whenever possible.
 
 """
-from __future__ import absolute_import
-
+# Standard library imports
+# Third-party imports
+# Local imports
 from . import metrics
 from .metrics import*
 from . import models
 from .models import*
 
+
+# Some metadata
 __version__ = "2.0.dev0"
 
 

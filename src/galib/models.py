@@ -67,11 +67,12 @@ RavaszBarabasiGraph
 ...moduleauthor:: Gorka Zamora-López <galib@zamora-lopez.xyz>
 
 """
-from __future__ import division, print_function, absolute_import
-
+# Standard library imports
 import types
+# Third party imports
 import numpy as np
 import numpy.random
+# Local imports
 from .metrics import Reciprocity
 from .tools import ExtractSubmatrix
 
