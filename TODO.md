@@ -18,10 +18,9 @@
 8. Integrate PathLims into pyGAlib (?) **LEARN: How to integrate a package to a packages?**
 9. Bring weighted network generation and randomization from SiReNetA.
 10. Add the generation of random graphs with specified degree(-degree) correlations. 
-11. Test, test, test:
-    1. Run the example scripts.
-    2. Warning and error cases.
-12. Add version and status indicators at the top of README.md file. **LEARN: What are those indicators and how to include them?**
+11. Update README.md file:
+    1. Add version and status indicators at the top. **LEARN: What are those indicators and how to include them?**
+    2. Revise installation instructions.
 
 
 
