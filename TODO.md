@@ -14,7 +14,7 @@
     3. Prepare GAlib for conda-sourceforge.
     4. Add instructions for conda users (either `conda install galib` or, first install dependencies via conda and then `python -m pip install -e . --no-deps`. Or, release also a *yml* file with preinstallation of the dependencies.
 6. What should I do with the Examples/ and Branding/ folders when packaging? Should I integrate them to the wheel, or should I let users to download the examples separately (manually) from the GitHub page? **NO, do not include them into the wheel. Just leave them in the root of the repo, for independent download.**
-7. Clean and fix scripts in the Examples/ folder.
+7. Clean, revise and test scripts in the Examples/ folder.
 8. Integrate PathLims into pyGAlib (?) **LEARN: How to integrate a package to a packages?**
 9. Bring weighted network generation and randomization from SiReNetA.
 10. Add the generation of random graphs with specified degree(-degree) correlations. 
