@@ -1,5 +1,17 @@
 ### HISTORY OF CHANGES
 
+##### March 14, 2024, version 
+Small bugs fixed:
+
+- Normalization of `galib.metrics.Modularity()` function corrected.
+- Fixed the new  aliases for `int` and `float` in *Numpy*. All arrays are now declared as `np.int64` or `np.float64`, and individual numbers as standard Python `int` or `float`. 
+
+##### February 7, 2022
+Minor bug fixes. A remaining Python 2 to Python 3 conversion error was fixed, since standard library function `range()` no longer returns a list, but an iterator object.
+
+##### June 15, 2020
+Docstrings corrected. Function `k_DensityW()` was added in module *metrics.py* to calculate the k-density in networks with weighted links, which is needed to evaluate potential formation of rich-club structures in weigthed networks.
+
 ##### July 12, 2019
 Version 1.1.0 released. Section for classic and deterministic graphs added to the *models.py* module. New generators `PathGraph()`, `StarGraph()` and `CompletGraph()` included.
 
