@@ -7,7 +7,7 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 
-"""In this file I will test all functions in module gamodels_numba.py.
+"""In this file I will test all functions in module galib.models_numba.py.
 """
 
 # Standard library imports
