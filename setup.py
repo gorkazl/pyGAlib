@@ -21,7 +21,7 @@ setup(
     scripts = [],
     include_package_data = True,
 
-    keywords = 'graph theory, complex networks, network analysis',
+    keywords = "graph theory, complex networks, network analysis",
     classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -30,7 +30,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Topic :: Scientific/Engineering :: Information Analysis',
