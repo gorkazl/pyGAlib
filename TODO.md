@@ -18,7 +18,11 @@
 8. Integrate PathLims into pyGAlib (?) **LEARN: How to integrate a package to a packages?**
 9. Bring weighted network generation and randomization from SiReNetA.
 10. Add the generation of random graphs with specified degree(-degree) correlations. 
-11. Use some *linting* software to double check code.
+11. Test, test, test:
+    1. Run the example scripts.
+    2. Warning and error cases.
+12. Add version and status indicators at the top of README.md file. **LEARN: What are those indicators and how to include them?**
+
 
 
 ### This and that...
@@ -35,8 +39,9 @@
 
 ### It would be nice to ...
 
-1. Add functions for community detection (please help!).
-2. Add functionalities for graph visualization.
-3. Finish documentation (use Sphinx for that).
-4. Check compatibility with scipy.sparse module.
-5. *Please, suggest your own…*
+1. Use some *linting* software to double check code style.
+2. Add functions for community detection (please help!).
+3. Add functionalities for graph visualization.
+4. Finish documentation (use Sphinx for that).
+5. Check compatibility with scipy.sparse module.
+6. *Please, suggest your own…*
