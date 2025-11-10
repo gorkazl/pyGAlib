@@ -18,7 +18,7 @@ Here the different cases for DIRECTED graphs are considered.
 import matplotlib.pyplot as plt
 import numpy as np
 # Personal libraries
-from galib import k_Density, RichClub
+from galib import k_Density
 import galib.models
 from galib.models import RewireNetwork
 from galib.tools import SymmetriseMatrix, LoadFromPajek
