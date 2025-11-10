@@ -18,8 +18,8 @@
 9. Bring weighted network generation and randomization from SiReNetA.
 10. Add the generation of random graphs with specified degree(-degree) correlations. 
 11. Update README.md file:
-    1. Add version and status indicators at the top. **LEARN: What are those indicators and how to include them?**
-    2. Revise installation instructions.
+    1. ~~Add version and status indicators at the top~~. 
+    2. ~~Revise installation instructions.~~
 
 
 
