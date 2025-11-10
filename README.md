@@ -1,3 +1,9 @@
+[![pypi version](https://img.shields.io/pypi/v/galib?logo=pypi)](https://pypi.org/project/galib/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/galib.svg?label=PyPI%20downloads)](
+https://pypi.org/project/galib/)
+[![Apache-2.0 License](https://img.shields.io/badge/license-Apache-blue.svg?style=flat)](http://choosealicense.com/licenses/Apache-2.0/)
+
+
 # pyGAlib – Graph Analysis Library in Python / NumPy
 
 > **Development branch**. Version 2 of pyGAlib under construction. Heavy changes expected in this branch. For download, please install the PyPI version or the one in the master branch of this repository. Both are installed via `pip`, see instructions in the corresponding README.md file. 
@@ -19,52 +25,42 @@ Main features...
 - no graph visualization tools.
 
 
+
 ### INSTALLATION
 
-Installation of pyGAlib is simple. An existing python distribution and the [pip](https://github.com/pypa/pip) package manager need to be installed. If Python was installed via the [Canopy](https://www.enthought.com/product/canopy/) or the [Anaconda](https://www.anaconda.com) distributions, then `pip` is surely installed. To check, open a terminal and type:
+Installation of pyGAlib is simple, only the [pip](https://github.com/pypa/pip) package manager is needed. To check whether `pip` is installed, open a terminal and type:
 
-	$ pip --help
+	pip --help
 
+> **NOTE**: If you use Anaconda (or any other third-party package manager), we recommend to install the dependencies (python>=3.6, numpy>=1.6, scipy and numba) into the target environment using Anaconda before installing pyGAlib. Otherwise, `pip` will download and install those packages directly from PyPI as well, and you won't be able to manage them through Acanconda.
 
-#### 1) The simple installation
+#### Installing from PyPI 
 
-> **WARNING:** At this moment PyPI has the outdated version v1.1.3 of *pyGAlib*. I recommend installation of the latest version by using the methods 2) and 3) described below, until I can update to the new PyPI packaging and uploading system.
+pyGAlib is registered in the official *Python Package Index*, [PyPI](https://pypi.org/project/galib/) . To install, open a terminal window and type:
 
-pyGAlib is registered in [PyPI](https://pypi.org/project/galib/) (the Python Packages Index), therefore installation from the terminal is straight forward. `pip` will automatically take care of the  dependencies (see the *requirements.txt* file). Simply type:
+	python3 -m pip install galib
 
-	$ pip install galib 
+To confirm the installation, open an interactive session (e.g., IPython or a Notebook) and try to import the library by typing `import galib`.
 
-To confirm the installation open an interactive session and try to import the library by typing `import galib`.
+#### Direct installation from GitHub 
 
-> **NOTE:** If you are using Python 2 and Python 3 environments, pyGAlib needs to be installed in each of the environments separately.
+If you have [git](https://git-scm.com) installed, you may like to install pyGAlib directly from its GitHub repository. Open a terminal and type:
 
+	python3 -m pip install git+https://github.com/gorkazl/pyGAlib.git@master
 
-#### 2) Installation from GitHub (lazy version)
+This will only download and install the package (files in "*src/galib/*") into your current environment. If desired, additional files of the repository (e.g. the examples in the *Examples/* folder) should be downloaded manually. You can choose to install the version in another branch by replacing the '*@master*' at the end of the command by '*@branchname*' of the desired branch.
 
-If [git](https://git-scm.com) is installed in your computer, then open a terminal and type:
+#### Installing pyGAlib in editable mode
 
-	$ pip install git+https://github.com/gorkazl/pyGAlib.git@master
+If you want to install pyGAlib such that you can make changes to it "*on the fly*" then, visit its GitHub repository [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/), select a branch and then click on the green "*<> Code*" button on the top right and select "Download ZIP" from the pop-up menu. Once downloaded, move the *zip* file to a target folder (e.g., "*~/Documents/myLibraries/*") and unzip the file. Open a terminal and `cd` to the resulting folder, e.g.,
 
-This will install the package, that is, the content in the folder *galib/*. Other files (Examples/, README.md, LICENSE.txt, etc.) need to be downloaded manually, if wanted.
+	cd ~/Documents/myLibraries/pyGAlib-master/
 
+Once on the path (make sure it contains the *pyproject.toml* file), type:
 
-#### 3) Installation from GitHub (full download)
+	python3 -m pip install -e .
 
-Visit the GitHub repository of pyGAlib [https://github.com/gorkazl/pyGAlib/](https://github.com/gorkazl/pyGAlib/) and click on the "Clone or download" button at the right hand side (the green button). Select "Download ZIP". Unzip the file, open a terminal and move to the folder, e.g.,
-
-	$ cd ~/Downloads/pyGAlib-master/
-
-Once on the folder that contains the *setup.py* file, type the following
-
-	$ pip install .
-
-Do not forget the "." at the end which means "*look for the setup.py file in the current directory*." This will check for the dependencies and install pyGAlib. To confirm installation, try running one of the  test scripts in the *Examples/* folder, e.g.,
-
-	$ cd Examples/Test_Python2/
-	$ python test_metrics_py2.py
-
-> **NOTE**: After installation the current folder "*~/Downloads/pyGAlib-master/*" can be safely deleted, or moved somewhere else if you want to conserve the examples and the tests.
-
+Do not forget the "." at the end which means "*look for the pyproject.toml file in the current directory*." This will install pyGAlib such that every time changes are made to the package (located in the path chosen), these will be inmediately available. You may need to restart the IPython or Jupyter notebook session, though.
 
 
 
@@ -180,7 +176,7 @@ usual data I/O functionalities of NumPy. See for example the documentation for f
 
 
 
-#### Finding further documentation
+### HOW TO FIND FURTHER DOCUMENTATION
 
 While working in an interactive session, after importing a module, the built-in `help()` function will show further details:
 
@@ -191,22 +187,22 @@ For further details regarding each function, type:
 
 	>>> help(galib.modulename.functionname)
 
-For IPython and Jupyter notebook users the help command is replaced by a question mark after the module's or function's name, e.g.:
+IPython and Jupyter notebook users, the help command is replaced by a question mark after the module's or function's name, e.g.:
 
 	>>> modulename?
 	>>> functionname?
 
-For questions, bug reports, etc, please write to <galib@Zamora-Lopez.xyz>, or open an issue in GitHub.
+For questions, bug reports, etc, please write to <gorka@Zamora-Lopez.xyz>, or open an issue in GitHub.
 
 
 ### FUTURE DEVELOPMENTS
 
-See the TODO.md file. 
+See the *[TODO.md](https://github.com/gorkazl/pyGAlib/blob/master/TODO.md)* file in the GitHub Repository. 
 **Collaborations to extend pyGAlib are welcome.** If you have experience using *scipy.sparse*, developing community detection methods or coding graph visualization, please, please, contact me. 
 
 
 ### LICENSE
-Copyright (c) 2018, Gorka Zamora-López, <gorka@Zamora-Lopez.xyz>
+Copyright (c) 2018, Gorka Zamora-López, <<gorka@Zamora-Lopez.xyz>>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this software except in compliance with the License.
@@ -222,15 +218,26 @@ limitations under the License.
 
 **Note:** Please, use the logos provided in the *Branding/* folder whenever possible.
 
+
+
 -----------------------------------------------------------------
 ### WHAT IS NEW
+
+##### November 10, 2025 (Release of Version 2)
+
+Stable version 2.0 checked, validated and released.
+
+* Python 2 support has been dropped. Only Python 3 compatibility will be developed and maintained from now on.
+* The library has been reshaped to be compliant with the modern [PyPA specifications](https://packaging.python.org/en/latest/specifications/).
+* [Hatch](https://hatch.pypa.io/latest/) was chosen as the tool to build and publish the package. See the *pyproject.toml* file. 
+* Bug fixes to adapt to the various changes in Python and NumPy since last release.
+* Sample and validation scripts in the "*Examples/*" folder revised and adapted to recent changes in Python and NumPy. 
 
 ##### March 14, 2024
 Small bugs fixed:
 
 - Normalization of `galib.metrics.Modularity()` function corrected.
 - Fixed the new  aliases for `int` and `float` in *Numpy*. All arrays are now declared as `np.int64` or `np.float64`, and individual numbers as standard Python `int` or `float`. 
-
 
 ##### February 7, 2022
 Minor bug fixes. A remaining Python 2 to Python 3 conversion error was fixed, since standard library function `range()` no longer returns a list, but an iterator object.
