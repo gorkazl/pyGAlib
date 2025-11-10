@@ -352,7 +352,7 @@ def FunctionalComplexity(corrmatrix, nbins=50, datarange=[0,1]):
 
     # 2) Compute the distribution of the correlation values
     # Convert corrvalues to 'float32' to avoid numerical issues. Don't ask me why.
-    ydata, xdata = np.histogram(corrvalues.astype(np.float32), nbins, datarange, density=True)
+    ydata, xdata = np.histogram(corrvalues.astype(np.float64), nbins, datarange, density=True)
     # Normalize probability. histogram() does not properly normalize.
     ydata /= ydata.sum()
 
