@@ -543,7 +543,7 @@ def LaplacianMatrix(adjmatrix):
     driven by their outputs, not by their inputs. We recommend to introduce
     adjmatrix.T into the function.
     """
-    if adjmatrix.dtype in [np.uint, np.uint0, np.uint8, np.uint16, np.uint32, np.uint64]:
+    if adjmatrix.dtype in [np.uint, np.uint8, np.uint16, np.uint32, np.uint64]:
         adjmatrix = adjmatrix.astype(int)
     N = len(adjmatrix)
 
