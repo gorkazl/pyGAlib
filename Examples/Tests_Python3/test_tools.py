@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2022, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
+# Copyright (c) 2013, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -7,28 +7,23 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 
-"""In this file I will test all functions in the Python3 version of GAlib
-(the module gatools.py) and make sure they work.
+"""In this file I will test all functions in module galib.tools.py.
 """
 
 # Standard library imports
-import os, os.path
 from timeit import default_timer as timer
 # Third party imports
 from numpy import*
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy.random
 # Personal libraries
 from galib import*
 from galib.tools import*
 
+
 ##################################################################
 # 1) I/O  AND DATA CONVERSIONS
-currdir = os.getcwd()
-currdir = os.path.split(currdir)[0]
-dataroot = os.path.join(currdir, 'Data/')
+dataroot = '../Data/'
 
 time1 = timer()
 net, labs = LoadFromPajek(dataroot + 'Cat53_cortex.net', getlabels=True)
@@ -37,7 +32,7 @@ net, labs = LoadFromPajek(dataroot + 'Cat53_cortex.net', getlabels=True)
 netsym = SymmetriseMatrix(net)
 print(Reciprocity(net), Reciprocity(netsym))
 nzidx = nonzero(net)
-net = net.astype(float32)
+net = net.astype(np.float64)
 net[nzidx] += 0.5
 
 Save2Pajek(dataroot + 'spam.net', net, labels=labs, directed=True, weighted=True)
@@ -76,7 +71,7 @@ for i in range(1,5):
 
 
 # 2) ARRAY AND MATRIX COMPARISONS
-print('Hamming distance...')
+print( 'Hamming distance...' )
 spam1 = zeros(100, float)
 spam2 = ones(100, float)
 print( HammingDistance(spam1, spam2) )
@@ -110,7 +105,7 @@ for i in range(11):
 
 # Quartiles
 q1, q2, q3 = Quartiles(data)
-print( 'quartiles: %2.5f %2.5f %2.5f' %(q1,q2,q3) )
+print( f"quartiles: {q1:2.5f} {q2:2.5f} {q3:2.5f}" )
 
 # Permuations, combinations, etc.
 newdata = [1,2,4,'spam']

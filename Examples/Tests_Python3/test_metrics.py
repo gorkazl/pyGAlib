@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2022, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
+# Copyright (c) 2013, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -7,18 +7,12 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 
-"""In this file I will test all functions in the Python3 version fo GAlib
-library and make sure they work.
-This file also tests for gametrics_numba.py module. So far, I only have two
-functions there so... did not make much sense to have a separate test file.
+"""In this file I will test all functions in module galib.metrics.py.
 """
 
 # Standard library imports
-import os, os.path
 from timeit import default_timer as timer
 # Third party imports
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from numpy import*
 # Personal libraries
@@ -29,9 +23,7 @@ from galib.metrics_numba import*
 
 ##################################################################
 # 0) READ THE DATA
-currdir = os.getcwd()
-currdir = os.path.split(currdir)[0]
-dataroot = os.path.join(currdir, 'Data/')
+dataroot = '../Data/'
 net, labs = LoadFromPajek(dataroot + 'Cat53_cortex.net', True)
 N = len(net)
 
@@ -108,7 +100,7 @@ pindex_ga = ParticipationIndex_GA(pmatrix)
 # 3) NORMALIZED ROLES
 # 3.1) Normalized hubness
 degree = Degree(net)
-normdeg = degree.astype(float) / N
+normdeg = degree.astype(np.float64) / N
 
 # 3.2) The participation index
 pindex = NodeParticipation(netsym,partition)

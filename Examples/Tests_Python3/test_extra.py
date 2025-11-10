@@ -7,16 +7,12 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 
-"""In this file I will test all functions in the Python3 version of GAlib
-(the module galib_extra.py) and make sure they work.
+"""In this file I will test all functions in module galib.extra.py.
 """
 
 # Standard library imports
-import os, os.path
 from timeit import default_timer as timer
 # Third party imports
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from numpy import*
 import numpy.linalg
@@ -28,9 +24,7 @@ from galib.extra import*
 
 ##################################################################
 # 0) READ THE DATA
-currdir = os.getcwd()
-currdir = os.path.split(currdir)[0]
-dataroot = os.path.join(currdir, 'Data/')
+dataroot = '../Data/'
 net, labs = LoadFromPajek(dataroot + 'Cat53_cortex.net', True)
 netsym = 0.5*(net+net.T)
 N = len(net)
