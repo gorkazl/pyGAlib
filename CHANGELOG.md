@@ -1,31 +1,49 @@
 ### HISTORY OF CHANGES
 
+##### November 10, 2025 (Release of Version 2.0)
+
+Stable version 2.0 checked, validated and released.
+
+* Python 2 support has been dropped. Only Python 3 compatibility will be developed and maintained from now on.
+* The library has been reshaped to be compliant with the modern [PyPA specifications](https://packaging.python.org/en/latest/specifications/).
+* [Hatch](https://hatch.pypa.io/latest/) was chosen as the tool to build and publish the package. See the *pyproject.toml* file. 
+* Bug fixes to adapt to the various changes in Python and NumPy since last release.
+* Sample and validation scripts in the "*Examples/*" folder revised and adapted to recent changes in Python and NumPy. 
+
+
 ##### March 14, 2024 (version 1.1.4)
 Small bugs fixed:
 
 - Normalization of `galib.metrics.Modularity()` function corrected.
 - Fixed the new  aliases for `int` and `float` in *Numpy*. All arrays are now declared as `np.int64` or `np.float64`, and individual numbers as standard Python `int` or `float`. 
 
+
 ##### February 7, 2022
 Minor bug fixes. A remaining Python 2 to Python 3 conversion error was fixed, since standard library function `range()` no longer returns a list, but an iterator object.
+
 
 ##### June 15, 2020
 Docstrings corrected. Function `k_DensityW()` was added in module *metrics.py* to calculate the k-density in networks with weighted links, which is needed to evaluate potential formation of rich-club structures in weigthed networks.
 
+
 ##### July 12, 2019
 Version 1.1.0 released. Section for classic and deterministic graphs added to the *models.py* module. New generators `PathGraph()`, `StarGraph()` and `CompletGraph()` included.
+
 
 ##### July 6, 2019
 For clarity, function `RichClub()` has been splitted into two functions: `RichClub()`and `k_Density()`. The reason is that the output of old `RichClub()` was basically the k-density for all degrees, from 0 to kmax. Now this is done by `k_Density()` and the new `RichClub()` function identifies the set of nodes (hubs) for which k-density overcomes a given value.
 
+
 ##### June 15, 2019
 GAlib has been registered in PYPI ([https://pypi.org/project/galib/](https://pypi.org/project/galib/)). Direct installation and version management using `pip` is thus available.
+
 
 ##### January 29, 2019
 New in Version 1.0.1:
 
 - Minor corrections overall.
 - Function to generate Ravasz-Barabási hierarchical networks added to *models.py* module.
+
 
 ##### December 3, 2018
 Release of Version 1.0.0 of pyGAlib. The library is now shaped as a proper Python package and is installable using standard tools. The structure of the package has been renewed and contains the following modules: 
