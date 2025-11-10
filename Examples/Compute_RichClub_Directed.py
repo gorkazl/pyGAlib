@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2013 - 2022, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
+# Copyright (c) 2013, Gorka Zamora-López <galib@Zamora-Lopez.xyz>
 #
 # Released under the Apache License, Version 2.0 (the "License");
 # you may not use this software except in compliance with the License.
@@ -12,23 +12,13 @@ This script computes the rich-club coefficient of a graph. It also does so for
 an ensemble of rewired networks conserving the degree distribution.
 Here the different cases for DIRECTED graphs are considered.
 """
-from __future__ import division, print_function
-
-__author__ = "Gorka Zamora-Lopez"
-__email__ = "galib@zamora-lopez.xyz"
-__copyright__ = "Copyright 2013-2022"
-__license__ = "Apache License 2.0"
-__update__="07/02/2022"
 
 # Standard library imports
-import os, os.path
 # Third party imports
-import matplotlib
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from numpy import*
+import numpy as np
 # Personal libraries
-from galib import RichClub
+from galib import k_Density, RichClub
 import galib.models
 from galib.models import RewireNetwork
 from galib.tools import SymmetriseMatrix, LoadFromPajek
@@ -36,36 +26,35 @@ from galib.tools import SymmetriseMatrix, LoadFromPajek
 
 ##################################################################
 # 0) READ THE DATA
-currdir = os.getcwd()
-dataroot = os.path.join(currdir, 'Data/')
-net = loadtxt(dataroot + 'Cat53_cortex.txt', dtype=uint8)
+dataroot = 'Data/'
+net = np.loadtxt(dataroot + 'Cat53_cortex.txt', dtype=np.uint8)
 N = len(net)
 
 
 # 1) COMPUTE THE RICH-CLUB OF THE NETWORKS
 # 1.1) Empirical network. Three different cases: input, output & average degrees
 # Notice that 'net' is weighted but function RichClub ignores the weights.
-inphi = RichClub(net, rctype='indegree')
-outphi= RichClub(net, rctype='outdegree')
-avphi = RichClub(net, rctype='average')
+inphi = k_Density(net, rctype='indegree')
+outphi= k_Density(net, rctype='outdegree')
+avphi = k_Density(net, rctype='average')
 
 # 1.2) Rich-club in an ensemble of rewired networks for comparison
 nrealiz = 100
 prewire = 10
 inkmax = len(inphi)
-rewphi_in = zeros((nrealiz,inkmax), float)
+rewphi_in = np.zeros((nrealiz,inkmax), np.float64)
 outkmax = len(outphi)
-rewphi_out = zeros((nrealiz,outkmax), float)
+rewphi_out = np.zeros((nrealiz,outkmax), np.float64)
 avkmax = len(avphi)
-rewphi_av = zeros((nrealiz,avkmax), float)
+rewphi_av = np.zeros((nrealiz,avkmax), np.float64)
 for re in range(nrealiz):
     # Generate a randomly rewired graph (conserving the in-/out-degrees)
     rewnet = RewireNetwork(net, prewire, directed=True)
 
     # Compute the rich club of the rewired network
-    rewphi_in[re] = RichClub(rewnet, rctype='indegree')
-    rewphi_out[re] = RichClub(rewnet, rctype='outdegree')
-    rewphi_av[re] = RichClub(rewnet, rctype='average')
+    rewphi_in[re] =  k_Density(rewnet, rctype='indegree')
+    rewphi_out[re] = k_Density(rewnet, rctype='outdegree')
+    rewphi_av[re] =  k_Density(rewnet, rctype='average')
 
 # Find the average rich-club and deviation for each k value
 maxrewphi_in = rewphi_in.max(axis=0)
@@ -91,7 +80,7 @@ colorlist = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']
 plt.figure()
 plt.title('Rich-club for input connections', fontsize=14)
 # Plot the rich-club of the network
-klist = arange(inkmax)
+klist = np.arange(inkmax)
 plt.plot(klist, inphi, color=colorlist[1], label='Original network')
 
 # Plot the mean rich-club of rewired networks with errorbars
@@ -110,7 +99,7 @@ plt.grid()
 plt.figure()
 plt.title('Rich-club for output connections', fontsize=14)
 # Plot the rich-club of the network
-klist = arange(inkmax)
+klist = np.arange(inkmax)
 plt.plot(klist, outphi, color=colorlist[1], label='Original network')
 
 # Plot the mean rich-club of rewired networks with errorbars
@@ -129,7 +118,7 @@ plt.grid()
 plt.figure()
 plt.title('Rich-club for average connections', fontsize=14)
 # Plot the rich-club of the network
-klist = arange(avkmax)
+klist = np.arange(avkmax)
 plt.plot(klist, avphi, color=colorlist[1], label='Original network')
 
 # Plot the mean rich-club of rewired networks with errorbars
