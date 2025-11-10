@@ -1,3 +1,5 @@
+> This branch is meant to propose a package structure that would integrate the PathLims package, and other results for extremal graph properties such as the largest and smallest possible clustering coefficient.
+
 [![pypi version](https://img.shields.io/pypi/v/galib?logo=pypi)](https://pypi.org/project/galib/)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/galib.svg?label=PyPI%20downloads)](
 https://pypi.org/project/galib/)
