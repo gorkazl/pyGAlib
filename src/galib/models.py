@@ -49,7 +49,7 @@ ModularityPreservingGraph
 
 HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
 --------------------------------------------
-ModularHeterogeneousGraph
+ModularGraph
     Generates random modular networks of given module sizes and densities.
 HMpartition
     Returns a partition of nodes for a hierarchical and modular network.
@@ -868,7 +868,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
 ############################################################################
 """MODULAR AND HIERARCHICAL NETWORK MODELS"""
-def ModularHeterogeneousGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
+def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     """
     Generates random modular networks of given module sizes and densities.
 
@@ -1094,7 +1094,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
     HMCentralisedGraph
         Random hierarchical and modular network with inter-modular
         connectivity centralised through local hubs.
-    ModularHeterogeneousGraph
+    ModularGraph
         Generates random modular networks with desired module sizes and
         densities.
     """
@@ -1272,7 +1272,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     --------
     HMRandomGraph
         Generates random hierarchical/modular network of given shape.
-    ModularHeterogeneousGraph
+    ModularGraph
         Generates random modular networks with desired module sizes and
         densities.
     """
