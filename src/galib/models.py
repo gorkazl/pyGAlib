@@ -16,21 +16,19 @@ including random networks and methods to rewire networks.
 
 DETERMINISTIC AND CLASSIC GRAPH MODELS
 --------------------------------------
-PathGraph
-    Returns a path graph (line or chain graph) of size N.
-StarGraph
-    Generates a star graph of size N.
 CompleteGraph
     Generates an all-to-all connected graph of size N.
 Lattice1D
     Generates regular ring lattices (all nodes have same degree).
 Lattice1D_FixLinks
     Generates ring lattices with desired number of links.
+PathGraph
+    Returns a path graph (line or chain graph) of size N.
+StarGraph
+    Generates a star graph of size N.
 
-RANDOM NETWORK GENERATORS
--------------------------
-WattsStrogatzGraph
-    Generates small-world networks as in the Watts & Strogatz model.
+GENERATE RANDOM NETWORKS
+------------------------
 ErdosRenyiGraph
     Generates random graphs following the Erdos & Renyi model.
 RandomGraph
@@ -39,16 +37,22 @@ BarabasiAlbertGraph
     Generates scale-free networks after the Barabasi & Albert model.
 ScaleFreeGraph
     Generates scale-free graphs of given size and exponent.
+WattsStrogatzGraph
+    Generates "small-world" networks following in the Watts & Strogatz model.
 
-NETWORK REWIRING/RANDOMIZATION ALGORITHMS
------------------------------------------
+REWIRE AND RANDOMIZE NETWORKS
+-----------------------------
 RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
 ModularityPreservingGraph
     Randomises an input graph conserving its modular structure.
+SeedRandomWeights (TO BE ADDED)
+    Randomly assigns weigths to links of a network, from a given distribution
+ShuffleWeights  (TO BE ADDED)
+    Mantains the links in place, but randomly reallocates their weights.
 
-HIERARCHICAL AND MODULAR (HM) NETWORK MODELS
---------------------------------------------
+HIERARCHICAL AND MODULAR (HM) GRAPH MODELS
+------------------------------------------
 ModularGraph
     Generates random modular networks of given module sizes and densities.
 HMpartition
@@ -63,6 +67,12 @@ HMCentralisedGraph
 RavaszBarabasiGraph
     Generates hierarchical networks following the Ravasz & Barabasi model.
 
+SPATIALLY EMBEDDED (SURROGATE) NETWORKS
+---------------------------------------
+SpatialLattice_From (TO BE DONE)
+    Generates spatial weighted lattices with same weights as input network.
+SpatialWeightSorting (TO BE DONE)
+    Sorts the link weights of a network by the spatial distance between nodes.
 
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
@@ -77,61 +87,8 @@ from .metrics import Reciprocity
 from .tools import ExtractSubmatrix
 
 
-############################################################################
+###############################################################################
 """DETERMINISTIC AND CLASSIC GRAPH MODELS"""
-def PathGraph(N, directed=False):
-    """Returns a path graph (line or chain graph) of size N.
-
-    Parameters
-    ----------
-    N : integer
-        Size of the network (number of nodes).
-    directed : Boolean (optional)
-        True if a directed graph is desired. False, for an undirected graph.
-
-    Returns
-    -------
-    adjmatrix : ndarray of rank-2 and integer type.
-        The adjacency matrix of the path graph.
-
-    See Also
-    --------
-    Lattice1D : Generates regular ring lattices (all nodes have same degree).
-    Lattice1D_FixLinks : Generates ring lattices with desired number of links.
-    """
-    # 0) SECURITY CHECK
-    if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
-
-    # 1) CREATE THE NETWORK
-    adjmatrix = np.eye(N,k=1,dtype=np.uint8)
-    if not directed:
-        adjmatrix += adjmatrix.T
-
-    return adjmatrix
-
-def StarGraph(N):
-    """Generates a star graph of size N.
-
-    Parameters
-    ----------
-    N : integer
-        Size of the network (number of nodes).
-
-    Returns
-    -------
-    adjmatrix : ndarray of rank-2 and integer type.
-        The adjacency matrix of the star graph.
-    """
-    # 0) SECURITY CHECK
-    if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
-
-    # 1) CREATE THE NETWORK
-    adjmatrix = np.zeros((N,N), np.uint8)
-    adjmatrix[0,1:] = 1
-    adjmatrix[1:,0] = 1
-
-    return adjmatrix
-
 def CompleteGraph(N):
     """Generates an all-to-all connected graph of size N.
 
@@ -154,7 +111,7 @@ def CompleteGraph(N):
 
     return adjmatrix
 
-def Lattice1D(N,z):
+def Lattice1D(N,z=1):
     """Generates regular ring lattices.
 
     Each node is connected to its 2z closest neighbours (z on the left and z on
@@ -164,7 +121,7 @@ def Lattice1D(N,z):
     ----------
     N : integer
         Size of the network (number of nodes).
-    z : integer
+    z : integer (optional) default = 1
         Diameter of the neighbourhood that every node connects with.
         For a given z, every node has degree 2*z in the resulting lattice.
 
@@ -247,106 +204,62 @@ def Lattice1D_FixLinks(N,L):
 
     return adjmatrix + adjmatrix.T
 
-
-############################################################################
-"""RANDOM NETWORK GENERATORS"""
-def WattsStrogatzGraph(N, z, prew, lattice=None):
-    """Generates small-world networks as in the Watts & Strogatz model.
-
-    See Watts & Strogatz, Nature 393(4) (1998) for details of the model.
-
-    The algorithm rewires, clockwise, the links of the first neighbours,
-    of the second neighbours, etc. with probability prew. If a link is
-    chosen for rewiring, it can't create a self-loop nor a multiple edge.
+def PathGraph(N, directed=False):
+    """Returns a path graph (line or chain graph) of size N.
 
     Parameters
     ----------
     N : integer
         Size of the network (number of nodes).
-    z : integer
-        Diameter of the neighbourhood that every node connects with.
-        For a given z, every node has degree k = 2*z in the resulting lattice.
-    prew : float, between 0 and 1.
-        Probability that links of the 1D lattice to be rewired.
-    lattice : ndarray of rank-2 (optional).
-        The adjacency matrix of a 1D lattice that has to be rewired.
-        When several realizations of the model are desired, the initial
-        lattice, usually the output of Lattice1D() function, can be passed
-        what avoids having to create a new lattice for every realization and
-        saving computational time. Recommended
+    directed : Boolean (optional)
+        True if a directed graph is desired. False, for an undirected graph.
 
     Returns
     -------
     adjmatrix : ndarray of rank-2 and integer type.
-        The adjacency matrix of the rewired 1-dimensional lattice.
-
-    Notes
-    -----
-    1) Unlike the Watts & Strogatz model in which k is the total number of
-    neighbours of a node, here z represents the largest z-neighbourhood
-    with which a node is connected (left and right). Hence, comparing the
-    two parameters, k = 2*z.
-
-    2) When several realizations of the model are desired, the initial
-    lattice, usually the output of Lattice1D() function, can be passed
-    to the optional argument 'lattice'. This avoids having to create a
-    new lattice for every realization and saves computational time.
-    Recommended for several realizations of large networks.
-
-    3) The present algorithm is only valid for graphs. In order to obtain
-    directed small-world networks, use the RewireNetwork() function on a
-    previously created ring-lattice.
+        The adjacency matrix of the path graph.
 
     See Also
     --------
-    Lattice1D : Generates a 1D lattice ring network.
-    RewiredNetwork : Randomized the links of a network with equal probability.
+    Lattice1D : Generates regular ring lattices (all nodes have same degree).
+    Lattice1D_FixLinks : Generates ring lattices with desired number of links.
     """
+    # 0) SECURITY CHECK
+    if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
 
-    # 0) SECURITY CHECKS
-    if (prew < 0 or prew > 1):
-        raise ValueError( "Probability 'prew' out of bounds. Insert value between 0 and 1" )
-
-    # 1) CREATE OR CHECK THE VALIDITY OF THE INITIAL RING-LATTICE
-    # if type(lattice) == types.NoneType:
-    if lattice == None:
-        if z > N//2:
-            raise ValueError("Largest possible z = N/2 =", N//2 )
-        adjmatrix = Lattice1D(N,z)
-    else:
-        Nlatt = len(lattice)
-        if N != Nlatt:
-            raise ValueError( "N and size of given lattice od not match." )
-        adjmatrix = lattice.copy()
-
-    # 2) REWIRE THE LINKS CLOCKWISE AND BY RANK OF NEIGHBOURHOOD
-    # For each rank of neighbourhood...
-    for k in range(1,z+1):
-        # Choose every node in clockwise direction
-        for i in range(N):
-            # 2.1) Rewire the link with neighbour i+k with probability prew
-            if numpy.random.rand() <= prew:
-                done = False
-                while not done:
-                    target = int( N * numpy.random.rand() )
-                    # Avoid self-loops and double links
-                    if target == i: continue
-                    if adjmatrix[i,target]: continue
-
-                    # Else, remove the old link and place the new one.
-                    if i+k < N:
-                        adjmatrix[i,i+k] = 0
-                        adjmatrix[i+k,i] = 0
-                    else:
-                        adjmatrix[i,i+k-N] = 0
-                        adjmatrix[i+k-N,i] = 0
-
-                    adjmatrix[i,target] = 1
-                    adjmatrix[target,i] = 1
-                    done = True
+    # 1) CREATE THE NETWORK
+    adjmatrix = np.eye(N,k=1,dtype=np.uint8)
+    if not directed:
+        adjmatrix += adjmatrix.T
 
     return adjmatrix
 
+def StarGraph(N):
+    """Generates a star graph of size N.
+
+    Parameters
+    ----------
+    N : integer
+        Size of the network (number of nodes).
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2 and integer type.
+        The adjacency matrix of the star graph.
+    """
+    # 0) SECURITY CHECK
+    if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
+
+    # 1) CREATE THE NETWORK
+    adjmatrix = np.zeros((N,N), np.uint8)
+    adjmatrix[0,1:] = 1
+    adjmatrix[1:,0] = 1
+
+    return adjmatrix
+
+
+################################################################################
+"""GENERATE RANDOM NETWORKS"""
 def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
     """Generates random graphs following the Erdos & Renyi model.
 
@@ -614,9 +527,107 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
 
     return adjmatrix
 
+def WattsStrogatzGraph(N, z, prew, lattice=None):
+    """Generates small-world networks as in the Watts & Strogatz model.
 
-############################################################################
-"""NETWORK REWIRING ALGORITHMS"""
+    See Watts & Strogatz, Nature 393(4) (1998) for details of the model.
+
+    The algorithm rewires, clockwise, the links of the first neighbours,
+    of the second neighbours, etc. with probability prew. If a link is
+    chosen for rewiring, it can't create a self-loop nor a multiple edge.
+
+    Parameters
+    ----------
+    N : integer
+        Size of the network (number of nodes).
+    z : integer
+        Diameter of the neighbourhood that every node connects with.
+        For a given z, every node has degree k = 2*z in the resulting lattice.
+    prew : float, between 0 and 1.
+        Probability that links of the 1D lattice to be rewired.
+    lattice : ndarray of rank-2 (optional).
+        The adjacency matrix of a 1D lattice that has to be rewired.
+        When several realizations of the model are desired, the initial
+        lattice, usually the output of Lattice1D() function, can be passed
+        what avoids having to create a new lattice for every realization and
+        saving computational time. Recommended
+
+    Returns
+    -------
+    adjmatrix : ndarray of rank-2 and integer type.
+        The adjacency matrix of the rewired 1-dimensional lattice.
+
+    Notes
+    -----
+    1) Unlike the Watts & Strogatz model in which k is the total number of
+    neighbours of a node, here z represents the largest z-neighbourhood
+    with which a node is connected (left and right). Hence, comparing the
+    two parameters, k = 2*z.
+
+    2) When several realizations of the model are desired, the initial
+    lattice, usually the output of Lattice1D() function, can be passed
+    to the optional argument 'lattice'. This avoids having to create a
+    new lattice for every realization and saves computational time.
+    Recommended for several realizations of large networks.
+
+    3) The present algorithm is only valid for graphs. In order to obtain
+    directed small-world networks, use the RewireNetwork() function on a
+    previously created ring-lattice.
+
+    See Also
+    --------
+    Lattice1D : Generates a 1D lattice ring network.
+    RewiredNetwork : Randomized the links of a network with equal probability.
+    """
+
+    # 0) SECURITY CHECKS
+    if (prew < 0 or prew > 1):
+        raise ValueError( "Probability 'prew' out of bounds. Insert value between 0 and 1" )
+
+    # 1) CREATE OR CHECK THE VALIDITY OF THE INITIAL RING-LATTICE
+    # if type(lattice) == types.NoneType:
+    if lattice == None:
+        if z > N//2:
+            raise ValueError("Largest possible z = N/2 =", N//2 )
+        adjmatrix = Lattice1D(N,z)
+    else:
+        Nlatt = len(lattice)
+        if N != Nlatt:
+            raise ValueError( "N and size of given lattice od not match." )
+        adjmatrix = lattice.copy()
+
+    # 2) REWIRE THE LINKS CLOCKWISE AND BY RANK OF NEIGHBOURHOOD
+    # For each rank of neighbourhood...
+    for k in range(1,z+1):
+        # Choose every node in clockwise direction
+        for i in range(N):
+            # 2.1) Rewire the link with neighbour i+k with probability prew
+            if numpy.random.rand() <= prew:
+                done = False
+                while not done:
+                    target = int( N * numpy.random.rand() )
+                    # Avoid self-loops and double links
+                    if target == i: continue
+                    if adjmatrix[i,target]: continue
+
+                    # Else, remove the old link and place the new one.
+                    if i+k < N:
+                        adjmatrix[i,i+k] = 0
+                        adjmatrix[i+k,i] = 0
+                    else:
+                        adjmatrix[i,i+k-N] = 0
+                        adjmatrix[i+k-N,i] = 0
+
+                    adjmatrix[i,target] = 1
+                    adjmatrix[target,i] = 1
+                    done = True
+
+    return adjmatrix
+
+
+
+################################################################################
+"""REWIRE AND RANDOMIZE NETWORKS"""
 def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     """Randomises an input graph conserving the degrees of its nodes.
 
@@ -866,7 +877,8 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
     return randmatrix
 
 
-############################################################################
+
+################################################################################
 """MODULAR AND HIERARCHICAL NETWORK MODELS"""
 def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     """
@@ -1527,5 +1539,10 @@ def RavaszBarabasiGraph(Nmotif=4, hlevels=3, hublinks=True):
                 adjmatrix[i,0] = 1
 
     return adjmatrix
+
+
+
+################################################################################
+"""SPATIALLY EMBEDDED RANDOM NETWORKS"""
 
 #
