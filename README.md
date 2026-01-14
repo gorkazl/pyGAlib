@@ -221,6 +221,12 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
+##### January 13, 2026 (Version 2.1)
+
+* *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
+* 
+
+
 ##### November 10, 2025 (Release of Version 2)
 
 Stable version 2.0 checked, validated and released.
@@ -240,33 +246,6 @@ Small bugs fixed:
 ##### February 7, 2022
 Minor bug fixes. A remaining Python 2 to Python 3 conversion error was fixed, since standard library function `range()` no longer returns a list, but an iterator object.
 
-##### June 15, 2020
-Docstrings corrected. Function `k_DensityW()` was added in module *metrics.py* to calculate the k-density in networks with weighted links, which is needed to evaluate potential formation of rich-club structures in weigthed networks.
-
-##### July 12, 2019
-Version 1.1.0 released. Section for classic and deterministic graphs added to the *models.py* module. New generators `PathGraph()`, `StarGraph()` and `CompleteGraph()` included.
-
-##### July 6, 2019
-For clarity, function `RichClub()` has been splitted into two functions: `RichClub()`and `k_Density()`. The reason is that the output of old `RichClub()` was basically the k-density for all degrees, from 0 to kmax. Now this is done by `k_Density()` and the new `RichClub()` function identifies the set of nodes (hubs) for which k-density overcomes a given value.
-
-##### June 15, 2019
-GAlib has been registered in PyPI ([https://pypi.org/project/galib/](https://pypi.org/project/galib/)). Direct installation and version management using `pip` is thus available.
-
-##### January 29, 2019
-New in Version 1.0.1:
-
-- Minor corrections overall.
-- Function to generate Ravasz-Barabási hierarchical networks added to *models.py* module.
-
-##### December 3, 2018
-Release of Version 1.0.0 of pyGAlib. The library is now shaped as a proper Python package and is installable using standard tools. The structure of the package has been renewed and contains the following modules: 
-
-- *metrics.py*: Common graph metrics (degrees, clustering, graph distance, etc)
-- *models.py*: Generation of synthetic networks and randomization.
-- *tools.py*: Miscelaneous helper functions.
-- *metrics_numba.py*: Uses the Numba package to accelerate calculation of some metrics.
-- *models_numba.py*: Uses the Numba package to accelerate generation of some graph models.
-- *extra.py*: Additional measures and functionalities related to network analysis.
  
 See the file *CHANGELOG.md* for a complete history of changes.
 
