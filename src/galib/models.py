@@ -260,7 +260,7 @@ def StarGraph(N):
 
 ################################################################################
 """GENERATE RANDOM NETWORKS"""
-def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
+def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
     """Generates random graphs following the Erdos & Renyi model.
 
     In an Erdos-Renyi graph a link happens with probability p. Therefore,
@@ -275,9 +275,9 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
         The size of the network (number of nodes).
     p : float between 0 and 1
         Probability of links.
-    directed : Boolean (optional)
+    directed : Boolean, optional
         True if a directed graph is desired. False, for an undirected graph.
-    selfloops: Boolean
+    selfloops: Boolean, optional
         True if self-loops are allowed, False otherwise.
 
     Returns
@@ -289,26 +289,25 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
     --------
     RandomGraph : Random graphs with specified number of links
     """
-    # 0) SECURITY CHECKS. Make sure that adequate parameters are given.
+    # 0) SECURITY CHECKS
     if (p < 0.0 or p > 1.0):
         raise ValueError( "Probability p out of bounds. Insert value between 0 and 1" )
 
-    # 1) FOR DIRECTED GRAPHS
-    # 1.1) Create a random matrix with normally distributed values
+    # 1) SEED RANDOM LINKS
     adjmatrix = numpy.random.rand(N,N)
-    # 1.2 Select the entries with value <= p
-    adjmatrix = np.where(adjmatrix <= p, 1, 0).astype(outdtype)
+    # Select the entries with value <= p, and transform into boolean
+    adjmatrix = adjmatrix <= p
 
     # 2) FOR UNDIRECTED GRAPHS
     if not directed:
         adjmatrix[np.tril_indices(N,k=-1)] = 0
         adjmatrix += adjmatrix.T
 
-    # 3) Remove the diagonal if no self-loops are desired
+    # 3) REMOVE THE DIAGONAL IF NO SELF-LOOPS ARE DESIRED
     if not selfloops:
         adjmatrix[np.diag_indices(N)] = 0
 
-    return adjmatrix
+    return adjmatrix.astype(np.uint8)
 
 def RandomGraph(N, L, directed=False, selfloops=False):
     """Generates random graphs with N nodes and L links.
@@ -390,7 +389,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
 
     return adjmatrix
 
-def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
+def BarabasiAlbertGraph(N, m):
     """Generates scale-free networks after the Barabasi & Albert model.
 
     The Barabasi and Albert model (Science 286 (1999)) creates networks with
@@ -407,9 +406,6 @@ def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
         Number of nodes of the final network.
     m : integer
         Number of links that each new node makes during the growing process.
-    outdtype : numpy compatible data type (optional).
-        The data type of the resulting adjacency matrix of the scale-free
-        network.
 
     Returns
     -------
@@ -418,8 +414,8 @@ def BarabasiAlbertGraph(N, m, outdtype=np.uint8):
     """
 
     # 1) INITIATE THE NETWORK AS A COMPLETE GRAPH OF SIZE m
-    adjmatrix = np.zeros((N,N),outdtype)
-    adjmatrix[:m+1,:m+1] = np.ones((m+1,m+1),outdtype)
+    adjmatrix = np.zeros((N,N),np.uitn8)
+    adjmatrix[:m+1,:m+1] = np.ones((m+1,m+1),np.uint8)
     adjmatrix[np.diag_indices(m+1)] = 0
 
     # 2) PERFORM THE PREFERENTIAL ATTACHMENT GROWTH
@@ -1030,7 +1026,7 @@ def HMpartition(HMshape):
 
     return partitions
 
-def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
+def HMRandomGraph(HMshape, avklist, directed=False):
     """Generates random hierarchical and modular networks of desired number
     of hierarchical levels and modules.
 
@@ -1060,8 +1056,6 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
     directed : boolean (optional).
         If true, the resulting network will be directed, else, it will be
         undirected.
-    outdtype : data type (optional)
-        Data-type of the resulting adjacency matrix. Default: uint8.
 
     Returns
     -------
@@ -1154,7 +1148,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
-    adjmatrix = np.zeros((N,N), outdtype)
+    adjmatrix = np.zeros((N,N), np.uint8)
 
     # 2) CREATE THE HM NETWORK BY SEEDING LINKS AT DIFFERENT SCALES
     # 2.1) For each hierarchical level
@@ -1191,7 +1185,7 @@ def HMRandomGraph(HMshape, avklist, directed=False, outdtype=np.uint8):
 
     return adjmatrix
 
-def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.uint8):
+def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
     """    Generates random hierarchical and modular networks of desired number
     of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
@@ -1237,8 +1231,6 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     directed : boolean (optional).
         If true, the resulting network will be directed, else, it will be
         undirected.
-    outdtype : data type (optional)
-        Data-type of the resulting adjacency matrix. Default: uint8.
 
     Returns
     -------
@@ -1371,7 +1363,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False, outdtype=np.
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
-    adjmatrix = np.zeros((N,N), outdtype)
+    adjmatrix = np.zeros((N,N), np.uint8)
 
     # 1.1) If no hub parameters given, connect modules at random.
     # This case returns the same networks as 'HMRandomGraph' function.
