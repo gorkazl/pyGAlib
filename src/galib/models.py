@@ -46,8 +46,8 @@ RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
 ModularityPreservingGraph
     Randomises an input graph conserving its modular structure.
-SeedRandomWeights (TO BE ADDED)
-    Randomly assigns weigths to links of a network, from a given distribution
+SeedWeights (TO BE ADDED)
+    Randomly assigns weigths to links of a network, from a given distribution.
 ShuffleWeights  (TO BE ADDED)
     Mantains the links in place, but randomly reallocates their weights.
 
@@ -301,7 +301,7 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False, outdtype=np.uint8):
 
     # 2) FOR UNDIRECTED GRAPHS
     if not directed:
-        adjmatrix[np.tril_indices(N)] = 0
+        adjmatrix[np.tril_indices(N,k=-1)] = 0
         adjmatrix += adjmatrix.T
 
     # 3) Remove the diagonal if no self-loops are desired
