@@ -221,10 +221,11 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
-##### January 13, 2026 (Version 2.1)
+##### January XX, 2026 (Version 2.1)
 
 * *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
-* 
+* Bug fix in `ErdosRenyiGraph()` function that prevented self-loops when desired in symmetric graphs.
+* `outdtype` option removed from graph generation functions in *models.py* module. For consistency, all graph generators return 2D arrays of `np.uint8` type, for the binary cases and `np.float64`) for the weighted graph options.
 
 
 ##### November 10, 2025 (Release of Version 2)
