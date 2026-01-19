@@ -14,7 +14,7 @@ MISCELLANOUS HELPER FUNCTIONS
 This module contains miscellaneous helper functions useful for the analisys
 of graphs and complex networks.
 
-I/O AND DATA CONVERSIONS
+I/O AND DATA CONVERSIONS (# TODO: Move these into their own module)
 ------------------------
 LoadFromPajek
     Reads a network from a text file with Pajek format.
@@ -71,7 +71,6 @@ MeanCorrelation
 """
 # Standard library imports
 import itertools
-import types
 import re
 import warnings
 import functools
