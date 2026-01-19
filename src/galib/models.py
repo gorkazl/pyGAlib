@@ -621,6 +621,8 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
     return adjmatrix
 
 def SeedWeights(adjmatrix, w_distr, sym_w=None, **arg_w_distr):
+    # TODO: We shall add a 'copy' parameter to allow in-place addition of weights.
+    # If dtype is integer, then raise runtime a warning and turn copy=True.
     """
     Randomly assigns weights (from a distribution) to the links of a network.
 
@@ -662,7 +664,7 @@ def SeedWeights(adjmatrix, w_distr, sym_w=None, **arg_w_distr):
     """
     # 0) SECURITY CHECKS AND GET READY FOR THE CALCULATIONS
     if sym_w not in (None, True, False):
-        raise ValueError( "Parameter 'sym_w' needs to be None, True or False." )
+        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} found." )
 
     # Set the symmetry of the weights, if not specified by user
     mask = adjmatrix.astype(bool)
