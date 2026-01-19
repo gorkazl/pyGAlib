@@ -39,7 +39,7 @@ ScaleFreeGraph
     Generates scale-free graphs of given size and exponent.
 WattsStrogatzGraph
     Generates "small-world" networks following in the Watts & Strogatz model.
-SeedWeights
+SeedRandomWeights
     Randomly assigns weigths to links of a network, from a given distribution.
 
 REWIRE AND RANDOMISE NETWORKS
@@ -618,7 +618,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
 
     return adjmatrix
 
-def SeedWeights(adjmatrix, w_distr, sym_w=None, **arg_w_distr):
+def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, **arg_w_distr):
     # TODO: We shall add a 'copy' parameter to allow in-place addition of weights.
     # If dtype is integer, then raise runtime a warning and turn copy=True.
     """
