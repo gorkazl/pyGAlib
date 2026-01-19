@@ -140,8 +140,8 @@ def is_symmetric(adjmatrix):
         the network is undirected but weights are not symmetrics, or if the
         network is directed.
     """
-    out = np.isclose(adjmatrix, adjmatrix.T).all()
-    return out.item()
+    out = np.allclose(adjmatrix, adjmatrix.T)
+    return out
 
 
 def Density(adjmatrix):
