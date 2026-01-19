@@ -78,7 +78,6 @@ SpatialWeightSorting (TO BE DONE)
 
 """
 # Standard library imports
-import types
 # Third party imports
 import numpy as np
 import numpy.random
@@ -581,7 +580,6 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
         raise ValueError( "Probability 'prew' out of bounds. Insert value between 0 and 1" )
 
     # 1) CREATE OR CHECK THE VALIDITY OF THE INITIAL RING-LATTICE
-    # if type(lattice) == types.NoneType:
     if lattice == None:
         if z > N//2:
             raise ValueError("Largest possible z = N/2 =", N//2 )

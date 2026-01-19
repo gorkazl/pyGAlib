@@ -97,7 +97,6 @@ Hubness_GA
 
 """
 # Standard library imports
-import types
 # Third party imports
 import numpy as np
 # Local imports
