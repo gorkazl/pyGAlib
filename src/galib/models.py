@@ -665,14 +665,12 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, **arg_w_distr):
         raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} found." )
 
     # Set the symmetry of the weights, if not specified by user
-    mask = adjmatrix.astype(bool)
-    if (mask^mask.T).sum() == 0: directed = False
-    else: directed = True
-
+    _directed = is_directed(adjmatrix)
     if sym_w is None:
-        if directed: sym_w = False
+        if _directed: sym_w = False
         else: sym_w = True
 
+    mask = adjmatrix.astype(bool)
     # CASE-1: Asymmetric weigths are desired (regardless of adjmatrix is
     # directed or undirected)
     if sym_w==False:
@@ -708,7 +706,7 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, **arg_w_distr):
             wmatrix += wmatrix.T
 
         # 3) Deal with the weights of non-reciprocal links, if any
-        if directed:
+        if _directed:
             mask_dir = mask ^ (mask_und + mask_und.T)
             nlinks = mask_dir.sum()
             if nlinks > 0:
