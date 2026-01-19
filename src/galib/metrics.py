@@ -19,39 +19,44 @@ measures will be added to GAlib in future releases.
 
 BASIC CONNECTIVITY DESCRIPTORS
 ------------------------------
-Density
-    Returns the density of links in a network.
-Degree
-    Computes the number of neighbours of every node.
-Intensity
-    The total strength of a node in a weighted network.
-Reciprocity
-    Computes the fraction of reciprocal links to total number of links.
-ReciprocalDegree
-    Returns the reciprocal degree and excess degrees of every nodes.
+is_directed
+    Checks whether a (weighted) matrix represents a directed or undirected  graph.
+is_symmetric
+    Checks whether a (weighted) matrix is symmetric or not.
+
 AvNeighboursDegree
     Average neighbours' degree of nodes with given degree k, for all k.
 Clustering
     Returns the clustering coefficient and the local clustering of every node.
+Degree
+    Computes the number of neighbours of every node.
+Density
+    Returns the density of links in a network.
+Intensity
+    The total strength of a node in a weighted network.
 k_Density
     Computes the density of subnetworks made of nodes with degree >= k',
     for all k' = 0 to kmax.
-RichClub
-    Identifies the subset of hubs with dense interconnectivity.
 k_DensityW
     Computes the ratio of link weights among the nodes with strength > s',
     for s' = 0 to s' = smax.
 MatchingIndex
     Computes the number of common neighbours of every pair of nodes.
+Reciprocity
+    Computes the fraction of reciprocal links to total number of links.
+ReciprocalDegree
+    Returns the reciprocal degree and excess degrees of every nodes.
+RichClub
+    Identifies the subset of hubs with dense interconnectivity.
 
 PATHS AND GRAPH DISTANCE FUNCTIONS
 ----------------------------------
+AllShortestPaths
+    Finds all the shortest paths between two nodes.
 FloydWarshall
     Computes the pathlength between all pairs of nodes in a network.
 PathsAllinOne
     Returns pathlength and betweenness. Finds all shortest paths and cycles.
-AllShortestPaths
-    Finds all the shortest paths between two nodes.
 
 COMMUNITIES, COMPONENTS, K-CORES, ...
 -------------------------------------
@@ -59,12 +64,12 @@ AssortativityMatrix
     Returns the assortativity matrix of network given a partition of nodes.
 ConnectedComponents
     Finds all the connected components in a network out of a distance matrix.
-Modularity
-    Computes the Newman modularity given a partition of nodes.
 K_Core
     Finds the K-core of a network with degree k >= kmin.
 K_Shells
     Returns the K-shells of a network for all k from kmin to kmax.
+Modularity
+    Computes the Newman modularity given a partition of nodes.
 
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
 ----------------------------------------------------
@@ -101,6 +106,45 @@ from . import tools
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
+def is_directed(adjmatrix):
+    """Checks whether a (weighted) matrix represents a directed or undirected graph.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        A (weighted) adjacency matrix of a network. Weighted links are ignored.
+
+    Returns
+    -------
+    out : boolean
+        True if `adjmatrix` represents a directed graph, and False if `adjmatrix`
+        represents an undirected graph.
+    """
+    mask = adjmatrix.astype(bool)
+    out = (mask ^ mask.T).any()
+    return out.item()
+
+def is_symmetric(adjmatrix):
+    """Checks whether a (weighted) matrix is symmetric or not.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        A (weighted) adjacency matrix of a network.
+
+    Returns
+    -------
+    out : boolean
+        True if `adjmatrix` represents a (weighted) undirected graph whose
+        link weights are all symmetric. False if any link weight `adjmatrix[i,j]`
+        differs from its reciprocal `adjmatrix[j,i]`. This can happen both if
+        the network is undirected but weights are not symmetrics, or if the
+        network is directed.
+    """
+    out = np.isclose(adjmatrix, adjmatrix.T).all()
+    return out.item()
+
+
 def Density(adjmatrix):
     """Returns the density of links in a network.
 
