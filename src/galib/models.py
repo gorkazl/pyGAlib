@@ -85,6 +85,8 @@ import numpy.random
 from .metrics import is_directed
 from .tools import ExtractSubmatrix
 
+# TODO: Add security checks for user inputs, to avoid errors in implicit
+# comparisons like `if directed: `
 
 ###############################################################################
 """DETERMINISTIC AND CLASSIC GRAPH MODELS"""
@@ -346,7 +348,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
     ErdosRenyiGraph : Random graphs with given link probability.
     """
     # 0) SECURITY CHECKS. Make sure L is not too large.
-    if directed:
+    if directed==True:
         if selfloops:
             maxL = N**2
             if L > maxL:
@@ -477,7 +479,7 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
     nodes are correlated, e.g., input hubs are also output hubs.
     """
     # 0) SECURITY CHECKS
-    if directed:
+    if directed==True:
         maxL = N*(N-1)
         if L > maxL:
             raise ValueError( "L out of bounds, max(L) = N*(N-1) =", maxL )
@@ -841,9 +843,9 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
         # 3) IF ALL CONDITIONS SUCCESFUL, REWIRE
         # 3.1) Rewire the matrix
-        if directed:
+        if directed==True:
             # Put the new links
-            if weighted:
+            if weighted==True:
                 rewmatrix[h1,t2] = rewmatrix[h2,t2]
                 rewmatrix[h2,t1] = rewmatrix[h1,t1]
             else:
@@ -856,7 +858,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
         else:
             # Put the new links
-            if weighted:
+            if weighted==True:
                 rewmatrix[h1,t2] = rewmatrix[h2,t2]
                 rewmatrix[t2,h1] = rewmatrix[t1,h1]
                 rewmatrix[h2,t1] = rewmatrix[h1,t1]
@@ -1246,7 +1248,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
             if adjmatrix[node1,node2]: continue
 
             # Link the nodes and update counter
-            if directed:
+            if directed==True:
                 adjmatrix[node1,node2] = 1
                 counter += 1
             else:
@@ -1292,7 +1294,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
 
             # 3) SEED THE LINKS AT RANDOM BETWEEN COMMUNITIES
             # NOTE: In the last hierarchical level, every node is one community
-            if directed:
+            if directed==True:
                 Ls = Nblock * avklist[level]
             else:
                 Ls = 0.5 * Nblock * avklist[level]
@@ -1527,7 +1529,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
             cumprobability = nodeweights.cumsum()
 
         # 2.4) Determine the number of links to be seed per block
-        if directed:
+        if directed==True:
             Lblock = Nblock * avklist[level]
         else:
             Lblock = 0.5 * Nblock * avklist[level]
@@ -1550,7 +1552,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
     cumprobability = nodeweights.cumsum()
 
     # 3.3) Determine the number of links to be seed per community
-    if directed:
+    if directed==True:
         Lcom = Ncom* avklist[-1]
     else:
         Lcom = 0.5 * Ncom * avklist[-1]
