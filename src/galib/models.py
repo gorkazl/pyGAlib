@@ -82,7 +82,7 @@ SpatialWeightSorting (TO BE DONE)
 import numpy as np
 import numpy.random
 # Local imports
-from .metrics import Reciprocity, is_directed
+from .metrics import is_directed
 from .tools import ExtractSubmatrix
 
 
@@ -797,18 +797,17 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     """
     # 0) PREPARE FOR THE CALCULATIONS
     # 0.1) Check the conditions for the rewiring process
-    if directed==None:
-        recip = Reciprocity(adjmatrix)
-        if recip == 1.0: directed = False
-        else: directed = True
-    if weighted:
+    if directed is None:
+        directed = is_directed(adjmatrix)
+    if weighted==True:
         rewmatrix = adjmatrix.copy()
     else:
-        rewmatrix = np.where(adjmatrix,1,0).astype(np.uint8)
+        # rewmatrix = np.where(adjmatrix,1,0).astype(np.uint8)
+        rewmatrix = adjmatrix.astype(bool).astype(np.uint8)
 
     N = len(rewmatrix)
     # 0.2) Generate the list of links
-    if directed:
+    if directed==True:
         linklist = np.array(rewmatrix.nonzero())
     else:
         # Apply nonzero only to the upper triangular part of the matrix
@@ -919,8 +918,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
     # Check if the original network is directed or undirected
     if directed == None:
-        if Reciprocity(adjmatrix) == 1: directed = False
-        else: directed = True
+        directed = is_directed(adjmatrix)
 
     # Check if the original network accepts self-loops
     if selfloops == None:
