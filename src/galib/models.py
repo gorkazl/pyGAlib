@@ -718,6 +718,8 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
             # Compute the random numbers and place them in 'wmatrix'
             weights = w_distr(size=nlinks, **arg_w_distr)
             adjmatrix[mask_und] = weights
+            # TODO: Not happy with this splitted solution. Try to make it
+            # work using np.nditer, and iterate mask_und.T in 'F' ordering
             if copy:
                 _diagweights = adjmatrix.diagonal().copy()
                 adjmatrix += adjmatrix.T
