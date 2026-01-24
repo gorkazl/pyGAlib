@@ -48,8 +48,8 @@ RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
 ModularityPreservingGraph
     Randomises an input graph conserving its modular structure.
-ShuffleWeights  (TO BE ADDED)
-    Mantains the links in place, but randomly reallocates their weights.
+ShuffleWeights
+    Randomly reallocates the link weights while maintaining the link positions.
 
 HIERARCHICAL AND MODULAR (HM) GRAPH MODELS
 ------------------------------------------
@@ -82,7 +82,7 @@ SpatialWeightSorting (TO BE DONE)
 import numpy as np
 import numpy.random
 # Local imports
-from .metrics import is_directed
+from .metrics import is_directed, is_symmetric
 from .tools import ExtractSubmatrix
 
 # TODO: Add security checks for user inputs, to avoid errors in implicit
@@ -622,7 +622,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
 
 def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     """
-    Randomly gives weights (from a distribution) to the links of a network.
+    Randomly assigns weigths to links of a network, from a given distribution.
 
     Assigns random weights to the links of a given connectivity matrix. Weights
     are sampled from a distribution specified by the user, for exmaple:
@@ -655,10 +655,9 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
         have asymmetric weights even if the connectivity is undirected.
     copy : boolean, optionla, default : True
         If True, the function returns a new array of shape (N,N) and `np.float64`
-        dtype.
-        If False, the function adds weights 'in-place' to the input `adjmatrix`
-        and does not return anything. For this in-place change, `adjmatrix`
-        needs to be of floating dtype.
+        dtype. If False, the function adds weights 'in-place' to the input
+        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
+        be of floating dtype.
     arg_w_distr : dictionary or named arguments.
         The other arguments necessary to define `w_distr`.
 
@@ -892,7 +891,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of dimension-2 and shape (N,N).
         The adjacency matrix of the network to be rewired. 'adjmatrix' itself
         won't be rewired but a new matrix is returned.
     partition : list of ndarrays of dtype = uint
@@ -991,6 +990,105 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
                 counter += 1
 
     return randmatrix
+
+def ShuffleWeights(adjmatrix, copy=True):
+    """
+    Randomly reallocates the link weights while maintaining the link positions.
+
+    This function reads the link weights from the given (weighted) connectivity
+    matrix, and places the same weights back, randomly re-assigned. This
+    randomization respects the symmetry of input `adjmatrix`.
+    - If `adjmatrix` is an undirected graph with all reciprocal weights identical
+    such that w[i,j] = w[j,i], then weigths are shuffled and their symmetry is
+    conserved.
+    - If the weights of `adjmatrix` are not symmetric, e.g., there is at least one
+    pair for which w[i,j] != w[j,i], all weights are randomly re-allocated
+    leading to a non-symmetric connectivity matrix (regardless of whether the
+    underlying connectivity is directed or undirected).
+
+    NOTE: The function can either return a new array or change the weights of
+    input `adjmatrix` in place. This is controled by the `copy` parameter which
+    is set to True by default for coherence with other functions.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of dimension-2 and shape (N,N).
+        The adjacency matrix of a network whose weights will be shuffled.
+    copy : boolean, optionla, default : True
+        If True, the function returns a new array of shape (N,N) and same dtype
+        as the input `adjmatrix`. If False, the function replaces the weights of
+       `adjmatrix` in-place.
+
+    Returns
+    -------
+    if copy = True
+        adjmatrix : ndarray (2d) of shape (N,N).
+            A connectivity matrix with same links as input `adjmatrix` but weights
+            reassigned, drawn from distribution `w_distr`.
+    if copy = False
+        None. (Changes `adjmatrix` in place and does not return anything.)
+    """
+    # 0) SECURITY CHECKS AND GETTING READY
+    # Check for potential erroneous inputs
+    if copy not in [True, False]:
+        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
+
+    # Identify if the network is symmetric or not
+    symmetric = is_symmetric(adjmatrix)
+    # Initialise the arrays needed
+    mask = adjmatrix.astype(np.bool)
+
+    # CASE-1: Weights in adjmatrix are NOT symmetric,
+    # it could be either directed or undirected
+    if symmetric == False:
+        # Extract the weights and shuffle them
+        weights = adjmatrix[mask]
+        np.random.shuffle(weights)
+        # Place the shuffled weights
+        if copy==True:
+            adjmatrix = np.zeros_like(adjmatrix)
+        adjmatrix[mask] = weights
+
+    # CASE-2: Weights in adjmatrix are symmetric, adjmatrix can only be undirected
+    else:
+        # 1) Deal with the diagonal weigths (if needed) and shuffle them
+        _self_loops = mask.trace()
+        if _self_loops == 0:
+            pass
+        elif _self_loops == 1:
+            _diagonal = adjmatrix.diagonal().copy()
+            print( _diagonal )
+        elif mask.trace() > 1:
+            _diagonal = adjmatrix.diagonal().copy()
+            _diagmask = mask.diagonal()
+            _diagweights = _diagonal[_diagmask]
+            # Shuffle and place back
+            np.random.shuffle(_diagweights)
+            _diagonal[_diagmask] = _diagweights
+            del _diagmask, _diagweights
+
+        # 2) Extract the upper-triangular values, and shuffle them
+        mask = np.triu(mask, k=1)
+        weights = adjmatrix[mask]
+        np.random.shuffle(weights)
+
+        # 3) Place the shuffled weights back
+        if copy == True:
+            adjmatrix = np.zeros_like(adjmatrix)
+            adjmatrix[mask] = weights
+            adjmatrix += adjmatrix.T
+        else:
+            # Can't make boolean indexing to read the mask in 'F' order :(
+            adjmatrix[mask] = weights
+            temp_idx = mask.nonzero()
+            adjmatrix[temp_idx[1],temp_idx[0]] = weights
+
+        # Place the shuffled diagonal weights
+        if _self_loops > 0:
+            np.fill_diagonal(adjmatrix, _diagonal)
+
+    if copy:
+        return adjmatrix
 
 
 
