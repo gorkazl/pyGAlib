@@ -23,22 +23,22 @@ Lattice1D
 Lattice1D_FixLinks
     Generates ring lattices with desired number of links.
 PathGraph
-    Returns a path graph (line or chain graph) of size N.
+    Generates a path graph (line or chain graph) of size N.
 StarGraph
     Generates a star graph of size N.
 
 GENERATE RANDOM NETWORKS
 ------------------------
 ErdosRenyiGraph (TODO: OPTION FOR RANDOM WEIGHTS)
-    Generates random graphs following the Erdos & Renyi model.
+    Generates a random graph following the Erdos & Renyi model.
 RandomGraph  (TODO: OPTION FOR RANDOM WEIGHTS)
-    Generates random graphs with N nodes and L links.
+    Generates a random graph of N nodes and L links.
 BarabasiAlbertGraph
-    Generates scale-free networks after the Barabasi & Albert model.
+    Generates an scale-free network following the Barabasi & Albert model.
 ScaleFreeGraph
-    Generates scale-free graphs of given size and exponent.
+    Generates a scale-free graph of given size and exponent.
 WattsStrogatzGraph
-    Generates "small-world" networks following in the Watts & Strogatz model.
+    Generates a graph following the Watts & Strogatz model.
 SeedRandomWeights
     Randomly assigns weigths to links of a network, from a given distribution.
 
@@ -46,7 +46,7 @@ REWIRE AND RANDOMISE NETWORKS
 -----------------------------
 RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
-ModularityPreservingGraph
+ModularPreservingGraph
     Randomises an input graph conserving its modular structure.
 ShuffleWeights
     Randomly reallocates the link weights while maintaining the link positions.
@@ -54,23 +54,23 @@ ShuffleWeights
 HIERARCHICAL AND MODULAR (HM) GRAPH MODELS
 ------------------------------------------
 ModularGraph
-    Generates random modular networks of given module sizes and densities.
+    Generates a random modular network of given module sizes and densities.
 HMpartition
     Returns a partition of nodes for a hierarchical and modular network.
 HMRandomGraph
-    Generates random hierarchical and modular networks of desired number
+    Generates a random hierarchical and modular network of desired number
     of hierarchical levels and modules.
 HMCentralisedGraph
-    Generates random hierarchical and modular networks of desired number
+    Generates a random hierarchical and modular network of desired number
     of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
 RavaszBarabasiGraph
-    Generates hierarchical networks following the Ravasz & Barabasi model.
+    Generates a hierarchical network following the Ravasz & Barabasi model.
 
 SPATIALLY EMBEDDED (SURROGATE) NETWORKS
 ---------------------------------------
 SpatialLattice_From (TO BE DONE)
-    Generates spatial weighted lattices with same weights as input network.
+    Generates a spatial weighted lattice with same weights as input network.
 SpatialWeightSorting (TO BE DONE)
     Sorts the link weights of a network by the spatial distance between nodes.
 
@@ -100,7 +100,7 @@ def CompleteGraph(N):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and integer type.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the complete graph.
     """
     # 0) SECURITY CHECK
@@ -113,7 +113,7 @@ def CompleteGraph(N):
     return adjmatrix
 
 def Lattice1D(N,z=1):
-    """Generates regular ring lattices.
+    """Generates a regular ring lattice.
 
     Each node is connected to its 2z closest neighbours (z on the left and z on
     the right). Hence, all nodes have same degree.
@@ -128,7 +128,7 @@ def Lattice1D(N,z=1):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and integer type.
+    adjmatrix : ndarray of shape(N,N) dtype = np.uint8
         The adjacency matrix of the 1-dimensional lattice.
 
     See Also
@@ -172,7 +172,7 @@ def Lattice1D_FixLinks(N,L):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and integer type.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the 1-dimensional lattice.
 
     See Also
@@ -206,7 +206,7 @@ def Lattice1D_FixLinks(N,L):
     return adjmatrix + adjmatrix.T
 
 def PathGraph(N, directed=False):
-    """Returns a path graph (line or chain graph) of size N.
+    """Generates a path graph (line or chain graph) of size N.
 
     Parameters
     ----------
@@ -217,7 +217,7 @@ def PathGraph(N, directed=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and integer type.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the path graph.
 
     See Also
@@ -245,7 +245,7 @@ def StarGraph(N):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and integer type.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the star graph.
     """
     # 0) SECURITY CHECK
@@ -262,7 +262,7 @@ def StarGraph(N):
 ################################################################################
 """GENERATE RANDOM NETWORKS"""
 def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
-    """Generates random graphs following the Erdos & Renyi model.
+    """Generates a random graph following the Erdos & Renyi model.
 
     In an Erdos-Renyi graph a link happens with probability p. Therefore,
     different relizations of the graph may have different number of links.
@@ -283,7 +283,7 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and size NxN
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated random graph.
 
     See Also
@@ -311,7 +311,7 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
     return adjmatrix.astype(np.uint8)
 
 def RandomGraph(N, L, directed=False, selfloops=False):
-    """Generates random graphs with N nodes and L links.
+    """Generates a random graph of N nodes and L links.
 
     Similar to an Erdos-Renyi (ER) graph with probability p = rho, where
     rho is the density of links. In ER graphs the total number of links
@@ -334,7 +334,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2, size NxN and dtype = int.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated random graph.
 
     Notes
@@ -391,7 +391,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
     return adjmatrix
 
 def BarabasiAlbertGraph(N, m):
-    """Generates scale-free networks after the Barabasi & Albert model.
+    """Generates a scale-free network following the Barabasi & Albert model.
 
     The Barabasi and Albert model (Science 286 (1999)) creates networks with
     a scale-free degree distribution of exponent gamma = -3 by a growth
@@ -410,7 +410,7 @@ def BarabasiAlbertGraph(N, m):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and size NxN
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated scale-free network.
     """
 
@@ -447,7 +447,7 @@ def BarabasiAlbertGraph(N, m):
     return adjmatrix
 
 def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
-    """Generates scale-free graphs of given size and exponent.
+    """Generates a scale-free graph of given size and exponent.
 
     It follows the method proposed by Goh, Kahng & Kim 'Universal Behaviour
     of Load Distribution in SF networks' PRL 87 (2001). Every node is chosen
@@ -470,7 +470,7 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and size NxN.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated scale-free network.
 
     Notes
@@ -525,7 +525,7 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
     return adjmatrix
 
 def WattsStrogatzGraph(N, z, prew, lattice=None):
-    """Generates small-world networks as in the Watts & Strogatz model.
+    """Generates a graph following the Watts & Strogatz model.
 
     See Watts & Strogatz, Nature 393(4) (1998) for details of the model.
 
@@ -542,7 +542,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
         For a given z, every node has degree k = 2*z in the resulting lattice.
     prew : float, between 0 and 1.
         Probability that links of the 1D lattice to be rewired.
-    lattice : ndarray of rank-2 (optional).
+    lattice : ndarray of dimension-2 (optional).
         The adjacency matrix of a 1D lattice that has to be rewired.
         When several realizations of the model are desired, the initial
         lattice, usually the output of Lattice1D() function, can be passed
@@ -551,7 +551,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and integer type.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the rewired 1-dimensional lattice.
 
     Notes
@@ -637,7 +637,7 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
 
     Parameters
     ----------
-    adjmatrix : ndarray (2d) of shape (N,N).
+    adjmatrix : ndarray of shape (N,N).
         The matrix of a network whose weights want to be randomly assigned.
         `adjmatrix` can be either a connectivity matrix (already weighted or not),
         or the mask (boolean matrix) of an existing `adjmatrix`.
@@ -664,7 +664,7 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     Returns
     -------
     if copy = True
-        adjmatrix : ndarray (2d) of shape (N,N).
+        adjmatrix : ndarray of shape (N,N) and dtype = np.float64
             A connectivity matrix with same links as input `adjmatrix` but weights
             reassigned, drawn from distribution `w_distr`.
     if copy = False
@@ -717,8 +717,6 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
             # Compute the random numbers and place them in 'wmatrix'
             weights = w_distr(size=nlinks, **arg_w_distr)
             adjmatrix[mask_und] = weights
-            # TODO: Not happy with this splitted solution. Try to make it
-            # work using np.nditer, and iterate mask_und.T in 'F' ordering
             if copy:
                 _diagweights = adjmatrix.diagonal().copy()
                 adjmatrix += adjmatrix.T
@@ -755,7 +753,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of dimension-2
         The adjacency matrix of the network to be rewired. 'adjmatrix' itself
         won't be rewired but a new matrix is returned.
     prewire : float (optional)
@@ -783,7 +781,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
     Returns
     -------
-    rewmatrix : ndarray of rank-2
+    rewmatrix : ndarray of shape (N,N)
         The dtype of 'rewmatrix' depends on the option 'weighted'. If
         'weighted' is True, 'rewmatrix' is of same dtype as 'adjmatrix'.
         If 'weighted' is False, 'rewmatrix' has dtype uint8.
@@ -881,7 +879,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
     return rewmatrix
 
-def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
+def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
     """Randomises an input graph conserving its modular structure.
 
     Given the adjacency matrix of a graph and a partition of its nodes, this
@@ -891,7 +889,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
     Parameters
     ----------
-    adjmatrix : ndarray of dimension-2 and shape (N,N).
+    adjmatrix : ndarray of dimension-2
         The adjacency matrix of the network to be rewired. 'adjmatrix' itself
         won't be rewired but a new matrix is returned.
     partition : list of ndarrays of dtype = uint
@@ -904,7 +902,7 @@ def ModularityPreservingGraph(adjmatrix, partition, directed=None, selfloops=Non
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and dtype = uin8
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated random modular graph.
 
     See Also
@@ -1012,7 +1010,7 @@ def ShuffleWeights(adjmatrix, copy=True):
 
     Parameters
     ----------
-    adjmatrix : ndarray of dimension-2 and shape (N,N).
+    adjmatrix : ndarray of dimension-2
         The adjacency matrix of a network whose weights will be shuffled.
     copy : boolean, optionla, default : True
         If True, the function returns a new array of shape (N,N) and same dtype
@@ -1022,9 +1020,9 @@ def ShuffleWeights(adjmatrix, copy=True):
     Returns
     -------
     if copy = True
-        adjmatrix : ndarray (2d) of shape (N,N).
+        adjmatrix : ndarray of shape (N,N) and same dtype as input matrix
             A connectivity matrix with same links as input `adjmatrix` but weights
-            reassigned, drawn from distribution `w_distr`.
+            randomly reassigned.
     if copy = False
         None. (Changes `adjmatrix` in place and does not return anything.)
     """
@@ -1096,7 +1094,7 @@ def ShuffleWeights(adjmatrix, copy=True):
 """MODULAR AND HIERARCHICAL NETWORK MODELS"""
 def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     """
-    Generates random modular networks of given module sizes and densities.
+    Generates a random modular network of given module sizes and densities.
 
     This function generates modular networks in which both the internal
     links within the modules and the external links across modules are shed
@@ -1125,7 +1123,7 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2 and dtype = uin8
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated random modular graph.
     partition : list of ndarrays of dtype = uint
         A list containing the indices of the nodes in each module.
@@ -1200,7 +1198,6 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
 
 def HMpartition(HMshape):
     """Returns a partition of nodes for a hierarchical and modular network.
-    network.
 
     Parameters
     ----------
@@ -1245,7 +1242,7 @@ def HMpartition(HMshape):
     return partitions
 
 def HMRandomGraph(HMshape, avklist, directed=False):
-    """Generates random hierarchical and modular networks of desired number
+    """Generates a random hierarchical and modular network of desired number
     of hierarchical levels and modules.
 
     This function generalizes the benchmark hierarchical and modular network
@@ -1277,7 +1274,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated modular and hierarchical
         network.
 
@@ -1404,7 +1401,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
     return adjmatrix
 
 def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
-    """    Generates random hierarchical and modular networks of desired number
+    """Generates random hierarchical and modular networks of desired number
     of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
 
@@ -1452,7 +1449,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated modular and hierarchical
         network.
 
@@ -1668,7 +1665,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
     return adjmatrix
 
 def RavaszBarabasiGraph(Nmotif=4, hlevels=3, hublinks=True):
-    """Generates a Ravasz-Barabasi hierarchical graph.
+    """Generates a hierarchical network following the Ravasz & Barabasi model.
 
     The Ravasz-Barabasi graph is a pseudo-fractal network that starts from a
     basic motif, a complete graph of size 'Nmotif'. Further hierarchical levels
@@ -1694,7 +1691,7 @@ def RavaszBarabasiGraph(Nmotif=4, hlevels=3, hublinks=True):
 
     Returns
     -------
-    adjmatrix : ndarray of rank-2.
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
         The adjacency matrix of the generated scale-free network. The size of
         the final network is N = Nmotif^hlevels.
 
