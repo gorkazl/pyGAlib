@@ -712,7 +712,7 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
         # 1) Deal with the weights of reciprocal links, including diagonal entries
         mask_und = mask * mask.T
         # Keep only the upper triangular entries
-        mask_und[np.tril_indices_from(mask,k=-1)] = False
+        mask_und = np.triu(mask_und,k=0)
         nlinks = mask_und.sum()
         if nlinks > 0:
             # Compute the random numbers and place them in 'wmatrix'
