@@ -69,6 +69,9 @@ MeanCorrelation
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
+## TODO 1: Move all the I/O functions to a new I/O module
+## TODO 2: Shall we rename this module from tools.py to utils.py ?
+
 # Standard library imports
 import itertools
 import re
