@@ -29,9 +29,9 @@ StarGraph
 
 GENERATE RANDOM NETWORKS
 ------------------------
-ErdosRenyiGraph (TODO: OPTION FOR RANDOM WEIGHTS)
+ErdosRenyiGraph
     Generates a random graph following the Erdos & Renyi model.
-RandomGraph  (TODO: OPTION FOR RANDOM WEIGHTS)
+RandomGraph
     Generates a random graph of N nodes and L links.
 BarabasiAlbertGraph
     Generates an scale-free network following the Barabasi & Albert model.
@@ -39,8 +39,14 @@ ScaleFreeGraph
     Generates a scale-free graph of given size and exponent.
 WattsStrogatzGraph
     Generates a graph following the Watts & Strogatz model.
+
 SeedRandomWeights
     Assigns weigths (from a random distribution) to the links of a graph.
+WeightedERGraph   (TO BE DONE)
+    Generates an Erdos-Renyi graph with link weights assigned from a radonm distribution
+WeightedRandomGraph   (TO BE DONE)
+    Generates a random graph of N nodes and L links, with weights assigned from
+    a radonm distribution.
 
 REWIRE AND RANDOMISE NETWORKS
 -----------------------------
