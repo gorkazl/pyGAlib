@@ -44,9 +44,9 @@ SeedRandomWeights
     Assigns weigths (from a random distribution) to the links of a graph.
 WeightedERGraph   (TO BE DONE)
     Generates an Erdos-Renyi graph with link weights assigned from a radonm distribution
-WeightedRandomGraph   (TO BE DONE)
+WeightedRandomGraph
     Generates a random graph of N nodes and L links, with weights assigned from
-    a radonm distribution.
+    a given distribution.
 
 REWIRE AND RANDOMISE NETWORKS
 -----------------------------
@@ -128,7 +128,7 @@ def Lattice1D(N,z=1):
     ----------
     N : integer
         Size of the network (number of nodes).
-    z : integer (optional) default = 1
+    z : integer, optional, default: 1
         Diameter of the neighbourhood that every node connects with.
         For a given z, every node has degree 2*z in the resulting lattice.
 
@@ -218,7 +218,7 @@ def PathGraph(N, directed=False):
     ----------
     N : integer
         Size of the network (number of nodes).
-    directed : Boolean (optional)
+    directed : bool, optional, default: False
         True if a directed graph is desired. False, for an undirected graph.
 
     Returns
@@ -282,9 +282,9 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
         The size of the network (number of nodes).
     p : float between 0 and 1
         Probability of links.
-    directed : Boolean, optional
+    directed : bool, optional, default: False
         True if a directed graph is desired. False, for an undirected graph.
-    selfloops: Boolean, optional
+    selfloops: bool, optional, defaulf: False
         True if self-loops are allowed, False otherwise.
 
     Returns
@@ -294,7 +294,7 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
 
     See Also
     --------
-    RandomGraph : Random graphs with specified number of links
+    RandomGraph : Generates a random graph of N nodes and L links.
     """
     # 0) SECURITY CHECKS
     if (p < 0.0 or p > 1.0):
@@ -333,9 +333,9 @@ def RandomGraph(N, L, directed=False, selfloops=False):
         The size of the network (number of nodes).
     L : integer
         Number of links of the resulting random network.
-    directed : Boolean (optional)
+    directed : bool, optional, default: False
         True if a directed graph is desired. False, for an undirected graph.
-    selfloops: Boolean (optional)
+    selfloops: bool, optional, defaulf: False
         True if self-loops are allowed, False otherwise.
 
     Returns
@@ -469,7 +469,7 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
     exponent : float (optional)
         The exponent (in positive) of the degree-distribution of the resulting
         networks. Recommended values between 2 and 3.
-    directed : boolean (optional)
+    directed : bool, optional, default: False
         False if a graph is desired, True if digraphs are desired. In case
         of digraphs, both the input and the output degrees follow a scale-
         free distribution but uncorrelated between them.
@@ -548,7 +548,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
         For a given z, every node has degree k = 2*z in the resulting lattice.
     prew : float, between 0 and 1.
         Probability that links of the 1D lattice to be rewired.
-    lattice : ndarray of dimension-2 (optional).
+    lattice : ndarray or NoneType, optional, default: None).
         The adjacency matrix of a 1D lattice that has to be rewired.
         When several realizations of the model are desired, the initial
         lattice, usually the output of Lattice1D() function, can be passed
@@ -649,8 +649,9 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
         or the mask (boolean matrix) of an existing `adjmatrix`.
     w_distr : function.
         The distribution function for drawing weight samples, it must have a
-        `size` argument for the number of generated samples.
-    sym_w : boolean, optional, default: None.
+        `size` argument for the number of generated samples. For example,
+        random number generators from `numpy.random` or `scipy.random`.
+    sym_w : bool, optional, default: None.
         If None, the function checks whether `adjmatrix` is an (un)directed or
         a directed graph, and will assign the weights with matching (a)symmetry.
         If True, the function will seed weights symmetrically. When `adjmatrix`
@@ -659,7 +660,7 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
         weights for the reciprocal links.
         If False, weights are fully randomly assigned thus the matrix will
         have asymmetric weights even if the connectivity is undirected.
-    copy : boolean, optionla, default : True
+    copy : bool, optional, default: True
         If True, the function returns a new array of shape (N,N) and `np.float64`
         dtype. If False, the function adds weights 'in-place' to the input
         `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
@@ -745,6 +746,70 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     if copy:
         return adjmatrix
 
+def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
+                        sym_w=None, **arg_w_distr):
+    """Generates a random graph of N nodes and L links, with weights assigned
+    from a given distribution.
+
+    Syntactic sugar for calling functions RandomGraph() and SeedRandomWeights()
+    to return a random graph with random weights in one command.
+
+    Parameters
+    ----------
+    N : integer
+        The size of the network (number of nodes).
+    L : integer
+        Number of links of the resulting random network.
+    w_distr : function
+        The distribution function for drawing weight samples, it must have a
+        `size` argument for the number of generated samples. For example,
+        random number generators from `numpy.random` or `scipy.random`.
+    directed : bool, optional, default: False
+        True if a directed graph is desired. False, for an undirected graph.
+    selfloops : bool, optional, default: False
+        True if self-loops are allowed, False otherwise.
+    sym_w : bool or NoneType, optional, default: None.
+        If True, the function will seed weights symmetrically. When `adjmatrix`
+        is undirected, the resulting matrix is fully symmetric. But when
+        `adjmatrix` is directed, the function will at least seed symmetric
+        weights for the reciprocal links.
+        If False, weights are fully randomly assigned thus the matrix will
+        have asymmetric weights even if the connectivity is undirected.
+    copy : bool, optionla, default : True
+        If True, the function returns a new array of shape (N,N) and `np.float64`
+        dtype. If False, the function adds weights 'in-place' to the input
+        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
+        be of floating dtype.
+    arg_w_distr : dictionary or named arguments.
+        The other arguments necessary to define `w_distr`.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+        The adjacency matrix of the generated weighted random graph.
+
+    See Also
+    --------
+    RandomGraph : Generates a random graph of N nodes and L links.
+    SeedRandomWeights : Assigns random weigths to the links of a graph.
+    """
+    # 0) SECURITY CHECKS
+    if sym_w not in (None, True, False):
+        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
+
+    # 1) CREATE THE BINARY RANDOM GRAPH
+    adjmatrix = RandomGraph(N,L, directed=directed, selfloops=selfloops)
+    adjmatrix = adjmatrix.astype(np.float64)
+
+    # 2) ADD THE RANDOM WEIGHTS
+    if sym_w == None:
+       if directed == True:    sym_w = False
+       elif directed == False: sym_w = True
+
+    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
+
+    return adjmatrix
+
 
 
 ################################################################################
@@ -762,9 +827,9 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     adjmatrix : ndarray of dimension-2
         The adjacency matrix of the network to be rewired. 'adjmatrix' itself
         won't be rewired but a new matrix is returned.
-    prewire : float (optional)
+    prewire : float, optional, default: 10
         Fraction of links to be rewired. See Usage for further instructions.
-    directed : Boolean (optional)
+    directed : bool, optional, default: False
         Specifies the directedness of the returned network. If 'directed' is
         None (default), the function checks the directedness of the input
         network and performs the rewiring accordingly. To save computational
@@ -776,7 +841,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
         when 'adjmatrix' is undirected. DO NOT set 'directed = False' when
         'adjmatrix' is a directed network, degress won't be conserved and the
         function won't raise an error.
-    weighted : Boolean (optional)
+    weighted : bool, optional, default: False
         Specifies whether the weights of the links are conserved.
         If 'weighted' is False, a binary network is returned.
         If 'weighted' is True, links are switched conserving their weights.
@@ -900,10 +965,10 @@ def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
         won't be rewired but a new matrix is returned.
     partition : list of ndarrays of dtype = uint
         A list containing the indices of the nodes in each module.
-    directed : Boolean (optional)
+    directed : bool, optional, default: False
         True if a directed graph is desired, False if an undirected graph is
         desired.
-    selfloops: Boolean (optional)
+    selfloops: bool, optional, defaulf: False
         True if self-loops are allowed, False otherwise.
 
     Returns
@@ -1018,7 +1083,7 @@ def ShuffleWeights(adjmatrix, copy=True):
     ----------
     adjmatrix : ndarray of dimension-2
         The adjacency matrix of a network whose weights will be shuffled.
-    copy : boolean, optionla, default : True
+    copy : bool, optionla, default : True
         If True, the function returns a new array of shape (N,N) and same dtype
         as the input `adjmatrix`. If False, the function replaces the weights of
        `adjmatrix` in-place.
@@ -1121,10 +1186,10 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     pext : float
         The external probability of connection between nodes in different
         communities.
-    directed : Boolean (optional)
+    directed : bool, optional, default: False
         True if a directed graph is desired, False if an undirected graph is
         desired.
-    selfloops: Boolean (optional)
+    selfloops: bool, optional, defaulf: False
         True if self-loops are allowed, False otherwise.
 
     Returns
@@ -1274,7 +1339,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
         submodule they belong to, 3 links with the rest of neighbours at the
         submodule they belong to at the second level, and 1 link with any
         node at any community of the rest of the network.
-    directed : boolean (optional).
+    directed : bool, optional, default: False
         If true, the resulting network will be directed, else, it will be
         undirected.
 
@@ -1449,7 +1514,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
         Internally, the four submodules are scale-free-like networks with
         exponent gamma = 3.0. The links between modules are seeded at random
         but
-    directed : boolean (optional).
+    directed : bool, optional, default: False
         If true, the resulting network will be directed, else, it will be
         undirected.
 
