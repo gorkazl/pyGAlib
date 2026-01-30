@@ -234,6 +234,10 @@ def PathGraph(N, directed=False):
     # 0) SECURITY CHECK
     if N < 2: raise ValueError( "Network needs at least two nodes, N > 1" )
 
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+
+
     # 1) CREATE THE NETWORK
     adjmatrix = np.eye(N,k=1,dtype=np.uint8)
     if directed == False:
@@ -300,6 +304,11 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
     if (p < 0.0 or p > 1.0):
         raise ValueError( "Probability p out of bounds. Insert value between 0 and 1" )
 
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+    if selfloops not in (True, False):
+        raise ValueError( "'selfloops' must be True or False" )
+
     # 1) SEED RANDOM LINKS
     adjmatrix = numpy.random.rand(N,N)
     # Select the entries with value <= p, and transform into boolean
@@ -311,7 +320,7 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
         adjmatrix += adjmatrix.T
 
     # 3) REMOVE THE DIAGONAL IF NO SELF-LOOPS ARE DESIRED
-    if selfloops == False:
+    if not selfloops:
         adjmatrix[np.diag_indices(N)] = 0
 
     return adjmatrix.astype(np.uint8)
@@ -370,7 +379,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = N*(N-1) =", maxL )
     else:
-        if selfloops == True:
+        if selfloops:
             maxL = 0.5*N*(N+1)
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = 1/2*N*(N+1) =", maxL )
@@ -459,6 +468,7 @@ def BarabasiAlbertGraph(N, m):
     return adjmatrix
 
 def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
+    ## TODO: Add option for self-loops?
     """Generates a scale-free graph of given size and exponent.
 
     It follows the method proposed by Goh, Kahng & Kim 'Universal Behaviour
@@ -491,7 +501,10 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
     nodes are correlated, e.g., input hubs are also output hubs.
     """
     # 0) SECURITY CHECKS
-    if directed==True:
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+
+    if directed:
         maxL = N*(N-1)
         if L > maxL:
             raise ValueError( "L out of bounds, max(L) = N*(N-1) =", maxL )
@@ -800,6 +813,11 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
     SeedRandomWeights : Assigns random weigths to the links of a graph.
     """
     # 0) SECURITY CHECKS
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+    if selfloops not in (True, False):
+        raise ValueError( "'selfloops' must be True or False" )
+
     if sym_w not in (None, True, False):
         raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
 
@@ -809,8 +827,8 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
 
     # 2) ADD THE RANDOM WEIGHTS
     if sym_w == None:
-       if directed == True:    sym_w = False
-       elif directed == False: sym_w = True
+        if directed: sym_w = False
+        else: sym_w = True
 
     SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
 
@@ -821,6 +839,7 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
 ################################################################################
 """REWIRE AND RANDOMIZE NETWORKS"""
 def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
+    ## TODO: Can I add a "copy" parameter ?
     """Randomises an input graph conserving the degrees of its nodes.
 
     It uses the link switching method to rewire networks while conserving
@@ -875,9 +894,15 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     """
     # 0) PREPARE FOR THE CALCULATIONS
     # 0.1) Check the conditions for the rewiring process
-    if directed is None:
+    if directed not in (None, True, False):
+        raise ValueError( "'directed' must be None, True or False" )
+    if weighted not in (True, False):
+        raise ValueError( "'weighted' must be True or False" )
+
+    if directed == None:
         directed = is_directed(adjmatrix)
-    if weighted==True:
+
+    if weighted:
         rewmatrix = adjmatrix.copy()
     else:
         # rewmatrix = np.where(adjmatrix,1,0).astype(np.uint8)
@@ -885,7 +910,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
     N = len(rewmatrix)
     # 0.2) Generate the list of links
-    if directed==True:
+    if directed == True:
         linklist = np.array(rewmatrix.nonzero())
     else:
         # Apply nonzero only to the upper triangular part of the matrix
@@ -919,9 +944,9 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
         # 3) IF ALL CONDITIONS SUCCESFUL, REWIRE
         # 3.1) Rewire the matrix
-        if directed==True:
+        if directed == True:
             # Put the new links
-            if weighted==True:
+            if weighted:
                 rewmatrix[h1,t2] = rewmatrix[h2,t2]
                 rewmatrix[h2,t1] = rewmatrix[h1,t1]
             else:
@@ -934,7 +959,7 @@ def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
 
         else:
             # Put the new links
-            if weighted==True:
+            if weighted:
                 rewmatrix[h1,t2] = rewmatrix[h2,t2]
                 rewmatrix[t2,h1] = rewmatrix[t1,h1]
                 rewmatrix[h2,t1] = rewmatrix[h1,t1]
@@ -971,11 +996,12 @@ def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
         won't be rewired but a new matrix is returned.
     partition : list of ndarrays of dtype = uint
         A list containing the indices of the nodes in each module.
-    directed : bool, optional, default: False
+    directed : bool, optional, default: None
         True if a directed graph is desired, False if an undirected graph is
-        desired.
-    selfloops: bool, optional, defaulf: False
-        True if self-loops are allowed, False otherwise.
+        desired. If None, the function identifies it from adjmatrix
+    selfloops: bool, optional, defaulf: None
+        True if self-loops are allowed, False otherwise. If None, the function
+        identifies it from adjmatrix.
 
     Returns
     -------
@@ -991,6 +1017,11 @@ def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
     """
 
     # 0) SECURITY CHECKS AND SETUP
+    if directed not in (None, True, False):
+        raise ValueError( "'directed' must be None, True or False" )
+    if selfloops not in (None, True, False):
+        raise ValueError( "'selfloops' must be None, True or False" )
+
     # Convert the input network into a boolean matrix
     adjmatrix = adjmatrix.astype('bool')
 
@@ -1023,7 +1054,7 @@ def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
             idx1 = int( N1*numpy.random.rand() )
             idx2 = int( N1*numpy.random.rand() )
             # Check for self-loops
-            if selfloops == False and idx1==idx2: continue
+            if not selfloops and idx1==idx2: continue
             source = com1[idx1]
             target = com1[idx2]
 
@@ -1221,6 +1252,11 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     ErdosRenyiGraph : Generates random graphs with given link probability.
     """
     # 0) SECURITY CHECKS
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+    if selfloops not in (True, False):
+        raise ValueError( "'selfloops' must be True or False" )
+
     if len(Nsizelist) != len(pintlist):
         raise TypeError( "Parameters 'Nsizelist' and 'pintlist' not aligned." )
     if (pext < 0.0 or pext > 1.0):
@@ -1268,7 +1304,7 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
         adjmatrix += adjmatrix.T
 
     # 4) Remove the diagonal if no self-loops are desired
-    if selfloops == False:
+    if not selfloops:
         adjmatrix[np.diag_indices(N)] = 0
 
     return adjmatrix, partition
@@ -1319,6 +1355,7 @@ def HMpartition(HMshape):
     return partitions
 
 def HMRandomGraph(HMshape, avklist, directed=False):
+    ## TODO: Add option for self-loops ?
     """Generates a random hierarchical and modular network of desired number
     of hierarchical levels and modules.
 
@@ -1396,7 +1433,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
         Generates random modular networks with desired module sizes and
         densities.
     """
-    def SeedLinks(adjmatrix, L, partition, directed=False):
+    def _SeedLinks(adjmatrix, L, partition, directed=False):
         """This is a helper subfunction that seeds links at random.
         """
         # 0) SSECURITY CHECK
@@ -1422,7 +1459,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
             if adjmatrix[node1,node2]: continue
 
             # Link the nodes and update counter
-            if directed==True:
+            if directed == True:
                 adjmatrix[node1,node2] = 1
                 counter += 1
             else:
@@ -1436,6 +1473,9 @@ def HMRandomGraph(HMshape, avklist, directed=False):
         raise ValueError( "HMshape and plist not aligned." )
     if HMshape[0] < 1:
         raise ValueError("HMshape[0] <= 1. First hierarchical level must contain more than one module." )
+
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
 
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
@@ -1468,12 +1508,12 @@ def HMRandomGraph(HMshape, avklist, directed=False):
 
             # 3) SEED THE LINKS AT RANDOM BETWEEN COMMUNITIES
             # NOTE: In the last hierarchical level, every node is one community
-            if directed==True:
+            if directed == True:
                 Ls = Nblock * avklist[level]
             else:
                 Ls = 0.5 * Nblock * avklist[level]
 
-            SeedLinks(adjmatrix, Ls, partition, directed)
+            _SeedLinks(adjmatrix, Ls, partition, directed)
 
     return adjmatrix
 
@@ -1572,7 +1612,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
         Generates random modular networks with desired module sizes and
         densities.
     """
-    def GenerateBlock(L, partition, cumprobability, directed=False):
+    def _GenerateBlock(L, partition, cumprobability, directed=False):
         """This is a helper function which generates the modules at a given
         hierachical level.
         """
@@ -1615,7 +1655,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
 
         return blockmatrix
 
-    def SkewedRandomGraph(L, cumprobability, directed=False):
+    def _SkewedRandomGraph(L, cumprobability, directed=False):
         """This is a helper function to seed inter-modular links.
         """
         Ncom = len(cumprobability)
@@ -1651,6 +1691,9 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
     if gammalist:
         if len(gammalist) != len(HMshape):
             raise ValueError( "HMshape and gammalist are not alighned." )
+
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
 
     # 1) PREPARE TO CREATE THE NETWORK
     N = np.multiply.reduce(HMshape)
@@ -1703,7 +1746,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
             cumprobability = nodeweights.cumsum()
 
         # 2.4) Determine the number of links to be seed per block
-        if directed==True:
+        if directed == True:
             Lblock = Nblock * avklist[level]
         else:
             Lblock = 0.5 * Nblock * avklist[level]
@@ -1713,7 +1756,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
             minidx = b*Nblock
             maxidx = (b+1)*Nblock
             adjmatrix[minidx:maxidx,minidx:maxidx] = \
-                GenerateBlock(Lblock, partition, cumprobability, directed)
+                _GenerateBlock(Lblock, partition, cumprobability, directed)
 
     # 3) CREATE THE LAST HIERARCHICAL LEVEL
     # 3.1 ) Find the number communities and nodes per community
@@ -1726,7 +1769,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
     cumprobability = nodeweights.cumsum()
 
     # 3.3) Determine the number of links to be seed per community
-    if directed==True:
+    if directed == True:
         Lcom = Ncom* avklist[-1]
     else:
         Lcom = 0.5 * Ncom * avklist[-1]
@@ -1737,7 +1780,7 @@ def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
         maxidx = (i+1)*Ncom
 
         adjmatrix[minidx:maxidx,minidx:maxidx] = \
-            SkewedRandomGraph(Lcom, cumprobability, directed)
+            _SkewedRandomGraph(Lcom, cumprobability, directed)
 
     return adjmatrix
 
@@ -1784,7 +1827,10 @@ def RavaszBarabasiGraph(Nmotif=4, hlevels=3, hublinks=True):
     if Nmotif < 4:
         raise ValueError('Basic motif needs at least four nodes, Nmotif > 3.')
     if hlevels < 1:
-        raise ValueError('Number of hirarchical levels needs to be positive, hlevels > 0.')
+        raise ValueError('Number of hirarchical levels must be: hlevels >= 1.')
+
+    if hublinks not in (True, False):
+        raise ValueError( "'hublinks' must be True or False" )
 
     # The number of nodes of one module in three different scales
     N = Nmotif**(hlevels)
