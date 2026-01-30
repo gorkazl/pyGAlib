@@ -353,13 +353,19 @@ def RandomGraph(N, L, directed=False, selfloops=False):
     --------
     ErdosRenyiGraph : Random graphs with given link probability.
     """
-    # 0) SECURITY CHECKS. Make sure L is not too large.
-    if directed==True:
-        if selfloops == True:
+    # 0) SECURITY CHECKS
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+    if selfloops not in (True, False):
+        raise ValueError( "'selfloops' must be True or False" )
+
+    # Make sure L is not too large
+    if directed:
+        if selfloops:
             maxL = N**2
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = N**2 =", maxL )
-        elif selfloops == False:
+        else:
             maxL = N*(N-1)
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = N*(N-1) =", maxL )
@@ -368,7 +374,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
             maxL = 0.5*N*(N+1)
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = 1/2*N*(N+1) =", maxL )
-        elif selfloops == False:
+        else:
             maxL = 0.5*N*(N-1)
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = 1/2*N*(N-1) =", maxL )
@@ -385,7 +391,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
 
         # 2.2) Check if they can be linked, otherwise look for another pair
         if adjmatrix[source,target] == 1: continue
-        if (selfloops == False) and source == target: continue
+        if not selfloops and source == target: continue
 
         # 2.3) If the nodes are linkable, place the link
         adjmatrix[source,target] = 1
