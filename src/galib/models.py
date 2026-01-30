@@ -236,7 +236,7 @@ def PathGraph(N, directed=False):
 
     # 1) CREATE THE NETWORK
     adjmatrix = np.eye(N,k=1,dtype=np.uint8)
-    if not directed:
+    if directed == False:
         adjmatrix += adjmatrix.T
 
     return adjmatrix
@@ -311,7 +311,7 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
         adjmatrix += adjmatrix.T
 
     # 3) REMOVE THE DIAGONAL IF NO SELF-LOOPS ARE DESIRED
-    if not selfloops:
+    if selfloops == False:
         adjmatrix[np.diag_indices(N)] = 0
 
     return adjmatrix.astype(np.uint8)
@@ -355,20 +355,20 @@ def RandomGraph(N, L, directed=False, selfloops=False):
     """
     # 0) SECURITY CHECKS. Make sure L is not too large.
     if directed==True:
-        if selfloops:
+        if selfloops == True:
             maxL = N**2
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = N**2 =", maxL )
-        else:
+        elif selfloops == False:
             maxL = N*(N-1)
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = N*(N-1) =", maxL )
     else:
-        if selfloops:
+        if selfloops == True:
             maxL = 0.5*N*(N+1)
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = 1/2*N*(N+1) =", maxL )
-        else:
+        elif selfloops == False:
             maxL = 0.5*N*(N-1)
             if L > maxL:
                 raise ValueError( "L out of bounds, max(L) = 1/2*N*(N-1) =", maxL )
@@ -385,7 +385,7 @@ def RandomGraph(N, L, directed=False, selfloops=False):
 
         # 2.2) Check if they can be linked, otherwise look for another pair
         if adjmatrix[source,target] == 1: continue
-        if not selfloops and source == target: continue
+        if (selfloops == False) and source == target: continue
 
         # 2.3) If the nodes are linkable, place the link
         adjmatrix[source,target] = 1
@@ -1017,7 +1017,7 @@ def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
             idx1 = int( N1*numpy.random.rand() )
             idx2 = int( N1*numpy.random.rand() )
             # Check for self-loops
-            if not selfloops and idx1==idx2: continue
+            if selfloops == False and idx1==idx2: continue
             source = com1[idx1]
             target = com1[idx2]
 
@@ -1262,7 +1262,7 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
         adjmatrix += adjmatrix.T
 
     # 4) Remove the diagonal if no self-loops are desired
-    if not selfloops:
+    if selfloops == False:
         adjmatrix[np.diag_indices(N)] = 0
 
     return adjmatrix, partition
