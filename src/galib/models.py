@@ -40,7 +40,7 @@ ScaleFreeGraph
 WattsStrogatzGraph
     Generates a graph following the Watts & Strogatz model.
 SeedRandomWeights
-    Randomly assigns weigths to links of a network, from a given distribution.
+    Assigns weigths (from a random distribution) to the links of a graph.
 
 REWIRE AND RANDOMISE NETWORKS
 -----------------------------
@@ -622,7 +622,7 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
 
 def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     """
-    Randomly assigns weigths to links of a network, from a given distribution.
+    Assigns weigths (from a random distribution) to the links of a graph.
 
     Assigns random weights to the links of a given connectivity matrix. Weights
     are sampled from a distribution specified by the user, for exmaple:
