@@ -42,7 +42,7 @@ WattsStrogatzGraph
 
 SeedRandomWeights
     Assigns weigths (from a random distribution) to the links of a graph.
-WeightedERGraph   (TO BE DONE)
+WeightedERGraph
     Generates an Erdos-Renyi graph with link weights assigned from a radonm distribution
 WeightedRandomGraph
     Generates a random graph of N nodes and L links, with weights assigned from
@@ -284,8 +284,8 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
     ----------
     N : integer
         The size of the network (number of nodes).
-    p : float between 0 and 1
-        Probability of links.
+    p : float
+        Probability of a link between each pair of nodes. Value between 0 and 1.
     directed : bool, optional, default: False
         True if a directed graph is desired. False, for an undirected graph.
     selfloops: bool, optional, defaulf: False
@@ -765,6 +765,77 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     if copy:
         return adjmatrix
 
+def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
+                                                                **arg_w_distr):
+    """Generates a random graph following the Erdos-Renyi model, and assigns weights
+    to the links, drawn from a given distribution.
+
+    Syntactic sugar for calling functions ErdosRenyiGraph() and SeedRandomWeights()
+    to generate a random graph with random weights in one command.
+
+    Parameters
+    ----------
+    N : integer
+        The size of the network (number of nodes).
+    p : float
+        Probability of a link between each pair of nodes. Value between 0 and 1.
+    w_distr : function
+        The distribution function for drawing weight samples, it must have a
+        `size` argument for the number of generated samples. For example,
+        random number generators from `numpy.random` or `scipy.random`.
+    directed : bool, optional, default: False
+        True if a directed graph is desired. False, for an undirected graph.
+    selfloops : bool, optional, default: False
+        True if self-loops are allowed, False otherwise.
+    sym_w : bool or NoneType, optional, default: None.
+        If True, the function will seed weights symmetrically. When `adjmatrix`
+        is undirected, the resulting matrix is fully symmetric. But when
+        `adjmatrix` is directed, the function will at least seed symmetric
+        weights for the reciprocal links.
+        If False, weights are fully randomly assigned thus the matrix will
+        have asymmetric weights even if the connectivity is undirected.
+    copy : bool, optionla, default : True
+        If True, the function returns a new array of shape (N,N) and `np.float64`
+        dtype. If False, the function adds weights 'in-place' to the input
+        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
+        be of floating dtype.
+    arg_w_distr : dictionary or named arguments.
+        The other arguments necessary to define `w_distr`.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+        The adjacency matrix of the generated weighted random graph.
+
+    See Also
+    --------
+    ErdosRenyiGraph : Generates a random graph following the Erdos & Renyi model.
+    SeedRandomWeights : Assigns random weigths to the links of a graph.
+    """
+    # 0) SECURITY CHECKS
+    if (p < 0.0 or p > 1.0):
+        raise ValueError( "Probability p out of bounds. Insert value between 0 and 1" )
+
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+    if selfloops not in (True, False):
+        raise ValueError( "'selfloops' must be True or False" )
+    if sym_w not in (None, True, False):
+        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
+
+    # 1) CREATE THE BINARY RANDOM GRAPH
+    adjmatrix = ErdosRenyiGraph(N,p, directed=directed, selfloops=selfloops)
+    adjmatrix = adjmatrix.astype(np.float64)
+
+    # 2) ADD THE RANDOM WEIGHTS
+    if sym_w == None:
+       if directed == True:    sym_w = False
+       elif directed == False: sym_w = True
+
+    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
+
+    return adjmatrix
+
 def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
                         sym_w=None, **arg_w_distr):
     """Generates a random graph of N nodes and L links, with weights assigned
@@ -817,7 +888,6 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
         raise ValueError( "'directed' must be True or False" )
     if selfloops not in (True, False):
         raise ValueError( "'selfloops' must be True or False" )
-
     if sym_w not in (None, True, False):
         raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
 
