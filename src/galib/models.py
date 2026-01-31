@@ -30,7 +30,7 @@ StarGraph
 GENERATE RANDOM NETWORKS
 ------------------------
 ErdosRenyiGraph
-    Generates a random graph following the Erdos & Renyi model.
+    Generates a random graph of N nodes and link probability p.
 RandomGraph
     Generates a random graph of N nodes and L links.
 BarabasiAlbertGraph
@@ -43,7 +43,8 @@ WattsStrogatzGraph
 SeedRandomWeights
     Assigns weigths (from a random distribution) to the links of a graph.
 WeightedERGraph
-    Generates an Erdos-Renyi graph with link weights assigned from a radonm distribution
+    Generates a random graph of N nodes and link probability p, with link
+    weights assigned from a given random distribution.
 WeightedRandomGraph
     Generates a random graph of N nodes and L links, with weights assigned from
     a given distribution.
@@ -272,7 +273,7 @@ def StarGraph(N):
 ################################################################################
 """GENERATE RANDOM NETWORKS"""
 def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
-    """Generates a random graph following the Erdos & Renyi model.
+    """Generates a random graph of N nodes and link probability p.
 
     In an Erdos-Renyi graph a link happens with probability p. Therefore,
     different relizations of the graph may have different number of links.
@@ -299,6 +300,8 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
     See Also
     --------
     RandomGraph : Generates a random graph of N nodes and L links.
+    WeightedERGraph : Random graph of N nodes and link probability p, with link
+        weights assigned from a given random distribution.
     """
     # 0) SECURITY CHECKS
     if (p < 0.0 or p > 1.0):
@@ -361,6 +364,9 @@ def RandomGraph(N, L, directed=False, selfloops=False):
     See Also
     --------
     ErdosRenyiGraph : Random graphs with given link probability.
+    WeightedRandomGraph : Random graph of N nodes and L links, with weights
+        assigned from a given distribution.
+
     """
     # 0) SECURITY CHECKS
     if directed not in (True, False):
@@ -695,6 +701,13 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
             reassigned, drawn from distribution `w_distr`.
     if copy = False
         None. (Changes `adjmatrix` in place and does not return anything.)
+
+    See also
+    --------
+    WeightedERGraph : Random graph of N nodes and link probability p, with link
+        weights assigned from a given random distribution
+    WeightedRandomGraph : Random graph of N nodes and L links, with weights
+        assigned from a given distribution.
     """
     # 0) SECURITY CHECKS AND GETTING READY
     # Check for potential erroneous inputs
@@ -767,8 +780,8 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
 
 def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
                                                                 **arg_w_distr):
-    """Generates a random graph following the Erdos-Renyi model, and assigns weights
-    to the links, drawn from a given distribution.
+    """Generates a random graph of N nodes and link probability p, with link
+    weights assigned from a given random distribution.
 
     Syntactic sugar for calling functions ErdosRenyiGraph() and SeedRandomWeights()
     to generate a random graph with random weights in one command.
