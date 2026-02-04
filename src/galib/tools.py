@@ -624,9 +624,9 @@ def HammingDistance(array1, array2, normed=False):
     """
     # 0) PREPARE FOR CALCULATIONS
     # 0.1) Convert the arrays into rank-1 arrays
-    if len(np.shape(array1)) > 1:
+    if array1.ndim > 1:
         array1 = array1.reshape(-1)
-    if len(np.shape(array2)) > 1:
+    if array2.ndim > 1:
         array2 = array2.reshape(-1)
 
     # 0.2) Security check
@@ -1020,7 +1020,7 @@ def MeanCorrelation(data, tolerance=10**(-15)):
     """
     # Security checks and data preparation
     dataset = np.array(data, np.float64)
-    if len(np.shape(dataset)) > 1:
+    if dataset.ndim > 1:
         dataset = dataset.flatten()
 
     if dataset.max() > 1.0 + tolerance:

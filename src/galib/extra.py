@@ -338,7 +338,7 @@ def FunctionalComplexity(corrmatrix, nbins=50, datarange=[0,1]):
 
     """
     # 0) Security checks
-    if len(np.shape(corrmatrix)) != 2:
+    if corrmatrix.ndim != 2:
         raise ValueError('Input data not a correlation matrix. Data not alligned.')
     if corrmatrix.min() < datarange[0]:
         raise ValueError('Input data not in range. Values smaller than range found.')
