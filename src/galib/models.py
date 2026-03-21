@@ -11,8 +11,10 @@
 SYNTHETIC NETWORK GENERATORS
 ============================
 
-This module contains functions to generate typical synthetic networks,
-including random networks and methods to rewire networks.
+This module contains functions to generate common synthetic graphs, including:
+- the generation of random graphs from scratch,
+- the generation of surrogate graphs by randomising existing ones,
+- and the support for various (random) weighted graphs.
 
 DETERMINISTIC AND CLASSIC GRAPH MODELS
 --------------------------------------
@@ -27,8 +29,8 @@ PathGraph
 StarGraph
     Generates a star graph of size N.
 
-GENERATE RANDOM NETWORKS
-------------------------
+GENERATION OF RANDOM GRAPHS
+---------------------------
 ErdosRenyiGraph
     Generates a random graph of N nodes and link probability p.
 RandomGraph
@@ -40,23 +42,13 @@ ScaleFreeGraph
 WattsStrogatzGraph
     Generates a graph following the Watts & Strogatz model.
 
-SeedRandomWeights
-    Assigns weigths (from a random distribution) to the links of a graph.
-WeightedERGraph
-    Generates a random graph of N nodes and link probability p, with link
-    weights assigned from a given random distribution.
-WeightedRandomGraph
-    Generates a random graph of N nodes and L links, with weights assigned from
-    a given distribution.
-
-REWIRE AND RANDOMISE NETWORKS
+REWIRE AND RANDOMISE GRAPHS
 -----------------------------
 RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
+    If weighted, it conserves the input weights to nodes.
 ModularPreservingGraph
     Randomises an input graph conserving its modular structure.
-ShuffleWeights
-    Randomly reallocates the link weights while maintaining the link positions.
 
 HIERARCHICAL AND MODULAR (HM) GRAPH MODELS
 ------------------------------------------
@@ -73,6 +65,23 @@ HMCentralisedGraph
     connectivity through local hubs.
 RavaszBarabasiGraph
     Generates a hierarchical network following the Ravasz & Barabasi model.
+
+WEIGHTED (RANDOM) GRAPHS
+------------------------
+SeedRandomWeights
+    Assigns weigths (from a random distribution) to the links of a graph.
+WeightedERGraph
+    Generates a random graph of N nodes and link probability p, with link
+    weights assigned from a given random distribution.
+WeightedRandomGraph
+    Generates a random graph of N nodes and L links, with weights assigned from
+    a given distribution.
+RewireNetwork
+    Randomises an input graph conserving the degrees of its nodes.
+    If weighted, it conserves the input weights to nodes.
+ShuffleWeights
+    Randomly reallocates the link weights while maintaining the link positions.
+
 
 SPATIALLY EMBEDDED (SURROGATE) NETWORKS
 ---------------------------------------
@@ -271,7 +280,7 @@ def StarGraph(N):
 
 
 ################################################################################
-"""GENERATE RANDOM NETWORKS"""
+"""GENERATE RANDOM GRAPHS"""
 def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
     """Generates a random graph of N nodes and link probability p.
 
@@ -651,276 +660,10 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
 
     return adjmatrix
 
-def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
-    """
-    Assigns weigths (from a random distribution) to the links of a graph.
-
-    Assigns random weights to the links of a given connectivity matrix. Weights
-    are sampled from a distribution specified by the user, for exmaple:
-    `numpy.random.uniform`, `scipy.stats.uniform` or `scipy.stats.norm`.
-
-    NOTE: The function can either return a new array or assign weights to the
-    input `adjmatrix` in place. This is controled by the `copy` parameter which
-    is set to True by default for coherence with the behaviour of other functions.
-    Note that for in-place overwriting of input `adjmatrix`, this needs to be
-    passed as a `np.float64` dtype while, typically, graph generation functions
-    in GAlib return arrays of `np.uint8`.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of shape (N,N).
-        The matrix of a network whose weights want to be randomly assigned.
-        `adjmatrix` can be either a connectivity matrix (already weighted or not),
-        or the mask (boolean matrix) of an existing `adjmatrix`.
-    w_distr : function.
-        The distribution function for drawing weight samples, it must have a
-        `size` argument for the number of generated samples. For example,
-        random number generators from `numpy.random` or `scipy.random`.
-    sym_w : bool, optional, default: None.
-        If None, the function checks whether `adjmatrix` is an (un)directed or
-        a directed graph, and will assign the weights with matching (a)symmetry.
-        If True, the function will seed weights symmetrically. When `adjmatrix`
-        is undirected, the resulting matrix is fully symmetric. But when
-        `adjmatrix` is directed, the function will at least seed symmetric
-        weights for the reciprocal links.
-        If False, weights are fully randomly assigned thus the matrix will
-        have asymmetric weights even if the connectivity is undirected.
-    copy : bool, optional, default: True
-        If True, the function returns a new array of shape (N,N) and `np.float64`
-        dtype. If False, the function adds weights 'in-place' to the input
-        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
-        be of floating dtype.
-    arg_w_distr : dictionary or named arguments.
-        The other arguments necessary to define `w_distr`.
-
-    Returns
-    -------
-    if copy = True
-        adjmatrix : ndarray of shape (N,N) and dtype = np.float64
-            A connectivity matrix with same links as input `adjmatrix` but weights
-            reassigned, drawn from distribution `w_distr`.
-    if copy = False
-        None. (Changes `adjmatrix` in place and does not return anything.)
-
-    See also
-    --------
-    WeightedERGraph : Random graph of N nodes and link probability p, with link
-        weights assigned from a given random distribution
-    WeightedRandomGraph : Random graph of N nodes and L links, with weights
-        assigned from a given distribution.
-    """
-    # 0) SECURITY CHECKS AND GETTING READY
-    # Check for potential erroneous inputs
-    if sym_w not in (None, True, False):
-        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
-
-    if copy not in [True, False]:
-        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
-
-    # Check if input array 'adjmatrix' can be changed in-place.
-    if copy == False:
-        if adjmatrix.dtype.kind != 'f':
-            warntext = f"'adjmatrix' needs to be np.floating for in-place " \
-                       f"modification but is {adjmatrix.dtype}. " \
-                       f"Setting copy = True and seeding random weights ..."
-            warnings.warn( warntext, category=RuntimeWarning )
-            copy = True
-
-    # Decide the type of weight symmetry, if not specified by user
-    _directed = is_directed(adjmatrix)
-    if sym_w is None:
-        if _directed: sym_w = False
-        else: sym_w = True
-
-    # Initialise the arrays needed
-    mask = adjmatrix.astype(np.bool)
-    if copy:
-        adjmatrix = np.zeros_like(mask, np.float64)
-
-    # CASE-1: Asymmetric weigths are desired (regardless of adjmatrix is
-    # directed or undirected)
-    if sym_w==False:
-        nlinks = mask.sum()
-        weights = w_distr(size=nlinks, **arg_w_distr)
-        adjmatrix[mask] = weights
-
-    # CASE-2: Symmetric weights are desired. If 'adjmatrix' is directed, then
-    # at least the reciprocal links will receive symmetric weights.
-    elif sym_w==True:
-        # 1) Deal with the weights of reciprocal links, including diagonal entries
-        mask_und = mask * mask.T
-        # Keep only the upper triangular entries
-        mask_und = np.triu(mask_und,k=0)
-        nlinks = mask_und.sum()
-        if nlinks > 0:
-            # Compute the random numbers and place them in 'wmatrix'
-            weights = w_distr(size=nlinks, **arg_w_distr)
-            adjmatrix[mask_und] = weights
-            if copy:
-                _diagweights = adjmatrix.diagonal().copy()
-                adjmatrix += adjmatrix.T
-                np.fill_diagonal(adjmatrix, _diagweights)
-            else:
-                # Can't make boolean indexing to read the mask in 'F' order :(
-                temp_idx = mask_und.nonzero()
-                adjmatrix[temp_idx[1],temp_idx[0]] = weights
-                del temp_idx
-
-        # 2) Deal with the weights of non-reciprocal links, if any
-        if _directed:
-            mask_dir = mask ^ (mask_und + mask_und.T)
-            nlinks = mask_dir.sum()
-            if nlinks > 0:
-                # Compute the random numbers and place them in 'wmatrix'
-                weights = w_distr(size=nlinks, **arg_w_distr)
-                adjmatrix[mask_dir] = weights
-
-    if copy:
-        return adjmatrix
-
-def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
-                                                                **arg_w_distr):
-    """Generates a random graph of N nodes and link probability p, with link
-    weights assigned from a given random distribution.
-
-    Syntactic sugar for calling functions ErdosRenyiGraph() and SeedRandomWeights()
-    to generate a random graph with random weights in one command.
-
-    Parameters
-    ----------
-    N : integer
-        The size of the network (number of nodes).
-    p : float
-        Probability of a link between each pair of nodes. Value between 0 and 1.
-    w_distr : function
-        The distribution function for drawing weight samples, it must have a
-        `size` argument for the number of generated samples. For example,
-        random number generators from `numpy.random` or `scipy.random`.
-    directed : bool, optional, default: False
-        True if a directed graph is desired. False, for an undirected graph.
-    selfloops : bool, optional, default: False
-        True if self-loops are allowed, False otherwise.
-    sym_w : bool or NoneType, optional, default: None.
-        If True, the function will seed weights symmetrically. When `adjmatrix`
-        is undirected, the resulting matrix is fully symmetric. But when
-        `adjmatrix` is directed, the function will at least seed symmetric
-        weights for the reciprocal links.
-        If False, weights are fully randomly assigned thus the matrix will
-        have asymmetric weights even if the connectivity is undirected.
-    copy : bool, optionla, default : True
-        If True, the function returns a new array of shape (N,N) and `np.float64`
-        dtype. If False, the function adds weights 'in-place' to the input
-        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
-        be of floating dtype.
-    arg_w_distr : dictionary or named arguments.
-        The other arguments necessary to define `w_distr`.
-
-    Returns
-    -------
-    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
-        The adjacency matrix of the generated weighted random graph.
-
-    See Also
-    --------
-    ErdosRenyiGraph : Generates a random graph following the Erdos & Renyi model.
-    SeedRandomWeights : Assigns random weigths to the links of a graph.
-    """
-    # 0) SECURITY CHECKS
-    if (p < 0.0 or p > 1.0):
-        raise ValueError( "Probability p out of bounds. Insert value between 0 and 1" )
-
-    if directed not in (True, False):
-        raise ValueError( "'directed' must be True or False" )
-    if selfloops not in (True, False):
-        raise ValueError( "'selfloops' must be True or False" )
-    if sym_w not in (None, True, False):
-        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
-
-    # 1) CREATE THE BINARY RANDOM GRAPH
-    adjmatrix = ErdosRenyiGraph(N,p, directed=directed, selfloops=selfloops)
-    adjmatrix = adjmatrix.astype(np.float64)
-
-    # 2) ADD THE RANDOM WEIGHTS
-    if sym_w == None:
-       if directed == True:    sym_w = False
-       elif directed == False: sym_w = True
-
-    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
-
-    return adjmatrix
-
-def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
-                        sym_w=None, **arg_w_distr):
-    """Generates a random graph of N nodes and L links, with weights assigned
-    from a given distribution.
-
-    Syntactic sugar for calling functions RandomGraph() and SeedRandomWeights()
-    to return a random graph with random weights in one command.
-
-    Parameters
-    ----------
-    N : integer
-        The size of the network (number of nodes).
-    L : integer
-        Number of links of the resulting random network.
-    w_distr : function
-        The distribution function for drawing weight samples, it must have a
-        `size` argument for the number of generated samples. For example,
-        random number generators from `numpy.random` or `scipy.random`.
-    directed : bool, optional, default: False
-        True if a directed graph is desired. False, for an undirected graph.
-    selfloops : bool, optional, default: False
-        True if self-loops are allowed, False otherwise.
-    sym_w : bool or NoneType, optional, default: None.
-        If True, the function will seed weights symmetrically. When `adjmatrix`
-        is undirected, the resulting matrix is fully symmetric. But when
-        `adjmatrix` is directed, the function will at least seed symmetric
-        weights for the reciprocal links.
-        If False, weights are fully randomly assigned thus the matrix will
-        have asymmetric weights even if the connectivity is undirected.
-    copy : bool, optionla, default : True
-        If True, the function returns a new array of shape (N,N) and `np.float64`
-        dtype. If False, the function adds weights 'in-place' to the input
-        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
-        be of floating dtype.
-    arg_w_distr : dictionary or named arguments.
-        The other arguments necessary to define `w_distr`.
-
-    Returns
-    -------
-    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
-        The adjacency matrix of the generated weighted random graph.
-
-    See Also
-    --------
-    RandomGraph : Generates a random graph of N nodes and L links.
-    SeedRandomWeights : Assigns random weigths to the links of a graph.
-    """
-    # 0) SECURITY CHECKS
-    if directed not in (True, False):
-        raise ValueError( "'directed' must be True or False" )
-    if selfloops not in (True, False):
-        raise ValueError( "'selfloops' must be True or False" )
-    if sym_w not in (None, True, False):
-        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
-
-    # 1) CREATE THE BINARY RANDOM GRAPH
-    adjmatrix = RandomGraph(N,L, directed=directed, selfloops=selfloops)
-    adjmatrix = adjmatrix.astype(np.float64)
-
-    # 2) ADD THE RANDOM WEIGHTS
-    if sym_w == None:
-        if directed: sym_w = False
-        else: sym_w = True
-
-    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
-
-    return adjmatrix
-
 
 
 ################################################################################
-"""REWIRE AND RANDOMIZE NETWORKS"""
+"""REWIRE AND RANDOMIZE GRAPHS"""
 def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     ## TODO: Can I add a "copy" parameter ?
     """Randomises an input graph conserving the degrees of its nodes.
@@ -1180,109 +923,10 @@ def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
 
     return randmatrix
 
-def ShuffleWeights(adjmatrix, copy=True):
-    """
-    Randomly reallocates the link weights while maintaining the link positions.
-
-    This function reads the link weights from the given (weighted) connectivity
-    matrix, and places the same weights back, randomly re-assigned. This
-    randomization respects the symmetry of input `adjmatrix`.
-    - If `adjmatrix` is an undirected graph with all reciprocal weights identical
-    such that w[i,j] = w[j,i], then weigths are shuffled and their symmetry is
-    conserved.
-    - If the weights of `adjmatrix` are not symmetric, e.g., there is at least one
-    pair for which w[i,j] != w[j,i], all weights are randomly re-allocated
-    leading to a non-symmetric connectivity matrix (regardless of whether the
-    underlying connectivity is directed or undirected).
-
-    NOTE: The function can either return a new array or change the weights of
-    input `adjmatrix` in place. This is controled by the `copy` parameter which
-    is set to True by default for coherence with other functions.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of dimension-2
-        The adjacency matrix of a network whose weights will be shuffled.
-    copy : bool, optionla, default : True
-        If True, the function returns a new array of shape (N,N) and same dtype
-        as the input `adjmatrix`. If False, the function replaces the weights of
-       `adjmatrix` in-place.
-
-    Returns
-    -------
-    if copy = True
-        adjmatrix : ndarray of shape (N,N) and same dtype as input matrix
-            A connectivity matrix with same links as input `adjmatrix` but weights
-            randomly reassigned.
-    if copy = False
-        None. (Changes `adjmatrix` in place and does not return anything.)
-    """
-    # 0) SECURITY CHECKS AND GETTING READY
-    # Check for potential erroneous inputs
-    if copy not in [True, False]:
-        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
-
-    # Identify if the network is symmetric or not
-    symmetric = is_symmetric(adjmatrix)
-    # Initialise the arrays needed
-    mask = adjmatrix.astype(np.bool)
-
-    # CASE-1: Weights in adjmatrix are NOT symmetric,
-    # it could be either directed or undirected
-    if symmetric == False:
-        # Extract the weights and shuffle them
-        weights = adjmatrix[mask]
-        np.random.shuffle(weights)
-        # Place the shuffled weights
-        if copy==True:
-            adjmatrix = np.zeros_like(adjmatrix)
-        adjmatrix[mask] = weights
-
-    # CASE-2: Weights in adjmatrix are symmetric, adjmatrix can only be undirected
-    else:
-        # 1) Deal with the diagonal weigths (if needed) and shuffle them
-        _self_loops = mask.trace()
-        if _self_loops == 0:
-            pass
-        elif _self_loops == 1:
-            _diagonal = adjmatrix.diagonal().copy()
-            print( _diagonal )
-        elif mask.trace() > 1:
-            _diagonal = adjmatrix.diagonal().copy()
-            _diagmask = mask.diagonal()
-            _diagweights = _diagonal[_diagmask]
-            # Shuffle and place back
-            np.random.shuffle(_diagweights)
-            _diagonal[_diagmask] = _diagweights
-            del _diagmask, _diagweights
-
-        # 2) Extract the upper-triangular values, and shuffle them
-        mask = np.triu(mask, k=1)
-        weights = adjmatrix[mask]
-        np.random.shuffle(weights)
-
-        # 3) Place the shuffled weights back
-        if copy == True:
-            adjmatrix = np.zeros_like(adjmatrix)
-            adjmatrix[mask] = weights
-            adjmatrix += adjmatrix.T
-        else:
-            # Can't make boolean indexing to read the mask in 'F' order :(
-            adjmatrix[mask] = weights
-            temp_idx = mask.nonzero()
-            adjmatrix[temp_idx[1],temp_idx[0]] = weights
-
-        # Place the shuffled diagonal weights
-        if _self_loops > 0:
-            np.fill_diagonal(adjmatrix, _diagonal)
-
-    if copy:
-        return adjmatrix
-
 
 
 ################################################################################
-"""MODULAR AND HIERARCHICAL NETWORK MODELS"""
+"""MODULAR AND HIERARCHICAL GRAPH MODELS"""
 def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     """
     Generates a random modular network of given module sizes and densities.
@@ -1956,6 +1600,377 @@ def RavaszBarabasiGraph(Nmotif=4, hlevels=3, hublinks=True):
 
 
 ################################################################################
+"""WEIGHTED (RANDOM) GRAPHS"""
+def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
+    """
+    Assigns weigths (from a random distribution) to the links of a graph.
+
+    Assigns random weights to the links of a given connectivity matrix. Weights
+    are sampled from a distribution specified by the user, for exmaple:
+    `numpy.random.uniform`, `scipy.stats.uniform` or `scipy.stats.norm`.
+
+    NOTE: The function can either return a new array or assign weights to the
+    input `adjmatrix` in place. This is controled by the `copy` parameter which
+    is set to True by default for coherence with the behaviour of other functions.
+    Note that for in-place overwriting of input `adjmatrix`, this needs to be
+    passed as a `np.float64` dtype while, typically, graph generation functions
+    in GAlib return arrays of `np.uint8`.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of shape (N,N).
+        The matrix of a network whose weights want to be randomly assigned.
+        `adjmatrix` can be either a connectivity matrix (already weighted or not),
+        or the mask (boolean matrix) of an existing `adjmatrix`.
+    w_distr : function.
+        The distribution function for drawing weight samples, it must have a
+        `size` argument for the number of generated samples. For example,
+        random number generators from `numpy.random` or `scipy.random`.
+    sym_w : bool, optional, default: None.
+        If None, the function checks whether `adjmatrix` is an (un)directed or
+        a directed graph, and will assign the weights with matching (a)symmetry.
+        If True, the function will seed weights symmetrically. When `adjmatrix`
+        is undirected, the resulting matrix is fully symmetric. But when
+        `adjmatrix` is directed, the function will at least seed symmetric
+        weights for the reciprocal links.
+        If False, weights are fully randomly assigned thus the matrix will
+        have asymmetric weights even if the connectivity is undirected.
+    copy : bool, optional, default: True
+        If True, the function returns a new array of shape (N,N) and `np.float64`
+        dtype. If False, the function adds weights 'in-place' to the input
+        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
+        be of floating dtype.
+    arg_w_distr : dictionary or named arguments.
+        The other arguments necessary to define `w_distr`.
+
+    Returns
+    -------
+    if copy = True
+        adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+            A connectivity matrix with same links as input `adjmatrix` but weights
+            reassigned, drawn from distribution `w_distr`.
+    if copy = False
+        None. (Changes `adjmatrix` in place and does not return anything.)
+
+    See also
+    --------
+    WeightedERGraph : Random graph of N nodes and link probability p, with link
+        weights assigned from a given random distribution
+    WeightedRandomGraph : Random graph of N nodes and L links, with weights
+        assigned from a given distribution.
+    """
+    # 0) SECURITY CHECKS AND GETTING READY
+    # Check for potential erroneous inputs
+    if sym_w not in (None, True, False):
+        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
+
+    if copy not in [True, False]:
+        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
+
+    # Check if input array 'adjmatrix' can be changed in-place.
+    if copy == False:
+        if adjmatrix.dtype.kind != 'f':
+            warntext = f"'adjmatrix' needs to be np.floating for in-place " \
+                       f"modification but is {adjmatrix.dtype}. " \
+                       f"Setting copy = True and seeding random weights ..."
+            warnings.warn( warntext, category=RuntimeWarning )
+            copy = True
+
+    # Decide the type of weight symmetry, if not specified by user
+    _directed = is_directed(adjmatrix)
+    if sym_w is None:
+        if _directed: sym_w = False
+        else: sym_w = True
+
+    # Initialise the arrays needed
+    mask = adjmatrix.astype(np.bool)
+    if copy:
+        adjmatrix = np.zeros_like(mask, np.float64)
+
+    # CASE-1: Asymmetric weigths are desired (regardless of adjmatrix is
+    # directed or undirected)
+    if sym_w==False:
+        nlinks = mask.sum()
+        weights = w_distr(size=nlinks, **arg_w_distr)
+        adjmatrix[mask] = weights
+
+    # CASE-2: Symmetric weights are desired. If 'adjmatrix' is directed, then
+    # at least the reciprocal links will receive symmetric weights.
+    elif sym_w==True:
+        # 1) Deal with the weights of reciprocal links, including diagonal entries
+        mask_und = mask * mask.T
+        # Keep only the upper triangular entries
+        mask_und = np.triu(mask_und,k=0)
+        nlinks = mask_und.sum()
+        if nlinks > 0:
+            # Compute the random numbers and place them in 'wmatrix'
+            weights = w_distr(size=nlinks, **arg_w_distr)
+            adjmatrix[mask_und] = weights
+            if copy:
+                _diagweights = adjmatrix.diagonal().copy()
+                adjmatrix += adjmatrix.T
+                np.fill_diagonal(adjmatrix, _diagweights)
+            else:
+                # Can't make boolean indexing to read the mask in 'F' order :(
+                temp_idx = mask_und.nonzero()
+                adjmatrix[temp_idx[1],temp_idx[0]] = weights
+                del temp_idx
+
+        # 2) Deal with the weights of non-reciprocal links, if any
+        if _directed:
+            mask_dir = mask ^ (mask_und + mask_und.T)
+            nlinks = mask_dir.sum()
+            if nlinks > 0:
+                # Compute the random numbers and place them in 'wmatrix'
+                weights = w_distr(size=nlinks, **arg_w_distr)
+                adjmatrix[mask_dir] = weights
+
+    if copy:
+        return adjmatrix
+
+def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
+                                                                **arg_w_distr):
+    """Generates a random graph of N nodes and link probability p, with link
+    weights assigned from a given random distribution.
+
+    Syntactic sugar for calling functions ErdosRenyiGraph() and SeedRandomWeights()
+    to generate a random graph with random weights in one command.
+
+    Parameters
+    ----------
+    N : integer
+        The size of the network (number of nodes).
+    p : float
+        Probability of a link between each pair of nodes. Value between 0 and 1.
+    w_distr : function
+        The distribution function for drawing weight samples, it must have a
+        `size` argument for the number of generated samples. For example,
+        random number generators from `numpy.random` or `scipy.random`.
+    directed : bool, optional, default: False
+        True if a directed graph is desired. False, for an undirected graph.
+    selfloops : bool, optional, default: False
+        True if self-loops are allowed, False otherwise.
+    sym_w : bool or NoneType, optional, default: None.
+        If True, the function will seed weights symmetrically. When `adjmatrix`
+        is undirected, the resulting matrix is fully symmetric. But when
+        `adjmatrix` is directed, the function will at least seed symmetric
+        weights for the reciprocal links.
+        If False, weights are fully randomly assigned thus the matrix will
+        have asymmetric weights even if the connectivity is undirected.
+    copy : bool, optionla, default : True
+        If True, the function returns a new array of shape (N,N) and `np.float64`
+        dtype. If False, the function adds weights 'in-place' to the input
+        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
+        be of floating dtype.
+    arg_w_distr : dictionary or named arguments.
+        The other arguments necessary to define `w_distr`.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+        The adjacency matrix of the generated weighted random graph.
+
+    See Also
+    --------
+    ErdosRenyiGraph : Generates a random graph following the Erdos & Renyi model.
+    SeedRandomWeights : Assigns random weigths to the links of a graph.
+    """
+    # 0) SECURITY CHECKS
+    if (p < 0.0 or p > 1.0):
+        raise ValueError( "Probability p out of bounds. Insert value between 0 and 1" )
+
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+    if selfloops not in (True, False):
+        raise ValueError( "'selfloops' must be True or False" )
+    if sym_w not in (None, True, False):
+        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
+
+    # 1) CREATE THE BINARY RANDOM GRAPH
+    adjmatrix = ErdosRenyiGraph(N,p, directed=directed, selfloops=selfloops)
+    adjmatrix = adjmatrix.astype(np.float64)
+
+    # 2) ADD THE RANDOM WEIGHTS
+    if sym_w == None:
+       if directed == True:    sym_w = False
+       elif directed == False: sym_w = True
+
+    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
+
+    return adjmatrix
+
+def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
+                        sym_w=None, **arg_w_distr):
+    """Generates a random graph of N nodes and L links, with weights assigned
+    from a given distribution.
+
+    Syntactic sugar for calling functions RandomGraph() and SeedRandomWeights()
+    to return a random graph with random weights in one command.
+
+    Parameters
+    ----------
+    N : integer
+        The size of the network (number of nodes).
+    L : integer
+        Number of links of the resulting random network.
+    w_distr : function
+        The distribution function for drawing weight samples, it must have a
+        `size` argument for the number of generated samples. For example,
+        random number generators from `numpy.random` or `scipy.random`.
+    directed : bool, optional, default: False
+        True if a directed graph is desired. False, for an undirected graph.
+    selfloops : bool, optional, default: False
+        True if self-loops are allowed, False otherwise.
+    sym_w : bool or NoneType, optional, default: None.
+        If True, the function will seed weights symmetrically. When `adjmatrix`
+        is undirected, the resulting matrix is fully symmetric. But when
+        `adjmatrix` is directed, the function will at least seed symmetric
+        weights for the reciprocal links.
+        If False, weights are fully randomly assigned thus the matrix will
+        have asymmetric weights even if the connectivity is undirected.
+    copy : bool, optionla, default : True
+        If True, the function returns a new array of shape (N,N) and `np.float64`
+        dtype. If False, the function adds weights 'in-place' to the input
+        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
+        be of floating dtype.
+    arg_w_distr : dictionary or named arguments.
+        The other arguments necessary to define `w_distr`.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+        The adjacency matrix of the generated weighted random graph.
+
+    See Also
+    --------
+    RandomGraph : Generates a random graph of N nodes and L links.
+    SeedRandomWeights : Assigns random weigths to the links of a graph.
+    """
+    # 0) SECURITY CHECKS
+    if directed not in (True, False):
+        raise ValueError( "'directed' must be True or False" )
+    if selfloops not in (True, False):
+        raise ValueError( "'selfloops' must be True or False" )
+    if sym_w not in (None, True, False):
+        raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
+
+    # 1) CREATE THE BINARY RANDOM GRAPH
+    adjmatrix = RandomGraph(N,L, directed=directed, selfloops=selfloops)
+    adjmatrix = adjmatrix.astype(np.float64)
+
+    # 2) ADD THE RANDOM WEIGHTS
+    if sym_w == None:
+        if directed: sym_w = False
+        else: sym_w = True
+
+    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
+
+    return adjmatrix
+
+def ShuffleWeights(adjmatrix, copy=True):
+    """
+    Randomly reallocates the link weights while maintaining the link positions.
+
+    This function reads the link weights from the given (weighted) connectivity
+    matrix, and places the same weights back, randomly re-assigned. This
+    randomization respects the symmetry of input `adjmatrix`.
+    - If `adjmatrix` is an undirected graph with all reciprocal weights identical
+    such that w[i,j] = w[j,i], then weigths are shuffled and their symmetry is
+    conserved.
+    - If the weights of `adjmatrix` are not symmetric, e.g., there is at least one
+    pair for which w[i,j] != w[j,i], all weights are randomly re-allocated
+    leading to a non-symmetric connectivity matrix (regardless of whether the
+    underlying connectivity is directed or undirected).
+
+    NOTE: The function can either return a new array or change the weights of
+    input `adjmatrix` in place. This is controled by the `copy` parameter which
+    is set to True by default for coherence with other functions.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of dimension-2
+        The adjacency matrix of a network whose weights will be shuffled.
+    copy : bool, optionla, default : True
+        If True, the function returns a new array of shape (N,N) and same dtype
+        as the input `adjmatrix`. If False, the function replaces the weights of
+       `adjmatrix` in-place.
+
+    Returns
+    -------
+    if copy = True
+        adjmatrix : ndarray of shape (N,N) and same dtype as input matrix
+            A connectivity matrix with same links as input `adjmatrix` but weights
+            randomly reassigned.
+    if copy = False
+        None. (Changes `adjmatrix` in place and does not return anything.)
+    """
+    # 0) SECURITY CHECKS AND GETTING READY
+    # Check for potential erroneous inputs
+    if copy not in [True, False]:
+        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
+
+    # Identify if the network is symmetric or not
+    symmetric = is_symmetric(adjmatrix)
+    # Initialise the arrays needed
+    mask = adjmatrix.astype(np.bool)
+
+    # CASE-1: Weights in adjmatrix are NOT symmetric,
+    # it could be either directed or undirected
+    if symmetric == False:
+        # Extract the weights and shuffle them
+        weights = adjmatrix[mask]
+        np.random.shuffle(weights)
+        # Place the shuffled weights
+        if copy==True:
+            adjmatrix = np.zeros_like(adjmatrix)
+        adjmatrix[mask] = weights
+
+    # CASE-2: Weights in adjmatrix are symmetric, adjmatrix can only be undirected
+    else:
+        # 1) Deal with the diagonal weigths (if needed) and shuffle them
+        _self_loops = mask.trace()
+        if _self_loops == 0:
+            pass
+        elif _self_loops == 1:
+            _diagonal = adjmatrix.diagonal().copy()
+            print( _diagonal )
+        elif mask.trace() > 1:
+            _diagonal = adjmatrix.diagonal().copy()
+            _diagmask = mask.diagonal()
+            _diagweights = _diagonal[_diagmask]
+            # Shuffle and place back
+            np.random.shuffle(_diagweights)
+            _diagonal[_diagmask] = _diagweights
+            del _diagmask, _diagweights
+
+        # 2) Extract the upper-triangular values, and shuffle them
+        mask = np.triu(mask, k=1)
+        weights = adjmatrix[mask]
+        np.random.shuffle(weights)
+
+        # 3) Place the shuffled weights back
+        if copy == True:
+            adjmatrix = np.zeros_like(adjmatrix)
+            adjmatrix[mask] = weights
+            adjmatrix += adjmatrix.T
+        else:
+            # Can't make boolean indexing to read the mask in 'F' order :(
+            adjmatrix[mask] = weights
+            temp_idx = mask.nonzero()
+            adjmatrix[temp_idx[1],temp_idx[0]] = weights
+
+        # Place the shuffled diagonal weights
+        if _self_loops > 0:
+            np.fill_diagonal(adjmatrix, _diagonal)
+
+    if copy:
+        return adjmatrix
+
+
+
+################################################################################
 """SPATIALLY EMBEDDED RANDOM NETWORKS"""
+
+
 
 #
