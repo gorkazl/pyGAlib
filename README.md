@@ -223,11 +223,12 @@ limitations under the License.
 
 ##### March XX, 2026 (Version 2.1)
 
-* Added support to generate and randomize weigthed networks, with new or updated functions in module _models.py_:
+* Added support to generate and randomize weigthed networks, with new (or updated) functions in module _models.py_:
     * New function `SeedWeights()` returns a copy of an existing (di)graph with weight randomly sampled from a distribution of choice.
     * Option to return a random graph with random link values added to `RandomGraph()`.
     * Option to return a random graph with random link values added to `ErdosRenyiGraph()`.
     * New function `ShuffleWeights()` returns a copy of a weighted matrix that conserves the links in place, but with their weights randomly reassigned.
+* Support functions `is_directed()` and `is_weighted()` added to _metrics.py_ module, to facilitate working with weighted graphs.
 * New example notebooks added:
     * [RichClub_Undirected.ipynb](Example/RichClub_Undirected.ipynb) illustrates the identification of a rich-club.
     * [WeightedGraphs_Intro](Examples/WeightedGraphs_Intro.ipynb) shows how to use the new functions to generate and work with weighted graphs and digraphs.
