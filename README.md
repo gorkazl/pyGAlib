@@ -221,16 +221,19 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
-##### January XX, 2026 (Version 2.1)
+##### March XX, 2026 (Version 2.1)
 
-* *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
-* Bug fix in `ErdosRenyiGraph()` function that prevented self-loops when desired in symmetric graphs.
-* `outdtype` option removed from graph generation functions in *models.py* module. For consistency, all graph generators return 2D arrays of `np.uint8` type, for the binary cases and `np.float64`) for the weighted graph options.
-* Support to generation and randomization of weigthed networks added, with new or updated functions in module _models.py_:
+* Added support to generate and randomize weigthed networks, with new or updated functions in module _models.py_:
     * New function `SeedWeights()` returns a copy of an existing (di)graph with weight randomly sampled from a distribution of choice.
     * Option to return a random graph with random link values added to `RandomGraph()`.
     * Option to return a random graph with random link values added to `ErdosRenyiGraph()`.
     * New function `ShuffleWeights()` returns a copy of a weighted matrix that conserves the links in place, but with their weights randomly reassigned.
+* New example notebooks added:
+    * [RichClub_Undirected.ipynb](Example/RichClub_Undirected.ipynb) illustrates the identification of a rich-club.
+    * [WeightedGraphs_Intro](Examples/WeightedGraphs_Intro.ipynb) shows how to use the new functions to generate and work with weighted graphs and digraphs.
+* In *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
+* Bug fix in `ErdosRenyiGraph()` function that prevented addition of self-loops even with `selfloops = True` option set.
+* `outdtype` option removed from graph generation functions in *models.py* module. For consistency, all graph generators return 2D arrays of `np.uint8` type, for the binary cases and `np.float64` for the weighted (di)graphs.
 
 
 ##### November 10, 2025 (Release of Version 2)
