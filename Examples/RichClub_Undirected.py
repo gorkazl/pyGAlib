@@ -23,62 +23,97 @@ import galib
 
 ##################################################################
 # 0) READ THE DATA
+# Choose one the three networks 'Zachary', 'CatCortex' or 'Miserables'
+netcase = 'CatCortex'
+
+# Define the local path to the datasets
 dataroot = 'Data/'
-# net = np.loadtxt(dataroot + 'Zachary.txt', dtype=np.uint8)
-# net, labels = galib.tools.LoadFromPajek(dataroot + 'LesMiserables.net', getlabels=True)
-net = np.loadtxt(dataroot + 'Cat53_cortex_sym.txt').astype(np.uint8)
+
+if netcase == 'Zachary':
+    net = np.loadtxt(dataroot + 'Zachary.txt', dtype=np.uint8)
+elif netcase == 'Miserables':
+    net = galib.tools.LoadFromPajek(dataroot + 'LesMiserables.net')
+elif netcase == 'CatCortex':
+    net = np.loadtxt(dataroot + 'Cat53_cortex_sym.txt').astype(np.uint8)
 
 # Get some basic properties of the network
 N = len(net)
 L = int( 0.5 * net.astype(bool).sum() )
+dens = galib.Density(net)
+
+# Print some quick feedback
+print( f"{netcase}\tNumber of nodes: {N}" )
+print( f"\t\tNumber of edges: {L}\n\t\tDensity: {dens:1.3f}" )
+
+# Visualise the adjacency matrix and the degree distribution
 deg = galib.Degree(net)
 
+# Plot the degree distribution
+plt.figure(figsize=(6.4,2.7))
+plt.subplot(1,2,1)
+plt.imshow(net.astype(bool), cmap='gray_r')
 
-# 1) COMPUTE THE k-DENSITY OF THE NETWORKS
+plt.subplot(1,2,2)
+plt.hist(deg, bins=N, range=[0,N], width=0.8, color='tab:red', alpha=0.8, align='mid');
+plt.xlabel( "Degree of nodes" )
+plt.ylabel( "Counts" )
+plt.tight_layout()
+
+
+# 1) COMPUTE THE k-DENSITY OF THE NETWORKs
 # 1.1) k-density of the empirical graph
-# Notice that 'net' can be weighted but function RichClub ignores the weights.
+# NOTE: 'net' can be weighted but function RichClub ignores the weights.
 kdens = galib.k_Density(net, rctype='undirected')
 
-# 1.2) Surrogates - Compute k-density in RANDOM graphs
+# 1.2) k-density of surrogates - RANDOM graphs
 nrealiz = 100
 
 kmax = len(kdens)
 klist = np.arange(kmax)
 
 deg_rand = np.zeros((nrealiz,N), np.uint64)
-kdens_rand = np.zeros((nrealiz,kmax), np.float64)
+kdens_rand = np.zeros((nrealiz,N), np.float64)
 for re in range(nrealiz):
-    # Generate the rewired surrogate graph (conserving the degrees)
+    # Generate the random graph of N nodes and L links
     randnet = galib.RandomGraph(N,L, directed=False)
     deg_rand[re] = galib.Degree(randnet)
 
     # Compute its k-density
-    spam = galib.k_Density(randnet, rctype='undirected')
-    kdens_rand[re,:len(spam)] = spam
+    _kdens = galib.k_Density(randnet, rctype='undirected')
+    kdens_rand[re,:len(_kdens)] = _kdens
 
-# Find the average rich-club and deviation for each k value
-maxphi_rand = kdens_rand.max(axis=0)
-minphi_rand = kdens_rand.min(axis=0)
+# Get the upper and lower bounds of the random graph ensemble
 meanphi_rand = kdens_rand.mean(axis=0)
+stdphi_rand = kdens_rand.std(axis=0)
+
+lowerphi_rand = meanphi_rand - stdphi_rand
+lowerphi_rand = lowerphi_rand.clip(0,1)
+upperphi_rand = meanphi_rand + stdphi_rand
+upperphi_rand = upperphi_rand.clip(0,1)
 
 
-# 1.3) Surrogates - Compute k-density in REWIRED graphs
+# 1.2) k-density of surrogates - REWIRED graphs
 nrealiz = 100
 prewire = 10
 deg_rew = np.zeros((nrealiz,N), np.uint64)
-kdens_rew = np.zeros((nrealiz,kmax), np.float64)
+kdens_rew = np.zeros((nrealiz,N), np.float64)
 for re in range(nrealiz):
     # Generate the rewired surrogate graph (conserving the degrees)
     rewnet = galib.RewireNetwork(net, prewire, directed=False)
     deg_rew[re] = galib.Degree(rewnet)
 
     # Compute its k-density
-    kdens_rew[re] = galib.k_Density(rewnet, rctype='undirected')
+    _kdens = galib.k_Density(rewnet, rctype='undirected')
+    kdens_rew[re,:len(_kdens)] = _kdens
 
-# Find the average rich-club and deviation for each k value
-maxphi_rew = kdens_rew.max(axis=0)
-minphi_rew = kdens_rew.min(axis=0)
+# Get the upper and lower bounds of the rewired ensemble
 meanphi_rew = kdens_rew.mean(axis=0)
+stdphi_rew = kdens_rew.std(axis=0)
+
+lowerphi_rew = meanphi_rew - stdphi_rew
+lowerphi_rew = lowerphi_rew.clip(0,1)
+upperphi_rew = meanphi_rew + stdphi_rew
+upperphi_rew = upperphi_rew.clip(0,1)
 
 
 
@@ -96,12 +131,13 @@ plt.legend(loc='upper right')
 
 
 # 2.2) Plot the k-densities
+nodelist = np.arange(N)
 plt.subplot(2,1,2)
 plt.plot(klist, kdens, '.-', color='tab:red', label='Empirical')
-plt.plot(klist, meanphi_rand, color='gray', label='Random graphs')
-plt.fill_between(klist, minphi_rand, maxphi_rand, color='gray', alpha=0.3, linewidth=1)
-plt.plot(klist, meanphi_rew, color='tab:blue', label='Rewired graphs')
-plt.fill_between(klist, minphi_rew, maxphi_rew, color='tab:blue', alpha=0.3)
+plt.plot(nodelist, meanphi_rand, color='gray', label='Random graphs')
+plt.fill_between(nodelist, lowerphi_rand, upperphi_rand, color='gray', alpha=0.3, linewidth=1)
+plt.plot(nodelist, meanphi_rew, color='tab:blue', label='Rewired graphs')
+plt.fill_between(nodelist, lowerphi_rew, upperphi_rew, color='tab:blue', alpha=0.3)
 plt.xlim(-1,kmax+1)
 plt.ylim(-0.02,1.05)
 plt.xlabel('Node Degree')
