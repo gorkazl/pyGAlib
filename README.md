@@ -221,20 +221,25 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
-##### March XX, 2026 (Version 2.1)
-
-* Added support to generate and randomize weigthed networks, with new (or updated) functions in module _models.py_:
-    * New function `SeedWeights()` returns a copy of an existing (di)graph with weight randomly sampled from a distribution of choice.
-    * Option to return a random graph with random link values added to `RandomGraph()`.
-    * Option to return a random graph with random link values added to `ErdosRenyiGraph()`.
-    * New function `ShuffleWeights()` returns a copy of a weighted matrix that conserves the links in place, but with their weights randomly reassigned.
-* Support functions `is_directed()` and `is_weighted()` added to _metrics.py_ module, to facilitate working with weighted graphs.
-* New example notebooks added:
-    * [RichClub_Undirected.ipynb](Example/RichClub_Undirected.ipynb) illustrates the identification of a rich-club.
-    * [WeightedGraphs_Intro](Examples/WeightedGraphs_Intro.ipynb) shows how to use the new functions to generate and work with weighted graphs and digraphs.
-* In *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
-* Bug fix in `ErdosRenyiGraph()` function that prevented addition of self-loops even with `selfloops = True` option set.
-* `outdtype` option removed from graph generation functions in *models.py* module. For consistency, all graph generators return 2D arrays of `np.uint8` type, for the binary cases and `np.float64` for the weighted (di)graphs.
+##### May XX, 2026 (Version 2.1)
+ 
+* **New functions** added:
+    * Support functions `is_directed()` and `is_weighted()` added to _metrics.py_ module, to facilitate working with weighted graphs.
+* **Support to generate and randomize weigthed networks** added. New functions included to _models.py_ module:
+    * `SeedWeights()` adds random weights (sampled from a distribution of choice) to the links of an existing (di)graph.
+    * `ShuffleWeights()` conserves the links of a (di)graph in-place, but randomly reassigns their weights.
+* **"Syntactic sugar" functions** were added to generate some common random / weighted graphs (_models.py_):
+    * `ErdosRenyiGraph_Like()` generates an Erdös-Rényi (random) graph of same size and link probability as a given input network.
+    * `RandomGraph_Like()` generates a random graph of same size and number of links as a given input network.
+    * `WeightedErdosRenyiGraph()` generates a weighted Erdos-Renyi graph with link weights sampled from a distribution of choice.
+    * `WeightedRandomGraph()` generates a weighted random graph with link weights sampled from a distribution of choice.
+* New **example notebooks** added:
+    * [RichClub_Undirected.ipynb](Example/RichClub_Undirected.ipynb) shows how to identify the presence of a rich-club in empirical (di)graphs.
+    * [WeightedGraphs_Intro](Examples/WeightedGraphs_Intro.ipynb) illustrates how to use the new functions to work with weighted (di)graphs.
+* Minor points and bug fixes:
+    * In *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
+    * Bug fix in `ErdosRenyiGraph()` function that prevented addition of self-loops even with `selfloops = True` option set.
+    * `outdtype` option removed from graph generation functions in *models.py* module. For consistency, all graph generators return 2D arrays of `np.uint8` type, for the binary cases and `np.float64` for the weighted (di)graphs.
 
 
 ##### November 10, 2025 (Release of Version 2)
