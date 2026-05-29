@@ -1639,7 +1639,7 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     w_distr : function.
         The distribution function for drawing weight samples, it must have a
         `size` argument for the number of generated samples. For example,
-        random number generators from `numpy.random` or `scipy.random`.
+        random number generators from `numpy.random` or `scipy.stats`.
     sym_w : bool, optional, default: None.
         If None, the function checks whether `adjmatrix` is an (un)directed or
         a directed graph, and will assign the weights with matching (a)symmetry.
@@ -1850,29 +1850,96 @@ def ShuffleWeights(adjmatrix, copy=True):
 
 ###############################################################################
 """SYNTACTIC SUGAR FUNCTIONS"""
-def ErdosRenyiGraph_Like(samplematrix):
-    """Generates a random graph of same N and link probability as the input matrix.
+# def ErdosRenyiGraph_Like(samplematrix):
+#     """Generates a random graph of same N and link probability as the input matrix.
+
+#     Same as ErdosRenyiGraph() but reading function parameters (N, p, directed, selfloops)
+#     from a given connectivity matrix. Link probability p is given from the density
+#     of the input matrix.
+
+#     Parameters
+#     ----------
+#     samplematrix : array-like of shape (N,N)
+#         Input matrix representing a graph. It can be either binary or weighted.
+
+#     Returns
+#     -------
+#     adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
+#         The adjacency matrix of the generated binary Erdos-Renyi graph.
+
+#     See Also
+#     --------
+#     ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
+#     RandomGraph : Generates a random graph of N nodes and L links.
+
+#     """    # 0) SECURITY CHECKS
+#     N1,N2 = np.shape(samplematrix)
+#     if N1 != N2:
+#         raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
+
+#     # 1) READ THE NECESSARY INFOS FROM THE INPUT MATRIX
+#     mask = np.array(samplematrix, dtype=bool)
+#     N = len(mask)
+#     density = Density(mask)
+#     _directed = is_directed(mask)
+#     # Find if input matrix has self-loops
+#     if mask.trace() == 0:
+#         _selfloops = False
+#     else:
+#         _selfloops = True
+
+#     # 2) GENERATE THE RANDOM GRAPH
+#     adjmatrix = ErdosRenyiGraph(N,density, directed=_directed, selfloops=_selfloops)
+
+#     return adjmatrix
+
+def ErdosRenyiGraph_Like(samplematrix, w_distr=None, sym_w=None, **arg_w_distr):
+    """Generates an Erdos-Renyi graph of same N and link probability as the input
+    matrix, with (optional) link weights assigned from a given random distribution.
 
     Same as ErdosRenyiGraph() but reading function parameters (N, p, directed, selfloops)
     from a given connectivity matrix. Link probability p is given from the density
     of the input matrix.
 
+    Besides, if a random distribution functions is passed to `w_distr` (for
+    example `numpy.random.uniform`, `scipy.stats.uniform` or `scipy.stats.norm`)
+    a weighted graph is returned with link weights sampled from the distribution.
+    given.
+
     Parameters
     ----------
     samplematrix : array-like of shape (N,N)
         Input matrix representing a graph. It can be either binary or weighted.
+    w_distr : function of NoneType, optional, default: None.
+        If None, a binary Erdos-Renyi graph is computed.
+        Else, the distribution function for drawing weight samples, it must have a
+        `size` argument for the number of generated samples. For example,
+        random number generators from `numpy.random` or `scipy.stats`.
+    sym_w : bool or NoneType, optional, default: None.
+        If True, the function will seed weights symmetrically. When `adjmatrix`
+        is undirected, the resulting matrix is fully symmetric. But when
+        `adjmatrix` is directed, the function will at least seed symmetric
+        weights for the reciprocal links.
+        If False, weights are fully randomly assigned thus the matrix will
+        have asymmetric weights even if the connectivity is undirected.
+    arg_w_distr : dictionary or named arguments.
+        The other arguments necessary to define `w_distr`.
 
     Returns
     -------
-    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the generated binary Erdos-Renyi graph.
+        If binary requested (w_distr=None), adjmatrix of dtype=np.uint8 returned,
+        else, adjmatrix is of np.float64.
 
     See Also
     --------
     ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
-    RandomGraph : Generates a random graph of N nodes and L links.
+    SeedRandomWeights : Assigns random weigths to the links of a graph.
+    RandomGraph_Like : Generates a (weighted) random graph of same size and L as given input matrix.
 
-    """    # 0) SECURITY CHECKS
+    """
+    # 0) SECURITY CHECKS
     N1,N2 = np.shape(samplematrix)
     if N1 != N2:
         raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
@@ -1889,7 +1956,22 @@ def ErdosRenyiGraph_Like(samplematrix):
         _selfloops = True
 
     # 2) GENERATE THE RANDOM GRAPH
+    # 2.1) Generate the binary Erdos-Renyi graph
     adjmatrix = ErdosRenyiGraph(N,density, directed=_directed, selfloops=_selfloops)
+
+    # 2.2) Seed the weights
+    if w_distr:
+        # Quick security check
+        if sym_w not in (None, True, False):
+            raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
+
+        # 2) Seed the random weights
+        adjmatrix = adjmatrix.astype(np.float64)
+        if sym_w == None:
+            if _directed == True:    sym_w = False
+            elif _directed == False: sym_w = True
+
+        SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, copy=False, **arg_w_distr)
 
     return adjmatrix
 
@@ -1963,7 +2045,7 @@ def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
     w_distr : function
         The distribution function for drawing weight samples, it must have a
         `size` argument for the number of generated samples. For example,
-        random number generators from `numpy.random` or `scipy.random`.
+        random number generators from `numpy.random` or `scipy.stats`.
     directed : bool, optional, default: False
         True if a directed graph is desired. False, for an undirected graph.
     selfloops : bool, optional, default: False
@@ -2034,7 +2116,7 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
     w_distr : function
         The distribution function for drawing weight samples, it must have a
         `size` argument for the number of generated samples. For example,
-        random number generators from `numpy.random` or `scipy.random`.
+        random number generators from `numpy.random` or `scipy.stats`.
     directed : bool, optional, default: False
         True if a directed graph is desired. False, for an undirected graph.
     selfloops : bool, optional, default: False
