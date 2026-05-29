@@ -83,13 +83,14 @@ SpatialLattice_From (TO BE DONE)
 SpatialWeightSorting (TO BE DONE)
     Sorts the link weights of a network by the spatial distance between nodes.
 
-
 SYNTACTIC SUGAR FUNCTIONS
 -------------------------
 ErdosRenyiGraph_Like
     Generates a random graph of same N and link probability p as an input matrix.
+    Optionally, also add random weights from a distribution of choice.
 RandomGraph_Like
     Generates a random graph of same N and L as an input matrix.
+    Optionally, also add random weights from a distribution of choice.
 WeightedERGraph
     Generates a random graph of N nodes and link probability p, with link
     weights assigned from a given random distribution.
