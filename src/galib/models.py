@@ -33,8 +33,12 @@ GENERATION OF RANDOM GRAPHS
 ---------------------------
 ErdosRenyiGraph
     Generates a random graph of N nodes and link probability p.
+ErdosRenyiGraph_Like
+    Generates a random graph of same N and link probability p as an input matrix.
 RandomGraph
     Generates a random graph of N nodes and L links.
+RandomGraph_Like
+    Generates a random graph of same N and L as an input matrix.
 BarabasiAlbertGraph
     Generates an scale-free network following the Barabasi & Albert model.
 ScaleFreeGraph
@@ -98,7 +102,7 @@ SpatialWeightSorting (TO BE DONE)
 import numpy as np
 import numpy.random
 # Local imports
-from .metrics import is_directed, is_symmetric
+from .metrics import is_directed, is_symmetric, Density
 from .tools import ExtractSubmatrix
 
 # TODO: Add security checks for user inputs, to avoid errors in implicit
@@ -337,6 +341,49 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
 
     return adjmatrix.astype(np.uint8)
 
+def ErdosRenyiGraph_Like(samplematrix):
+    """Generates a random graph of same N and link probability as the input matrix.
+
+    Same as ErdosRenyiGraph() but reading function parameters (N, p, directed, selfloops)
+    from a given connectivity matrix. Link probability p is given from the density
+    of the input matrix.
+
+    Parameters
+    ----------
+    samplematrix : array-like of shape (N,N)
+        Input matrix representing a graph. It can be either binary or weighted.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
+        The adjacency matrix of the generated binary Erdos-Renyi graph.
+
+    See Also
+    --------
+    ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
+    RandomGraph : Generates a random graph of N nodes and L links.
+
+    """    # 0) SECURITY CHECKS
+    N1,N2 = np.shape(samplematrix)
+    if N1 != N2:
+        raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
+
+    # 1) READ THE NECESSARY INFOS FROM THE INPUT MATRIX
+    mask = np.array(samplematrix, dtype=bool)
+    N = len(mask)
+    density = Density(mask)
+    _directed = is_directed(mask)
+    # Find if input matrix has self-loops
+    if mask.trace() == 0:
+        _selfloops = False
+    else:
+        _selfloops = True
+
+    # 2) GENERATE THE RANDOM GRAPH
+    adjmatrix = ErdosRenyiGraph(N,density, directed=_directed, selfloops=_selfloops)
+
+    return adjmatrix
+
 def RandomGraph(N, L, directed=False, selfloops=False):
     """Generates a random graph of N nodes and L links.
 
@@ -423,6 +470,59 @@ def RandomGraph(N, L, directed=False, selfloops=False):
             adjmatrix[target,source] = 1
 
         counter += 1
+
+    return adjmatrix
+
+def RandomGraph_Like(samplematrix):
+    """Generates a random graph of same N and L as the input matrix.
+
+    Same as RandomGraph() but reading function parameters (N, L, directed, selfloops)
+    from a given connectivity matrix. If 'samplematrix' contains self-loops (diagonal
+    entries), 'adjmatrix' will have the same number of them but randomly placed.
+
+    Parameters
+    ----------
+    samplematrix : array-like of shape (N,N)
+        Input matrix representing a graph. It can be either binary or weighted.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
+        The adjacency matrix of the generated binary random graph.
+
+    See Also
+    --------
+    RandomGraph : Generates a random graph of N nodes and L links.
+    ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
+
+    """
+    # 0) SECURITY CHECKS
+    N1,N2 = np.shape(samplematrix)
+    if N1 != N2:
+        raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
+
+    # 1) READ THE NECESSARY INFOS FROM THE INPUT MATRIX
+    mask = np.array(samplematrix, dtype=bool)
+    N = len(mask)
+    _directed = is_directed(mask)
+    # Find if input matrix has self-loops
+    Ldiag = mask.trace()
+    # Get the number of links (non-diagonal ones only)
+    if _directed:
+        L = mask.sum() - Ldiag
+    else:
+        L = int(round( 0.5*(mask.sum() - Ldiag) ))
+
+    # 2) GENERATE THE RANDOM GRAPH
+    adjmatrix = RandomGraph(N,L, directed=_directed, selfloops=False)
+
+    # Add self-loops, if needed
+    if Ldiag > 0:
+        _diagonal = mask.diagonal().copy()
+        np.random.shuffle(_diagonal)
+
+        diagidx = np.diag_indices(N)
+        adjmatrix[diagidx] = _diagonal
 
     return adjmatrix
 
