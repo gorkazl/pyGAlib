@@ -16,8 +16,8 @@ This module contains functions to generate common synthetic graphs, including:
 - the generation of surrogate graphs by randomising existing ones,
 - and the support for various (random) weighted graphs.
 
-DETERMINISTIC AND CLASSIC GRAPH MODELS
---------------------------------------
+DETERMINISTIC AND CLASSIC (DI)GRAPH MODELS
+------------------------------------------
 CompleteGraph
     Generates an all-to-all connected graph of size N.
 Lattice1D
@@ -29,16 +29,12 @@ PathGraph
 StarGraph
     Generates a star graph of size N.
 
-GENERATION OF RANDOM GRAPHS
----------------------------
+GENERATION OF RANDOM (DI)GRAPHS
+-------------------------------
 ErdosRenyiGraph
     Generates a random graph of N nodes and link probability p.
-ErdosRenyiGraph_Like
-    Generates a random graph of same N and link probability p as an input matrix.
 RandomGraph
     Generates a random graph of N nodes and L links.
-RandomGraph_Like
-    Generates a random graph of same N and L as an input matrix.
 BarabasiAlbertGraph
     Generates an scale-free network following the Barabasi & Albert model.
 ScaleFreeGraph
@@ -46,7 +42,7 @@ ScaleFreeGraph
 WattsStrogatzGraph
     Generates a graph following the Watts & Strogatz model.
 
-REWIRE AND RANDOMISE GRAPHS
+REWIRE AND RANDOMISE (DI)GRAPHS
 -----------------------------
 RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
@@ -74,18 +70,11 @@ WEIGHTED (RANDOM) GRAPHS
 ------------------------
 SeedRandomWeights
     Assigns weigths (from a random distribution) to the links of a graph.
-WeightedERGraph
-    Generates a random graph of N nodes and link probability p, with link
-    weights assigned from a given random distribution.
-WeightedRandomGraph
-    Generates a random graph of N nodes and L links, with weights assigned from
-    a given distribution.
+ShuffleWeights
+    Randomly reallocates the link weights while maintaining the link positions.
 RewireNetwork
     Randomises an input graph conserving the degrees of its nodes.
     If weighted, it conserves the input weights to nodes.
-ShuffleWeights
-    Randomly reallocates the link weights while maintaining the link positions.
-
 
 SPATIALLY EMBEDDED (SURROGATE) NETWORKS
 ---------------------------------------
@@ -94,9 +83,30 @@ SpatialLattice_From (TO BE DONE)
 SpatialWeightSorting (TO BE DONE)
     Sorts the link weights of a network by the spatial distance between nodes.
 
+
+SYNTACTIC SUGAR FUNCTIONS
+-------------------------
+ErdosRenyiGraph_Like
+    Generates a random graph of same N and link probability p as an input matrix.
+RandomGraph_Like
+    Generates a random graph of same N and L as an input matrix.
+WeightedERGraph
+    Generates a random graph of N nodes and link probability p, with link
+    weights assigned from a given random distribution.
+WeightedRandomGraph
+    Generates a random graph of N nodes and L links, with weights assigned from
+    a given distribution.
+
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
+## TO BE DECIDED:
+## - Shall we have only one ErdosRenyiGraph_Like() and RandomGraph_Like()
+##   including the weighted versions, or separate the weighted versions as
+##   WeightedERGraph_Like() and WeightedRandomGraph_Like() ??
+## - Shall we call these shorter like wErdosRenyiGraph() and wRandomGraph() ??
+
+
 # Standard library imports
 # Third party imports
 import numpy as np
@@ -341,49 +351,6 @@ def ErdosRenyiGraph(N, p, directed=False, selfloops=False):
 
     return adjmatrix.astype(np.uint8)
 
-def ErdosRenyiGraph_Like(samplematrix):
-    """Generates a random graph of same N and link probability as the input matrix.
-
-    Same as ErdosRenyiGraph() but reading function parameters (N, p, directed, selfloops)
-    from a given connectivity matrix. Link probability p is given from the density
-    of the input matrix.
-
-    Parameters
-    ----------
-    samplematrix : array-like of shape (N,N)
-        Input matrix representing a graph. It can be either binary or weighted.
-
-    Returns
-    -------
-    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
-        The adjacency matrix of the generated binary Erdos-Renyi graph.
-
-    See Also
-    --------
-    ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
-    RandomGraph : Generates a random graph of N nodes and L links.
-
-    """    # 0) SECURITY CHECKS
-    N1,N2 = np.shape(samplematrix)
-    if N1 != N2:
-        raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
-
-    # 1) READ THE NECESSARY INFOS FROM THE INPUT MATRIX
-    mask = np.array(samplematrix, dtype=bool)
-    N = len(mask)
-    density = Density(mask)
-    _directed = is_directed(mask)
-    # Find if input matrix has self-loops
-    if mask.trace() == 0:
-        _selfloops = False
-    else:
-        _selfloops = True
-
-    # 2) GENERATE THE RANDOM GRAPH
-    adjmatrix = ErdosRenyiGraph(N,density, directed=_directed, selfloops=_selfloops)
-
-    return adjmatrix
-
 def RandomGraph(N, L, directed=False, selfloops=False):
     """Generates a random graph of N nodes and L links.
 
@@ -470,59 +437,6 @@ def RandomGraph(N, L, directed=False, selfloops=False):
             adjmatrix[target,source] = 1
 
         counter += 1
-
-    return adjmatrix
-
-def RandomGraph_Like(samplematrix):
-    """Generates a random graph of same N and L as the input matrix.
-
-    Same as RandomGraph() but reading function parameters (N, L, directed, selfloops)
-    from a given connectivity matrix. If 'samplematrix' contains self-loops (diagonal
-    entries), 'adjmatrix' will have the same number of them but randomly placed.
-
-    Parameters
-    ----------
-    samplematrix : array-like of shape (N,N)
-        Input matrix representing a graph. It can be either binary or weighted.
-
-    Returns
-    -------
-    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
-        The adjacency matrix of the generated binary random graph.
-
-    See Also
-    --------
-    RandomGraph : Generates a random graph of N nodes and L links.
-    ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
-
-    """
-    # 0) SECURITY CHECKS
-    N1,N2 = np.shape(samplematrix)
-    if N1 != N2:
-        raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
-
-    # 1) READ THE NECESSARY INFOS FROM THE INPUT MATRIX
-    mask = np.array(samplematrix, dtype=bool)
-    N = len(mask)
-    _directed = is_directed(mask)
-    # Find if input matrix has self-loops
-    Ldiag = mask.trace()
-    # Get the number of links (non-diagonal ones only)
-    if _directed:
-        L = mask.sum() - Ldiag
-    else:
-        L = int(round( 0.5*(mask.sum() - Ldiag) ))
-
-    # 2) GENERATE THE RANDOM GRAPH
-    adjmatrix = RandomGraph(N,L, directed=_directed, selfloops=False)
-
-    # Add self-loops, if needed
-    if Ldiag > 0:
-        _diagonal = mask.diagonal().copy()
-        np.random.shuffle(_diagonal)
-
-        diagidx = np.diag_indices(N)
-        adjmatrix[diagidx] = _diagonal
 
     return adjmatrix
 
@@ -1828,6 +1742,210 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     if copy:
         return adjmatrix
 
+def ShuffleWeights(adjmatrix, copy=True):
+    """
+    Randomly reallocates the link weights while maintaining the link positions.
+
+    This function reads the link weights from the given (weighted) connectivity
+    matrix, and places the same weights back, randomly re-assigned. This
+    randomization respects the symmetry of input `adjmatrix`.
+    - If `adjmatrix` is an undirected graph with all reciprocal weights identical
+    such that w[i,j] = w[j,i], then weigths are shuffled and their symmetry is
+    conserved.
+    - If the weights of `adjmatrix` are not symmetric, e.g., there is at least one
+    pair for which w[i,j] != w[j,i], all weights are randomly re-allocated
+    leading to a non-symmetric connectivity matrix (regardless of whether the
+    underlying connectivity is directed or undirected).
+
+    NOTE: The function can either return a new array or change the weights of
+    input `adjmatrix` in place. This is controled by the `copy` parameter which
+    is set to True by default for coherence with other functions.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of dimension-2
+        The adjacency matrix of a network whose weights will be shuffled.
+    copy : bool, optionla, default : True
+        If True, the function returns a new array of shape (N,N) and same dtype
+        as the input `adjmatrix`. If False, the function replaces the weights of
+       `adjmatrix` in-place.
+
+    Returns
+    -------
+    if copy = True
+        adjmatrix : ndarray of shape (N,N) and same dtype as input matrix
+            A connectivity matrix with same links as input `adjmatrix` but weights
+            randomly reassigned.
+    if copy = False
+        None. (Changes `adjmatrix` in place and does not return anything.)
+    """
+    # 0) SECURITY CHECKS AND GETTING READY
+    # Check for potential erroneous inputs
+    if copy not in [True, False]:
+        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
+
+    # Identify if the network is symmetric or not
+    symmetric = is_symmetric(adjmatrix)
+    # Initialise the arrays needed
+    mask = adjmatrix.astype(np.bool)
+
+    # CASE-1: Weights in adjmatrix are NOT symmetric,
+    # it could be either directed or undirected
+    if symmetric == False:
+        # Extract the weights and shuffle them
+        weights = adjmatrix[mask]
+        np.random.shuffle(weights)
+        # Place the shuffled weights
+        if copy==True:
+            adjmatrix = np.zeros_like(adjmatrix)
+        adjmatrix[mask] = weights
+
+    # CASE-2: Weights in adjmatrix are symmetric, adjmatrix can only be undirected
+    else:
+        # 1) Deal with the diagonal weigths (if needed) and shuffle them
+        _self_loops = mask.trace()
+        if _self_loops == 0:
+            pass
+        elif _self_loops == 1:
+            _diagonal = adjmatrix.diagonal().copy()
+            print( _diagonal )
+        elif mask.trace() > 1:
+            _diagonal = adjmatrix.diagonal().copy()
+            _diagmask = mask.diagonal()
+            _diagweights = _diagonal[_diagmask]
+            # Shuffle and place back
+            np.random.shuffle(_diagweights)
+            _diagonal[_diagmask] = _diagweights
+            del _diagmask, _diagweights
+
+        # 2) Extract the upper-triangular values, and shuffle them
+        mask = np.triu(mask, k=1)
+        weights = adjmatrix[mask]
+        np.random.shuffle(weights)
+
+        # 3) Place the shuffled weights back
+        if copy == True:
+            adjmatrix = np.zeros_like(adjmatrix)
+            adjmatrix[mask] = weights
+            adjmatrix += adjmatrix.T
+        else:
+            # Can't make boolean indexing to read the mask in 'F' order :(
+            adjmatrix[mask] = weights
+            temp_idx = mask.nonzero()
+            adjmatrix[temp_idx[1],temp_idx[0]] = weights
+
+        # Place the shuffled diagonal weights
+        if _self_loops > 0:
+            np.fill_diagonal(adjmatrix, _diagonal)
+
+    if copy:
+        return adjmatrix
+
+
+
+################################################################################
+"""SPATIALLY EMBEDDED RANDOM NETWORKS"""
+
+
+
+###############################################################################
+"""SYNTACTIC SUGAR FUNCTIONS"""
+def ErdosRenyiGraph_Like(samplematrix):
+    """Generates a random graph of same N and link probability as the input matrix.
+
+    Same as ErdosRenyiGraph() but reading function parameters (N, p, directed, selfloops)
+    from a given connectivity matrix. Link probability p is given from the density
+    of the input matrix.
+
+    Parameters
+    ----------
+    samplematrix : array-like of shape (N,N)
+        Input matrix representing a graph. It can be either binary or weighted.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
+        The adjacency matrix of the generated binary Erdos-Renyi graph.
+
+    See Also
+    --------
+    ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
+    RandomGraph : Generates a random graph of N nodes and L links.
+
+    """    # 0) SECURITY CHECKS
+    N1,N2 = np.shape(samplematrix)
+    if N1 != N2:
+        raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
+
+    # 1) READ THE NECESSARY INFOS FROM THE INPUT MATRIX
+    mask = np.array(samplematrix, dtype=bool)
+    N = len(mask)
+    density = Density(mask)
+    _directed = is_directed(mask)
+    # Find if input matrix has self-loops
+    if mask.trace() == 0:
+        _selfloops = False
+    else:
+        _selfloops = True
+
+    # 2) GENERATE THE RANDOM GRAPH
+    adjmatrix = ErdosRenyiGraph(N,density, directed=_directed, selfloops=_selfloops)
+
+    return adjmatrix
+
+def RandomGraph_Like(samplematrix):
+    """Generates a random graph of same N and L as the input matrix.
+
+    Same as RandomGraph() but reading function parameters (N, L, directed, selfloops)
+    from a given connectivity matrix. If 'samplematrix' contains self-loops (diagonal
+    entries), 'adjmatrix' will have the same number of them but randomly placed.
+
+    Parameters
+    ----------
+    samplematrix : array-like of shape (N,N)
+        Input matrix representing a graph. It can be either binary or weighted.
+
+    Returns
+    -------
+    adjmatrix : ndarray of shape (N,N) and dtype = np.uint8
+        The adjacency matrix of the generated binary random graph.
+
+    See Also
+    --------
+    RandomGraph : Generates a random graph of N nodes and L links.
+    ErdosRenyiGraph : Generates a random graph of N nodes and link probability p.
+
+    """
+    # 0) SECURITY CHECKS
+    N1,N2 = np.shape(samplematrix)
+    if N1 != N2:
+        raise ValueError( f"'samplematrix' not square, shape({N1},{N2}) given." )
+
+    # 1) READ THE NECESSARY INFOS FROM THE INPUT MATRIX
+    mask = np.array(samplematrix, dtype=bool)
+    N = len(mask)
+    _directed = is_directed(mask)
+    # Find if input matrix has self-loops
+    Ldiag = mask.trace()
+    # Get the number of links (non-diagonal ones only)
+    if _directed:
+        L = mask.sum() - Ldiag
+    else:
+        L = int(round( 0.5*(mask.sum() - Ldiag) ))
+
+    # 2) GENERATE THE RANDOM GRAPH
+    adjmatrix = RandomGraph(N,L, directed=_directed, selfloops=False)
+
+    # Add self-loops, if needed
+    if Ldiag > 0:
+        _diagonal = mask.diagonal().copy()
+        np.random.shuffle(_diagonal)
+
+        diagidx = np.diag_indices(N)
+        adjmatrix[diagidx] = _diagonal
+
+    return adjmatrix
+
 def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
                                                                 **arg_w_distr):
     """Generates a random graph of N nodes and link probability p, with link
@@ -1966,111 +2084,6 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
     SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
 
     return adjmatrix
-
-def ShuffleWeights(adjmatrix, copy=True):
-    """
-    Randomly reallocates the link weights while maintaining the link positions.
-
-    This function reads the link weights from the given (weighted) connectivity
-    matrix, and places the same weights back, randomly re-assigned. This
-    randomization respects the symmetry of input `adjmatrix`.
-    - If `adjmatrix` is an undirected graph with all reciprocal weights identical
-    such that w[i,j] = w[j,i], then weigths are shuffled and their symmetry is
-    conserved.
-    - If the weights of `adjmatrix` are not symmetric, e.g., there is at least one
-    pair for which w[i,j] != w[j,i], all weights are randomly re-allocated
-    leading to a non-symmetric connectivity matrix (regardless of whether the
-    underlying connectivity is directed or undirected).
-
-    NOTE: The function can either return a new array or change the weights of
-    input `adjmatrix` in place. This is controled by the `copy` parameter which
-    is set to True by default for coherence with other functions.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of dimension-2
-        The adjacency matrix of a network whose weights will be shuffled.
-    copy : bool, optionla, default : True
-        If True, the function returns a new array of shape (N,N) and same dtype
-        as the input `adjmatrix`. If False, the function replaces the weights of
-       `adjmatrix` in-place.
-
-    Returns
-    -------
-    if copy = True
-        adjmatrix : ndarray of shape (N,N) and same dtype as input matrix
-            A connectivity matrix with same links as input `adjmatrix` but weights
-            randomly reassigned.
-    if copy = False
-        None. (Changes `adjmatrix` in place and does not return anything.)
-    """
-    # 0) SECURITY CHECKS AND GETTING READY
-    # Check for potential erroneous inputs
-    if copy not in [True, False]:
-        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
-
-    # Identify if the network is symmetric or not
-    symmetric = is_symmetric(adjmatrix)
-    # Initialise the arrays needed
-    mask = adjmatrix.astype(np.bool)
-
-    # CASE-1: Weights in adjmatrix are NOT symmetric,
-    # it could be either directed or undirected
-    if symmetric == False:
-        # Extract the weights and shuffle them
-        weights = adjmatrix[mask]
-        np.random.shuffle(weights)
-        # Place the shuffled weights
-        if copy==True:
-            adjmatrix = np.zeros_like(adjmatrix)
-        adjmatrix[mask] = weights
-
-    # CASE-2: Weights in adjmatrix are symmetric, adjmatrix can only be undirected
-    else:
-        # 1) Deal with the diagonal weigths (if needed) and shuffle them
-        _self_loops = mask.trace()
-        if _self_loops == 0:
-            pass
-        elif _self_loops == 1:
-            _diagonal = adjmatrix.diagonal().copy()
-            print( _diagonal )
-        elif mask.trace() > 1:
-            _diagonal = adjmatrix.diagonal().copy()
-            _diagmask = mask.diagonal()
-            _diagweights = _diagonal[_diagmask]
-            # Shuffle and place back
-            np.random.shuffle(_diagweights)
-            _diagonal[_diagmask] = _diagweights
-            del _diagmask, _diagweights
-
-        # 2) Extract the upper-triangular values, and shuffle them
-        mask = np.triu(mask, k=1)
-        weights = adjmatrix[mask]
-        np.random.shuffle(weights)
-
-        # 3) Place the shuffled weights back
-        if copy == True:
-            adjmatrix = np.zeros_like(adjmatrix)
-            adjmatrix[mask] = weights
-            adjmatrix += adjmatrix.T
-        else:
-            # Can't make boolean indexing to read the mask in 'F' order :(
-            adjmatrix[mask] = weights
-            temp_idx = mask.nonzero()
-            adjmatrix[temp_idx[1],temp_idx[0]] = weights
-
-        # Place the shuffled diagonal weights
-        if _self_loops > 0:
-            np.fill_diagonal(adjmatrix, _diagonal)
-
-    if copy:
-        return adjmatrix
-
-
-
-################################################################################
-"""SPATIALLY EMBEDDED RANDOM NETWORKS"""
-
 
 
 #
