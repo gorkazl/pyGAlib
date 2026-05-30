@@ -109,6 +109,7 @@ WeightedRandomGraph
 
 
 # Standard library imports
+import warnings
 # Third party imports
 import numpy as np
 import numpy.random
@@ -1616,20 +1617,13 @@ def RavaszBarabasiGraph(Nmotif=4, hlevels=3, hublinks=True):
 
 ################################################################################
 """WEIGHTED (RANDOM) GRAPHS"""
-def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
+def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, **arg_w_distr):
     """
     Assigns weigths (from a random distribution) to the links of a graph.
 
     Assigns random weights to the links of a given connectivity matrix. Weights
     are sampled from a distribution specified by the user, for exmaple:
     `numpy.random.uniform`, `scipy.stats.uniform` or `scipy.stats.norm`.
-
-    NOTE: The function can either return a new array or assign weights to the
-    input `adjmatrix` in place. This is controled by the `copy` parameter which
-    is set to True by default for coherence with the behaviour of other functions.
-    Note that for in-place overwriting of input `adjmatrix`, this needs to be
-    passed as a `np.float64` dtype while, typically, graph generation functions
-    in GAlib return arrays of `np.uint8`.
 
     Parameters
     ----------
@@ -1650,22 +1644,14 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
         weights for the reciprocal links.
         If False, weights are fully randomly assigned thus the matrix will
         have asymmetric weights even if the connectivity is undirected.
-    copy : bool, optional, default: True
-        If True, the function returns a new array of shape (N,N) and `np.float64`
-        dtype. If False, the function adds weights 'in-place' to the input
-        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
-        be of floating dtype.
     arg_w_distr : dictionary or named arguments.
         The other arguments necessary to define `w_distr`.
 
     Returns
     -------
-    if copy = True
-        adjmatrix : ndarray of shape (N,N) and dtype = np.float64
-            A connectivity matrix with same links as input `adjmatrix` but weights
-            reassigned, drawn from distribution `w_distr`.
-    if copy = False
-        None. (Changes `adjmatrix` in place and does not return anything.)
+    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+        A weighted adjacency matrix with the same links as the input `adjmatrix`,
+        but with the link weights randomly assigned from distribution `w_distr`.
 
     See also
     --------
@@ -1679,18 +1665,6 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
     if sym_w not in (None, True, False):
         raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
 
-    if copy not in [True, False]:
-        raise TypeError( f"'copy' needs to be boolean but {type(copy)} given." )
-
-    # Check if input array 'adjmatrix' can be changed in-place.
-    if copy == False:
-        if adjmatrix.dtype.kind != 'f':
-            warntext = f"'adjmatrix' needs to be np.floating for in-place " \
-                       f"modification but is {adjmatrix.dtype}. " \
-                       f"Setting copy = True and seeding random weights ..."
-            warnings.warn( warntext, category=RuntimeWarning )
-            copy = True
-
     # Decide the type of weight symmetry, if not specified by user
     _directed = is_directed(adjmatrix)
     if sym_w is None:
@@ -1699,15 +1673,14 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
 
     # Initialise the arrays needed
     mask = adjmatrix.astype(np.bool)
-    if copy:
-        adjmatrix = np.zeros_like(mask, np.float64)
+    wmatrix = np.zeros_like(mask, np.float64)
 
     # CASE-1: Asymmetric weigths are desired (regardless of adjmatrix is
     # directed or undirected)
     if sym_w==False:
         nlinks = mask.sum()
         weights = w_distr(size=nlinks, **arg_w_distr)
-        adjmatrix[mask] = weights
+        wmatrix[mask] = weights
 
     # CASE-2: Symmetric weights are desired. If 'adjmatrix' is directed, then
     # at least the reciprocal links will receive symmetric weights.
@@ -1720,16 +1693,11 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
         if nlinks > 0:
             # Compute the random numbers and place them in 'wmatrix'
             weights = w_distr(size=nlinks, **arg_w_distr)
-            adjmatrix[mask_und] = weights
-            if copy:
-                _diagweights = adjmatrix.diagonal().copy()
-                adjmatrix += adjmatrix.T
-                np.fill_diagonal(adjmatrix, _diagweights)
-            else:
-                # Can't make boolean indexing to read the mask in 'F' order :(
-                temp_idx = mask_und.nonzero()
-                adjmatrix[temp_idx[1],temp_idx[0]] = weights
-                del temp_idx
+            wmatrix[mask_und] = weights
+            # Can't make boolean indexing to read the mask in 'F' order :(
+            temp_idx = mask_und.nonzero()
+            wmatrix[temp_idx[1],temp_idx[0]] = weights
+            del temp_idx
 
         # 2) Deal with the weights of non-reciprocal links, if any
         if _directed:
@@ -1738,10 +1706,9 @@ def SeedRandomWeights(adjmatrix, w_distr, sym_w=None, copy=True, **arg_w_distr):
             if nlinks > 0:
                 # Compute the random numbers and place them in 'wmatrix'
                 weights = w_distr(size=nlinks, **arg_w_distr)
-                adjmatrix[mask_dir] = weights
+                wmatrix[mask_dir] = weights
 
-    if copy:
-        return adjmatrix
+    return wmatrix
 
 def ShuffleWeights(adjmatrix, copy=True):
     """
