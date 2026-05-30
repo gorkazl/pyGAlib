@@ -226,7 +226,7 @@ limitations under the License.
 * **New functions** added:
     * Support functions `is_directed()` and `is_weighted()` added to _metrics.py_ module, to facilitate working with weighted graphs.
 * **Support to generate and randomize weigthed networks** added. New functions included to _models.py_ module:
-    * `SeedWeights()` adds random weights (sampled from a distribution of choice) to the links of an existing (di)graph.
+    * `SeedRandomWeights()` adds random weights (sampled from a distribution of choice) to the links of an existing (di)graph.
     * `ShuffleWeights()` conserves the links of a (di)graph in-place, but randomly reassigns their weights.
 * **"Syntactic sugar" functions** were added to generate some common random / weighted graphs (_models.py_):
     * `ErdosRenyiGraph_Like()` generates an Erdös-Rényi (random) graph of same size and link probability as a given input network. Optionally, it also seeds random weights to the links, from a distribution of choice.
