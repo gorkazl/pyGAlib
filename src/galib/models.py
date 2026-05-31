@@ -1896,7 +1896,7 @@ def ErdosRenyiGraph_Like(samplematrix, w_distr=None, sym_w=None, **arg_w_distr):
             if _directed == True:    sym_w = False
             elif _directed == False: sym_w = True
 
-        SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, copy=False, **arg_w_distr)
+        SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, **arg_w_distr)
 
     return adjmatrix
 
@@ -1986,7 +1986,7 @@ def RandomGraph_Like(samplematrix, w_distr=None, sym_w=None, **arg_w_distr):
             if _directed == True:    sym_w = False
             elif _directed == False: sym_w = True
 
-        SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, copy=False, **arg_w_distr)
+        SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, **arg_w_distr)
 
     return adjmatrix
 
@@ -2019,17 +2019,12 @@ def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
         weights for the reciprocal links.
         If False, weights are fully randomly assigned thus the matrix will
         have asymmetric weights even if the connectivity is undirected.
-    copy : bool, optionla, default : True
-        If True, the function returns a new array of shape (N,N) and `np.float64`
-        dtype. If False, the function adds weights 'in-place' to the input
-        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
-        be of floating dtype.
     arg_w_distr : dictionary or named arguments.
         The other arguments necessary to define `w_distr`.
 
     Returns
     -------
-    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+    wmatrix : ndarray of shape (N,N) and dtype = np.float64
         The adjacency matrix of the generated weighted random graph.
 
     See Also
@@ -2049,17 +2044,16 @@ def WeightedERGraph(N, p, w_distr, directed=False, selfloops=False, sym_w=None,
         raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
 
     # 1) CREATE THE BINARY RANDOM GRAPH
-    adjmatrix = ErdosRenyiGraph(N,p, directed=directed, selfloops=selfloops)
-    adjmatrix = adjmatrix.astype(np.float64)
+    wmatrix = ErdosRenyiGraph(N,p, directed=directed, selfloops=selfloops)
 
     # 2) ADD THE RANDOM WEIGHTS
     if sym_w == None:
        if directed == True:    sym_w = False
        elif directed == False: sym_w = True
 
-    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
+    wmatrix = SeedRandomWeights(wmatrix, w_distr, sym_w=sym_w,**arg_w_distr)
 
-    return adjmatrix
+    return wmatrix
 
 def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
                         sym_w=None, **arg_w_distr):
@@ -2090,17 +2084,12 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
         weights for the reciprocal links.
         If False, weights are fully randomly assigned thus the matrix will
         have asymmetric weights even if the connectivity is undirected.
-    copy : bool, optionla, default : True
-        If True, the function returns a new array of shape (N,N) and `np.float64`
-        dtype. If False, the function adds weights 'in-place' to the input
-        `adjmatrix` and does not return anything. For this, `adjmatrix` needs to
-        be of floating dtype.
     arg_w_distr : dictionary or named arguments.
         The other arguments necessary to define `w_distr`.
 
     Returns
     -------
-    adjmatrix : ndarray of shape (N,N) and dtype = np.float64
+    wmatrix : ndarray of shape (N,N) and dtype = np.float64
         The adjacency matrix of the generated weighted random graph.
 
     See Also
@@ -2117,17 +2106,16 @@ def WeightedRandomGraph(N, L, w_distr, directed=False, selfloops=False,
         raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
 
     # 1) CREATE THE BINARY RANDOM GRAPH
-    adjmatrix = RandomGraph(N,L, directed=directed, selfloops=selfloops)
-    adjmatrix = adjmatrix.astype(np.float64)
+    wmatrix = RandomGraph(N,L, directed=directed, selfloops=selfloops)
 
     # 2) ADD THE RANDOM WEIGHTS
     if sym_w == None:
-        if directed: sym_w = False
-        else: sym_w = True
+       if directed == True:    sym_w = False
+       elif directed == False: sym_w = True
 
-    SeedRandomWeights(adjmatrix, w_distr, copy=False, sym_w=sym_w,**arg_w_distr)
+    wmatrix = SeedRandomWeights(wmatrix, w_distr, sym_w=sym_w,**arg_w_distr)
 
-    return adjmatrix
+    return wmatrix
 
 
 #
