@@ -1891,12 +1891,11 @@ def ErdosRenyiGraph_Like(samplematrix, w_distr=None, sym_w=None, **arg_w_distr):
             raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
 
         # 2) Seed the random weights
-        adjmatrix = adjmatrix.astype(np.float64)
         if sym_w == None:
             if _directed == True:    sym_w = False
             elif _directed == False: sym_w = True
 
-        SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, **arg_w_distr)
+        adjmatrix = SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, **arg_w_distr)
 
     return adjmatrix
 
@@ -1981,12 +1980,11 @@ def RandomGraph_Like(samplematrix, w_distr=None, sym_w=None, **arg_w_distr):
             raise TypeError( f"'sym_w' needs to be None, True or False; but {type(sym_w)} given." )
 
         # 2) Seed the random weights
-        adjmatrix = adjmatrix.astype(np.float64)
         if sym_w == None:
             if _directed == True:    sym_w = False
             elif _directed == False: sym_w = True
 
-        SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, **arg_w_distr)
+        adjmatrix = SeedRandomWeights(adjmatrix, w_distr, sym_w=sym_w, **arg_w_distr)
 
     return adjmatrix
 
