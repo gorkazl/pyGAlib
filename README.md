@@ -234,7 +234,7 @@ limitations under the License.
     * `WeightedErdosRenyiGraph()` generates a weighted Erdos-Renyi graph with link weights sampled from a distribution of choice.
     * `WeightedRandomGraph()` generates a weighted random graph with link weights sampled from a distribution of choice.
 * New **example notebooks** added:
-    * [RichClub_Undirected.ipynb](Example/RichClub_Undirected.ipynb) shows how to identify the presence of a rich-club in empirical (di)graphs.
+    * [RichClub_Undirected](Example/RichClub_Undirected.ipynb) shows how to identify the presence of a rich-club in empirical (di)graphs.
     * [WeightedGraphs_Intro](Examples/WeightedGraphs_Intro.ipynb) illustrates how to use the new functions to work with weighted (di)graphs.
 * Minor points and bug fixes:
     * In *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
