@@ -467,7 +467,7 @@ def BarabasiAlbertGraph(N, m):
     """
 
     # 1) INITIATE THE NETWORK AS A COMPLETE GRAPH OF SIZE m
-    adjmatrix = np.zeros((N,N),np.uitn8)
+    adjmatrix = np.zeros((N,N),np.uint8)
     adjmatrix[:m+1,:m+1] = np.ones((m+1,m+1),np.uint8)
     adjmatrix[np.diag_indices(m+1)] = 0
 
