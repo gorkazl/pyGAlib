@@ -682,6 +682,9 @@ def WattsStrogatzGraph(N, z, prew, lattice=None):
 """REWIRE AND RANDOMIZE GRAPHS"""
 def RewireNetwork(adjmatrix, prewire=10, directed=None, weighted=False):
     ## TODO: Can I add a "copy" parameter ?
+    ## TODO: Make weighted=None default
+    ## TODO: Option to choose whether out- or in-stregths are conserved.
+    ## TODO: Use zeros_like() to generate rewnet in the weighted case.
     """Randomises an input graph conserving the degrees of its nodes.
 
     It uses the link switching method to rewire networks while conserving
