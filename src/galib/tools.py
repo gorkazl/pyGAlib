@@ -24,7 +24,7 @@ LoadLabels
     Reads the labels of nodes from a text file.
 SaveLabels
     Saves the labels of nodes into a text file
-ReadPartition
+LoadPartition
     Reads a partition of nodes from a text file.
 SavePartition
     Saves a partition of nodes into a text file.
