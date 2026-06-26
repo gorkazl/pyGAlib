@@ -14,7 +14,7 @@
     4. Add in README.md instructions for conda users (either `conda install galib` or, first install dependencies via conda and then `python -m pip install -e . --no-deps`. Or, release also a *yml* file with preinstallation of the dependencies.
 6. ~~What should I do with the Examples/ and Branding/ folders when packaging?~~ Should I integrate them to the wheel, or should I let users to download the examples separately (manually) from the GitHub page? **NO, do not include them into the wheel. Just leave them in the root of the repo, for independent download.**
 7. Clean, revise and test scripts in the Examples/ folder.
-8. Integrate PathLims into pyGAlib (?).
+8. Integrate PathLims into pyGAlib (?). **Yes, create `galib.extremal` submodule. Include also for clustering coefficient.**
 9. ~~Bring weighted network generation and randomization from SiReNetA.~~
 10. Add the generation of random graphs with specified degree(-degree) correlations. 
 11. Update README.md file:
