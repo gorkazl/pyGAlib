@@ -145,7 +145,6 @@ def is_symmetric(adjmatrix):
     out = np.allclose(adjmatrix, adjmatrix.T)
     return out
 
-
 def Density(adjmatrix):
     """Returns the density of links in a network.
 
@@ -1566,7 +1565,7 @@ def LocalHubness(adjmatrix, partition):
     """Computes the internal hubness of nodes, for a given partition of the network.
 
     Hubness is the degree of a node weighted by the expected degree
-    distribution in random graphs of same size and density. e Equation (4)
+    distribution in random graphs of same size and density. Seee Equation (4)
     of Klim et al. New J. Phys. 16:125006 (2014).
     Local hubness is the hubness applied to the subgraph formed by the
     community the node belongs to.
@@ -1598,7 +1597,6 @@ def LocalHubness(adjmatrix, partition):
     F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
-
     """
     N = len(adjmatrix)
     ncoms = len(partition)
@@ -1650,7 +1648,7 @@ def ParticipationMatrix(adjmatrix, partition):
     --------
     GlobalHubness : Computes the global hubness of all nodes in a network.
     LocalHubness : Given a partition, computes the local hubness of all nodes.
-    PArticipationVectors : Computes the probability of nodes to belong to every community.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
     ParticipationIndex : Participation index of every node given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
     RolesNode :
@@ -1660,7 +1658,6 @@ def ParticipationMatrix(adjmatrix, partition):
     F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
-
     """
     N = len(adjmatrix)
     ncomms = len(partition)
@@ -1669,6 +1666,9 @@ def ParticipationMatrix(adjmatrix, partition):
     # 1) CONSTRUCT THE PARTITION MATRIX, S (1 if node in module c, 0 otherwise)
     for c in range(ncomms):
         partitionmatrix[partition[c],c] = 1
+    ## TODO: Test Replacing by the following
+    # for c, com in enumerate(partition):
+    #     partitionmatrix[com,c] = 1
 
     # 2) COMPUTE THE PARTICIPATION MATRIX
     # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
@@ -1714,7 +1714,6 @@ def ParticipationVectors(adjmatrix, partition):
     F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
-
     """
     N = len(adjmatrix)
     ncomms = len(partition)
@@ -1782,7 +1781,6 @@ def ParticipationIndex(adjmatrix, partition):
     F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
-
     """
     # 1) Compute first the participation vectors
     particvectors = ParticipationVectors(adjmatrix,partition)
@@ -1830,7 +1828,6 @@ def DispersionIndex(adjmatrix, partition):
     F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
-
     """
     N = len(adjmatrix)
     # 1) Compute first the participation vectors
@@ -1887,7 +1884,6 @@ def RolesNodes(adjmatrix, partition):
     F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
-
     """
     N = len(adjmatrix)
     ncomms = len(partition)
