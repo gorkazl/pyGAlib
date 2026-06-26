@@ -1519,110 +1519,11 @@ def K_Shells(adjmatrix):
 
 ######################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
-def GlobalHubness(adjmatrix):
-    """Computes the global hubness of the nodes in a network.
-
-    Hubness is the degree of a node weighted by the expected degree
-    distribution in random graphs of same size and density. See Equation (4)
-    of Klimm et al. New J. Phys. 16:125006 (2014).
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network. Weighted links are ignored.
-
-    Returns
-    -------
-    globalhubness : ndarray (float64)
-        Global hubness of every node.
-
-    See Also
-    --------
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
-    ParticipationIndex : Participation index of every node given a partition of the network.
-    DispersionIndex : Dispersion index of every node given a partition of the network.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationVectors : Computes the probability of nodes to belong to every community.
-    NodeRoles : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
-
+def PartitionMatrix(adjmatrix, partition):
+    ## TODO: write this ! Use this for the other functions !
     """
-    N = len(adjmatrix)
-
-    dens = Density(adjmatrix)
-    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
-    degree = Degree(adjmatrix)
-
-    globalhubness = invnorm * (degree - (N-1)*dens)
-    return globalhubness
-
-def LocalHubness(adjmatrix, partition):
-    """Computes the internal hubness of nodes, for a given partition of the network.
-
-    Hubness is the degree of a node weighted by the expected degree
-    distribution in random graphs of same size and density. Seee Equation (4)
-    of Klim et al. New J. Phys. 16:125006 (2014).
-    Local hubness is the hubness applied to the subgraph formed by the
-    community the node belongs to.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network. Weighted links are ignored.
-    partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
-
-    Returns
-    -------
-    localhubness : ndarray (float64)
-        Local hubness of every node.
-
-    See Also
-    --------
-    GlobalHubness : Hubness of nodes within their community.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationVectors : Computes the probability of nodes to belong to every community.
-    ParticipationIndex : Participation index of every node given a partition of the network.
-    DispersionIndex : Dispersion index of every node given a partition of the network.
-    NodeRoles : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
     """
-    N = len(adjmatrix)
-    ncoms = len(partition)
-
-    localhubness = np.zeros(N, np.float64)
-    for n, com in enumerate(partition):
-
-        # Skip nodes of only one node
-        if len(com) == 1: continue
-
-        # Compute the hubness of nodes in the isolated community
-        subnet = tools.ExtractSubmatrix(adjmatrix,com)
-        hubness = GlobalHubness(subnet)
-
-        if np.isnan(hubness.min()): continue
-
-        localhubness[com] = hubness
-
-    return localhubness
-
-def LocalDegree(adjmatrix, partition):
-        ## TO BE WRITTEN !!
-    """Number of links that nodes make inside their module, for a given partition.
-    """
-
-    return None
+    return Void
 
 def ParticipationMatrix(adjmatrix, partition):
     """
@@ -1745,6 +1646,110 @@ def ParticipationVectors(adjmatrix, partition):
         pmatrix[i] /= pmatrix[i].sum()
 
     return pmatrix
+
+def GlobalHubness(adjmatrix):
+    """Computes the global hubness of the nodes in a network.
+
+    Hubness is the degree of a node weighted by the expected degree
+    distribution in random graphs of same size and density. See Equation (4)
+    of Klimm et al. New J. Phys. 16:125006 (2014).
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+
+    Returns
+    -------
+    globalhubness : ndarray (float64)
+        Global hubness of every node.
+
+    See Also
+    --------
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    NodeRoles : Computes all four parameters to characterise the roles of nodes.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
+    """
+    N = len(adjmatrix)
+
+    dens = Density(adjmatrix)
+    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
+    degree = Degree(adjmatrix)
+
+    globalhubness = invnorm * (degree - (N-1)*dens)
+    return globalhubness
+
+def LocalHubness(adjmatrix, partition):
+    """Computes the internal hubness of nodes, for a given partition of the network.
+
+    Hubness is the degree of a node weighted by the expected degree
+    distribution in random graphs of same size and density. Seee Equation (4)
+    of Klim et al. New J. Phys. 16:125006 (2014).
+    Local hubness is the hubness applied to the subgraph formed by the
+    community the node belongs to.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+
+    Returns
+    -------
+    localhubness : ndarray (float64)
+        Local hubness of every node.
+
+    See Also
+    --------
+    GlobalHubness : Hubness of nodes within their community.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
+    NodeRoles : Computes all four parameters to characterise the roles of nodes.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+    """
+    N = len(adjmatrix)
+    ncoms = len(partition)
+
+    localhubness = np.zeros(N, np.float64)
+    for n, com in enumerate(partition):
+
+        # Skip nodes of only one node
+        if len(com) == 1: continue
+
+        # Compute the hubness of nodes in the isolated community
+        subnet = tools.ExtractSubmatrix(adjmatrix,com)
+        hubness = GlobalHubness(subnet)
+
+        if np.isnan(hubness.min()): continue
+
+        localhubness[com] = hubness
+
+    return localhubness
+
+def LocalDegree(adjmatrix, partition):
+        ## TO BE WRITTEN !!
+    """Number of links that nodes make inside their module, for a given partition.
+    """
+    return Void
 
 def ParticipationIndex(adjmatrix, partition):
     """Participation index of every node, for given a partition of the network.
