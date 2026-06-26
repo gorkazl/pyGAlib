@@ -221,6 +221,15 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
+##### mmmm dd, 2026 (Version 2.2)
+
+This version adds changes and extension to the metrics to characterise the roles of nodes in modular networks.
+
+* Minor changes and bug fixes:
+    * Function `metrics.NodeParticipation()` renamed as `metrics.ParticipationIndex()`
+    * Function `metrics.NodeDispersion()` renamed as `metrics.DispersionIndex()`.
+
+
 ##### June 26, 2026 (Release of Version 2.1)
 
 * **New functions** added:
