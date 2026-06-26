@@ -105,7 +105,7 @@ import numpy as np
 from . import tools
 
 
-############################################################################
+################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def is_directed(adjmatrix):
     """Checks whether a (weighted) matrix represents a directed or undirected graph.
@@ -938,7 +938,9 @@ def MatchingIndex(adjmatrix, normed=True):
 
     return MImatrix
 
-###############################################################################
+
+
+################################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
 def FloydWarshall(adjmatrix, weighted_dist = False):
     """Computes the pathlength between all pairs of nodes in a network..
@@ -1182,8 +1184,9 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
     return paths
 
 
-############################################################################
-"""COMPONENTS, COMMUNITIES, K-CORES..."""
+
+################################################################################
+"""COMPONENTS, K-CORES and COMMUNITIES..."""
 def ConnectedComponents(distmatrix, directed=False, showall=True):
     """Finds all the connected components in a network out of a distance
     matrix.
@@ -1248,131 +1251,6 @@ def ConnectedComponents(distmatrix, directed=False, showall=True):
 
     del newmatrix
     return components
-
-def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
-    """Returns the assortativity matrix of network given a partition of nodes.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network.
-    partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays). 'partition' may contain any arbitrary grouping of network
-        nodes, e.g., overlapping subsets are also accepted.
-    norm : boolean or string, optional
-        Defines the kind of normalization for the counts of links:
-        - If norm=None, returns the number of links between subsets of nodes.
-        - If norm='linkfraction', returns the number of links divided by the
-        total number of links in the network.
-        - If norm='linkprobability' returns the number of links between two
-        subsets, divided by the total number of possible links between them.
-    maxweight : floating-point scalar, optional
-        Largest possible weight of the links.
-
-    Returns
-    -------
-    assortmatrix : ndarray of rank-2 and dtype=float64
-        Assortativity matrix of shape Nc x Nc, where Nc is the number of
-        subsets of nodes in 'partition'.
-
-    Notes
-    -----
-    The function accepts weighted adjacency matrices but assumes link
-    weights to lie between 0 and 'maxweight'. See documentation.
-
-    See Also
-    --------
-    ParticipationMatrix : Probability of nodes to belong to a community.
-    """
-    # Security check
-    keylist = [None, 'linkfraction', 'linkprobability']
-    if norm not in keylist:
-        raise KeyError("Enter a valid norm:", keylist)
-
-    N = len(adjmatrix)
-    Ncoms = len(partition)
-
-    # Calculate the assortativity matrix
-    assortmatrix = np.zeros((Ncoms,Ncoms), np.float64)
-
-    if norm == 'linkprobability':
-        for c1 in range(Ncoms):
-            com1 = partition[c1]
-            for c2 in range(Ncoms):
-                com2 = partition[c2]
-                submat = tools.ExtractSubmatrix(adjmatrix, com1, com2)
-                assortmatrix[c1,c2] = submat.sum()
-                # Normalise, avoiding self-loops
-                if c1 == c2:
-                    ncom1 = len(com1)
-                    assortmatrix[c1,c2] /= (maxweight * ncom1*(ncom1-1))
-                else:
-                    assortmatrix[c1,c2] /= (maxweight * len(com1) * len(com2))
-
-    else:
-        for c1 in range(Ncoms):
-            for c2 in range(Ncoms):
-                submat = tools.ExtractSubmatrix(adjmatrix, partition[c1], \
-                                                  partition[c2])
-                assortmatrix[c1,c2] = submat.sum()
-
-        if norm == 'linkfraction' and maxweight == 1.0:
-            assortmatrix /= adjmatrix.sum()
-        elif norm == 'linkfraction' and maxweight != 1.0:
-            L = len(adjmatrix.flatten().nonzero()[0])
-            assortmatrix /= (maxweight*L)
-
-    return assortmatrix
-
-def Modularity(adjmatrix, partition):
-    """Computes the Newman-Girvan modularity given a partition of nodes.
-
-    It computes modularity for both weighted or unweighted and for directed
-    or undirected networks after a generalization of the modularity measure
-    by S. Gomez, P. Jensen & A. Arenas [Phys. Rev. E 80,016114 (2009)].
-    See Notes and the GAlib documentation.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network.
-    partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
-
-    Returns
-    -------
-    Q : float scalar
-        The modularity value of the network for the given partition
-
-    Notes
-    -----
-    If 'adjmatrix' is the binary adjacency matrix of the network and 'degree'
-    the usual degree, the function returns the unweighted modularity.
-    If 'adjmatrix' is a weighted adjacency matrix and 'degree' its weighted
-    degree or intensity, it returns the weighted modularity.
-    The algorithm automatically computes modularity for both directed and
-    undirected networks according to input 'matrix'.
-    """
-    # Prepare for calculations
-    N = len(adjmatrix)
-    L = adjmatrix.sum()
-
-    indegree, outdegree = Intensity(adjmatrix, directed=True)
-
-    # Compute the modularity
-    Q = 0.0
-    L_norm = 1./L
-    for s, community in enumerate(partition):
-        submat = tools.ExtractSubmatrix(adjmatrix, community)
-        # Add the fraction of internal links
-        Q += np.float64(submat.sum())
-        # Minus the expected fraction of links
-        productsubmat = np.outer(outdegree[community], indegree[community])
-        Q -= productsubmat.sum() * L_norm
-
-    return Q * L_norm
 
 def K_Core(adjmatrix, kmin):
     """Finds the K-core of a network with degree k >= kmin.
@@ -1517,13 +1395,282 @@ def K_Shells(adjmatrix):
     return kshells
 
 
-######################################################################
-"""ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
+def ShufflePartition(partition):
+    ## TODO: Write this function !!
+    """
+    """
+    return None
+
+def RandomPartition(N,M):
+    ## TODO: Write this function !!
+    """
+    """
+    return None
+
 def PartitionMatrix(adjmatrix, partition):
-    ## TODO: write this ! Use this for the other functions !
+    """Computes the partition matrix of a network for a given partition.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+
+    Returns
+    -------
+    partitionmatrix : ndarray of rank-2
+        The partition matrix P is a binary matrix of shape (N,ncomms) with
+        P(i,c) = 1 if node i belongs to community c, and P(i,c) = 0 otherwise.
+
+    See Also
+    --------
+    AssortativityMatrix : Returns the assortativity matrix of a network for a given a partition.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     """
+    N = len(adjmatrix)
+    ncomms = len(partition)
+
+    # 1) COMPUTE THE LOCAL HUBNESS AND CREATE THE PARTITION MATRIX
+    partitionmatrix = np.zeros((N,ncomms), np.uint8)
+    for c, com in enumerate(partition):
+        partitionmatrix[com,c] = 1
+
+    return partitionmatrix
+
+def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
+    """Returns the assortativity matrix of network given a partition of nodes.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays). 'partition' may contain any arbitrary grouping of network
+        nodes, e.g., overlapping subsets are also accepted.
+    norm : boolean or string, optional
+        Defines the kind of normalization for the counts of links:
+        - If norm=None, returns the number of links between subsets of nodes.
+        - If norm='linkfraction', returns the number of links divided by the
+        total number of links in the network.
+        - If norm='linkprobability' returns the number of links between two
+        subsets, divided by the total number of possible links between them.
+    maxweight : floating-point scalar, optional
+        Largest possible weight of the links.
+
+    Returns
+    -------
+    assortmatrix : ndarray of rank-2 and dtype=float64
+        Assortativity matrix of shape Nc x Nc, where Nc is the number of
+        subsets of nodes in 'partition'.
+
+    Notes
+    -----
+    The function accepts weighted adjacency matrices but assumes link
+    weights to lie between 0 and 'maxweight'. See documentation.
+
+    See Also
+    --------
+    ParticipationMatrix : Probability of nodes to belong to a community.
     """
-    return Void
+    # Security check
+    keylist = [None, 'linkfraction', 'linkprobability']
+    if norm not in keylist:
+        raise KeyError("Enter a valid norm:", keylist)
+
+    N = len(adjmatrix)
+    Ncoms = len(partition)
+
+    # Calculate the assortativity matrix
+    assortmatrix = np.zeros((Ncoms,Ncoms), np.float64)
+
+    if norm == 'linkprobability':
+        for c1 in range(Ncoms):
+            com1 = partition[c1]
+            for c2 in range(Ncoms):
+                com2 = partition[c2]
+                submat = tools.ExtractSubmatrix(adjmatrix, com1, com2)
+                assortmatrix[c1,c2] = submat.sum()
+                # Normalise, avoiding self-loops
+                if c1 == c2:
+                    ncom1 = len(com1)
+                    assortmatrix[c1,c2] /= (maxweight * ncom1*(ncom1-1))
+                else:
+                    assortmatrix[c1,c2] /= (maxweight * len(com1) * len(com2))
+
+    else:
+        for c1 in range(Ncoms):
+            for c2 in range(Ncoms):
+                submat = tools.ExtractSubmatrix(adjmatrix, partition[c1], \
+                                                  partition[c2])
+                assortmatrix[c1,c2] = submat.sum()
+
+        if norm == 'linkfraction' and maxweight == 1.0:
+            assortmatrix /= adjmatrix.sum()
+        elif norm == 'linkfraction' and maxweight != 1.0:
+            L = len(adjmatrix.flatten().nonzero()[0])
+            assortmatrix /= (maxweight*L)
+
+    return assortmatrix
+
+def Modularity(adjmatrix, partition):
+    """Computes the Newman-Girvan modularity given a partition of nodes.
+
+    It computes modularity for both weighted or unweighted and for directed
+    or undirected networks after a generalization of the modularity measure
+    by S. Gomez, P. Jensen & A. Arenas [Phys. Rev. E 80,016114 (2009)].
+    See Notes and the GAlib documentation.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+
+    Returns
+    -------
+    Q : float scalar
+        The modularity value of the network for the given partition
+
+    Notes
+    -----
+    If 'adjmatrix' is the binary adjacency matrix of the network and 'degree'
+    the usual degree, the function returns the unweighted modularity.
+    If 'adjmatrix' is a weighted adjacency matrix and 'degree' its weighted
+    degree or intensity, it returns the weighted modularity.
+    The algorithm automatically computes modularity for both directed and
+    undirected networks according to input 'matrix'.
+    """
+    # Prepare for calculations
+    N = len(adjmatrix)
+    L = adjmatrix.sum()
+
+    indegree, outdegree = Intensity(adjmatrix, directed=True)
+
+    # Compute the modularity
+    Q = 0.0
+    L_norm = 1./L
+    for s, community in enumerate(partition):
+        submat = tools.ExtractSubmatrix(adjmatrix, community)
+        # Add the fraction of internal links
+        Q += np.float64(submat.sum())
+        # Minus the expected fraction of links
+        productsubmat = np.outer(outdegree[community], indegree[community])
+        Q -= productsubmat.sum() * L_norm
+
+    return Q * L_norm
+
+
+
+################################################################################
+"""ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
+def GlobalHubness(adjmatrix):
+    """Computes the global hubness of the nodes in a network.
+
+    Hubness is the degree of a node weighted by the expected degree
+    distribution in random graphs of same size and density. See Equation (4)
+    of Klimm et al. New J. Phys. 16:125006 (2014).
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+
+    Returns
+    -------
+    globalhubness : ndarray (float64)
+        Global hubness of every node.
+
+    See Also
+    --------
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    NodeRoles : Computes all four parameters to characterise the roles of nodes.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
+    """
+    N = len(adjmatrix)
+
+    dens = Density(adjmatrix)
+    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
+    degree = Degree(adjmatrix)
+
+    globalhubness = invnorm * (degree - (N-1)*dens)
+    return globalhubness
+
+def LocalHubness(adjmatrix, partition):
+    """Computes the internal hubness of nodes, for a given partition of the network.
+
+    Hubness is the degree of a node weighted by the expected degree
+    distribution in random graphs of same size and density. Seee Equation (4)
+    of Klim et al. New J. Phys. 16:125006 (2014).
+    Local hubness is the hubness applied to the subgraph formed by the
+    community the node belongs to.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of rank-2
+        The adjacency matrix of the network. Weighted links are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+
+    Returns
+    -------
+    localhubness : ndarray (float64)
+        Local hubness of every node.
+
+    See Also
+    --------
+    GlobalHubness : Hubness of nodes within their community.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
+    NodeRoles : Computes all four parameters to characterise the roles of nodes.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+    """
+    N = len(adjmatrix)
+    ncomms = len(partition)
+
+    localhubness = np.zeros(N, np.float64)
+    for n, com in enumerate(partition):
+
+        # Skip nodes of only one node
+        if len(com) == 1: continue
+
+        # Compute the hubness of nodes in the isolated community
+        subnet = tools.ExtractSubmatrix(adjmatrix,com)
+        hubness = GlobalHubness(subnet)
+
+        if np.isnan(hubness.min()): continue
+
+        localhubness[com] = hubness
+
+    return localhubness
+
+def LocalDegree(adjmatrix, partition):
+        ## TO BE WRITTEN !!
+    """Number of links that nodes make inside their module, for a given partition.
+    """
+    return None
 
 def ParticipationMatrix(adjmatrix, partition):
     """
@@ -1626,6 +1773,9 @@ def ParticipationVectors(adjmatrix, partition):
     for c in range(ncomms):
         partitionmatrix[partition[c],c] = 1
         commsizes[c] = len(partition[c])
+        ## TODO: Test Replacing by the following
+        # for c, com in enumerate(partition):
+        #     partitionmatrix[com,c] = 1
 
     # 1.2) Compute the participation matrix
     # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
@@ -1646,110 +1796,6 @@ def ParticipationVectors(adjmatrix, partition):
         pmatrix[i] /= pmatrix[i].sum()
 
     return pmatrix
-
-def GlobalHubness(adjmatrix):
-    """Computes the global hubness of the nodes in a network.
-
-    Hubness is the degree of a node weighted by the expected degree
-    distribution in random graphs of same size and density. See Equation (4)
-    of Klimm et al. New J. Phys. 16:125006 (2014).
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network. Weighted links are ignored.
-
-    Returns
-    -------
-    globalhubness : ndarray (float64)
-        Global hubness of every node.
-
-    See Also
-    --------
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
-    ParticipationIndex : Participation index of every node given a partition of the network.
-    DispersionIndex : Dispersion index of every node given a partition of the network.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationVectors : Computes the probability of nodes to belong to every community.
-    NodeRoles : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
-
-    """
-    N = len(adjmatrix)
-
-    dens = Density(adjmatrix)
-    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
-    degree = Degree(adjmatrix)
-
-    globalhubness = invnorm * (degree - (N-1)*dens)
-    return globalhubness
-
-def LocalHubness(adjmatrix, partition):
-    """Computes the internal hubness of nodes, for a given partition of the network.
-
-    Hubness is the degree of a node weighted by the expected degree
-    distribution in random graphs of same size and density. Seee Equation (4)
-    of Klim et al. New J. Phys. 16:125006 (2014).
-    Local hubness is the hubness applied to the subgraph formed by the
-    community the node belongs to.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network. Weighted links are ignored.
-    partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
-
-    Returns
-    -------
-    localhubness : ndarray (float64)
-        Local hubness of every node.
-
-    See Also
-    --------
-    GlobalHubness : Hubness of nodes within their community.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationVectors : Computes the probability of nodes to belong to every community.
-    ParticipationIndex : Participation index of every node given a partition of the network.
-    DispersionIndex : Dispersion index of every node given a partition of the network.
-    NodeRoles : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
-    """
-    N = len(adjmatrix)
-    ncoms = len(partition)
-
-    localhubness = np.zeros(N, np.float64)
-    for n, com in enumerate(partition):
-
-        # Skip nodes of only one node
-        if len(com) == 1: continue
-
-        # Compute the hubness of nodes in the isolated community
-        subnet = tools.ExtractSubmatrix(adjmatrix,com)
-        hubness = GlobalHubness(subnet)
-
-        if np.isnan(hubness.min()): continue
-
-        localhubness[com] = hubness
-
-    return localhubness
-
-def LocalDegree(adjmatrix, partition):
-        ## TO BE WRITTEN !!
-    """Number of links that nodes make inside their module, for a given partition.
-    """
-    return Void
 
 def ParticipationIndex(adjmatrix, partition):
     """Participation index of every node, for given a partition of the network.
@@ -2028,7 +2074,7 @@ def Hubness_GA(participmatrix, partition):
     ParticipationIndex : Returns the participation index of all nodes given
         a partition.
     """
-    N, ncoms = np.shape(participmatrix)
+    N, ncomms = np.shape(participmatrix)
 
     zscore = np.zeros(N, np.float64)
     for s, community in enumerate(partition):
