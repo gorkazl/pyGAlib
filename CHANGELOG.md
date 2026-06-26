@@ -1,5 +1,26 @@
 ### HISTORY OF CHANGES
 
+##### June 26, 2026 (Release of Version 2.1)
+
+* **New functions** added:
+    * Support functions `is_directed()` and `is_weighted()` added to _metrics.py_ module, to facilitate working with weighted graphs.
+* **Support to generate and randomize weigthed networks** added. New functions included to _models.py_ module:
+    * `SeedRandomWeights()` adds random weights (sampled from a distribution of choice) to the links of an existing (di)graph.
+    * `ShuffleWeights()` conserves the links of a (di)graph in-place, but randomly reassigns their weights.
+* **"Syntactic sugar" functions** were added to generate some common random / weighted graphs (_models.py_):
+    * `ErdosRenyiGraph_Like()` generates an Erdös-Rényi (random) graph of same size and link probability as a given input network. Optionally, it also seeds random weights to the links, from a distribution of choice.
+    * `RandomGraph_Like()` generates a random graph of same size and number of links as a given input network. Optionally, it also seeds random weights to the links, from a distribution of choice.
+    * `WeightedErdosRenyiGraph()` generates a weighted Erdos-Renyi graph with link weights sampled from a distribution of choice.
+    * `WeightedRandomGraph()` generates a weighted random graph with link weights sampled from a distribution of choice.
+* New **example notebooks** added:
+    * [RichClub_Undirected.ipynb](Examples/RichClub_Undirected.ipynb) shows how to identify the presence of a rich-club in empirical (di)graphs.
+    * [WeightedGraphs_Intro.ipynb](Examples/WeightedGraphs_Intro.ipynb) illustrates how to use the new functions to work with weighted (di)graphs.
+* Minor changes and bug fixes:
+    * In *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
+    * Bug fix in `ErdosRenyiGraph()` function that prevented addition of self-loops even with `selfloops = True` option set.
+    * `outdtype` option removed from graph generation functions in *models.py* module. For consistency, all graph generators return 2D arrays of `np.uint8` type, for the binary cases and `np.float64` for the weighted (di)graphs.
+
+
 ##### November 10, 2025 (Release of Version 2.0)
 
 Stable version 2.0 checked, validated and released.
