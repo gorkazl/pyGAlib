@@ -225,6 +225,10 @@ limitations under the License.
 
 This version adds changes and extension to the metrics to characterise the roles of nodes in modular networks.
 
+* New functions added:
+    * `PartitionMatrix()` ... finish this ...
+    * `RandomPartition()` ... finish this ...
+    * `ShufflePartition()` ... finish this ...
 * Minor changes and bug fixes:
     * Function `metrics.NodeParticipation()` renamed as `metrics.ParticipationIndex()`
     * Function `metrics.NodeDispersion()` renamed as `metrics.DispersionIndex()`.
