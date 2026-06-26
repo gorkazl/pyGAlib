@@ -74,23 +74,25 @@ Modularity
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
 ----------------------------------------------------
 GlobalHubness
-    Computes the global hubness of all nodes in a network.
+    Computes the global hubness of the nodes in a network.
 LocalHubness
-    Given a partition, computes the local hubness of all nodes.
+    Computes the internal hubness of nodes, for a given partition of the network.
+LocalDegree
+    Number of links that nodes make inside their module, for a given partition.
 ParticipationMatrix
-    Given a partition of the network, it returns the participation matrix.
+    Number of links nodes make across modules, given a partition of the network.
 ParticipationVectors
-    Computes the probability of nodes to belong to every community.
-NodeParticipation
-    Participation index of every node given a partition of the network.
-NodeDispersion
-    Dispersion index of every node given a partition of the network.
+    Probability of nodes to belong to each module, given a partition of the network.
+ParticipationIndex
+    Participation index of every node, for given a partition of the network.
+DispersionIndex
+    Dispersion index of every node, for given a partition of the network.
 NodeRoles
     Computes all four parameters to characterise the roles of nodes.
 ParticipationIndex_GA
-   Returns the participation index as defined by Guimera & Amaral.
+   Computes the participation index as defined by Guimera & Amaral (2005).
 Hubness_GA
-    Returns the within-module degree defined by Guimera & Amaral.
+    Computes the within-module degree defined by Guimera & Amaral (2005).
 
 
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
@@ -1519,7 +1521,7 @@ def K_Shells(adjmatrix):
 ######################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
 def GlobalHubness(adjmatrix):
-    """Computes the global hubness of all nodes in a network.
+    """Computes the global hubness of the nodes in a network.
 
     Hubness is the degree of a node weighted by the expected degree
     distribution in random graphs of same size and density. See Equation (4)
@@ -1538,11 +1540,11 @@ def GlobalHubness(adjmatrix):
     See Also
     --------
     LocalHubness : Given a partition, computes the local hubness of all nodes.
-    NodeParticipation : Participation index of every node given a partition of the network.
-    NodeDispersion : Dispersion index of every node given a partition of the network.
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
-    NodeRoles :
+    NodeRoles : Computes all four parameters to characterise the roles of nodes.
 
     Citation
     --------
@@ -1561,7 +1563,7 @@ def GlobalHubness(adjmatrix):
     return globalhubness
 
 def LocalHubness(adjmatrix, partition):
-    """Given a partition, computes the local hubness of all nodes.
+    """Computes the internal hubness of nodes, for a given partition of the network.
 
     Hubness is the degree of a node weighted by the expected degree
     distribution in random graphs of same size and density. e Equation (4)
@@ -1587,9 +1589,9 @@ def LocalHubness(adjmatrix, partition):
     GlobalHubness : Hubness of nodes within their community.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
-    NodeParticipation : Participation index of every node given a partition of the network.
-    NodeDispersion : Dispersion index of every node given a partition of the network.
-    NodeRoles :
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
+    NodeRoles : Computes all four parameters to characterise the roles of nodes.
 
     Citation
     --------
@@ -1617,8 +1619,16 @@ def LocalHubness(adjmatrix, partition):
 
     return localhubness
 
+def LocalDegree(adjmatrix, partition):
+        ## TO BE WRITTEN !!
+    """Number of links that nodes make inside their module, for a given partition.
+    """
+
+    return None
+
 def ParticipationMatrix(adjmatrix, partition):
-    """Given a partition of the network, it returns the participation matrix.
+    """
+    Number of links nodes make across modules, given a partition of the network.
 
     A matrix of shape N x n, where N is the number of nodes and n is the
     number of communities. Elements a(i,s) of the matrix are the number of
@@ -1641,8 +1651,8 @@ def ParticipationMatrix(adjmatrix, partition):
     GlobalHubness : Computes the global hubness of all nodes in a network.
     LocalHubness : Given a partition, computes the local hubness of all nodes.
     PArticipationVectors : Computes the probability of nodes to belong to every community.
-    NodeParticipation : Participation index of every node given a partition of the network.
-    NodeDispersion : Dispersion index of every node given a partition of the network.
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
     RolesNode :
 
     Citation
@@ -1667,7 +1677,8 @@ def ParticipationMatrix(adjmatrix, partition):
     return pmatrix
 
 def ParticipationVectors(adjmatrix, partition):
-    """Computes the probability of nodes to belong to every community.
+    """
+    Probability of nodes to belong to each module, given a partition of the network.
 
     The probability of node i to belong to community c is estimated as the
     fraction of nodes in c with which i is connected to: k_ic / N_c, where
@@ -1693,8 +1704,8 @@ def ParticipationVectors(adjmatrix, partition):
     --------
     GlobalHubness : Computes the global hubness of all nodes in a network.
     LocalHubness : Given a partition, computes the local hubness of all nodes.
-    NodeParticipation : Participation index of every node given a partition of the network.
-    NodeDispersion : Dispersion index of every node given a partition of the network.
+    ParticipationIndex : Participation index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     RolesNode :
 
@@ -1736,8 +1747,8 @@ def ParticipationVectors(adjmatrix, partition):
 
     return pmatrix
 
-def NodeParticipation(adjmatrix, partition):
-    """Participation index of every node given a partition of the network.
+def ParticipationIndex(adjmatrix, partition):
+    """Participation index of every node, for given a partition of the network.
 
     Computes the participation index of every node. If a node is only
     connected to other nodes of the same community, then pi = 0. If the
@@ -1762,7 +1773,7 @@ def NodeParticipation(adjmatrix, partition):
     --------
     GlobalHubness : Computes the global hubness of all nodes in a network.
     LocaHubness : Given a partition, computes the local hubness of all nodes.
-    NodeDispersion : Dispersion index of every node given a partition of the network.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
 
@@ -1782,8 +1793,8 @@ def NodeParticipation(adjmatrix, partition):
 
     return nodeparticip
 
-def NodeDispersion(adjmatrix, partition):
-    """Dispersion index of every node given a partition of the network.
+def DispersionIndex(adjmatrix, partition):
+    """Dispersion index of every node, for given a partition of the network.
 
     Computes the dispersion index of every node. Dispersion is a measure to
     quantify whether a node is well classified within the partition, or it
@@ -1803,14 +1814,14 @@ def NodeDispersion(adjmatrix, partition):
 
     Returns
     -------
-    nodedispersion : ndarray of dtype=Float64 and rank-N
+    DispersionIndex : ndarray of dtype=Float64 and rank-N
         The participation index of each node.
 
     See Also
     --------
     GlobalHubness : Computes the global hubness of all nodes in a network.
     LocalHubness : Given a partition, computes the local hubness of all nodes.
-    NodeParticipation : Participation index of every node given a partition of the network.
+    ParticipationIndex : Participation index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
 
@@ -1826,15 +1837,15 @@ def NodeDispersion(adjmatrix, partition):
     particvectors = ParticipationVectors(adjmatrix,partition)
 
     # 2) Reduce the vector of each node into a single normalised scalar
-    nodedispersion = np.zeros(N, np.float64)
+    DispersionIndex = np.zeros(N, np.float64)
     for i in range(N):
         idx = particvectors[i].nonzero()[0]
         vector = particvectors[i,idx]
         ncomms = np.float64(len(vector))
         if ncomms > 1:
-            nodedispersion[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
+            DispersionIndex[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
 
-    return nodedispersion
+    return DispersionIndex
 
 def RolesNodes(adjmatrix, partition):
     """Computes all four parameters to characterise the roles of nodes.
@@ -1860,14 +1871,14 @@ def RolesNodes(adjmatrix, partition):
         Local hubness of every node.
     nodeparticip : ndarray of dtype=Float64 and rank-N
         The participation index of each node.
-    nodedispersion : ndarray of dtype=Float64 and rank-N
+    DispersionIndex : ndarray of dtype=Float64 and rank-N
         The participation index of each node.
 
     See Also
     --------
     GlobalHubness : Computes the global hubness of all nodes in a network.
     LocalHubness : Given a partition, computes the local hubness of all nodes.
-    NodeParticipation : Participation index of every node given a partition of the network.
+    ParticipationIndex : Participation index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
 
@@ -1925,18 +1936,18 @@ def RolesNodes(adjmatrix, partition):
     nodeparticip = 1. - norm * particvectors.std(axis=1)
 
     # The dispersion index
-    nodedispersion = np.zeros(N, np.float64)
+    DispersionIndex = np.zeros(N, np.float64)
     for i in range(N):
         idx = particvectors[i].nonzero()[0]
         vector = particvectors[i,idx]
         ncomms = np.float64(len(vector))
         if ncomms > 1:
-            nodedispersion[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
+            DispersionIndex[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
 
-    return globalhubness, localhubness, nodeparticip, nodedispersion
+    return globalhubness, localhubness, nodeparticip, DispersionIndex
 
 def ParticipationIndex_GA(participmatrix):
-    """Returns the participation index as defined by Guimera & Amaral.
+    """Computes the participation index as defined by Guimera & Amaral.
 
     Given a partition of the network into communities, the participation
     index quantifies how much are the links of a node distributed along
@@ -1985,7 +1996,7 @@ def ParticipationIndex_GA(participmatrix):
     return participindex
 
 def Hubness_GA(participmatrix, partition):
-    """Returns the within-module degree defined by Guimera & Amaral.
+    """Computes the within-module degree defined by Guimera & Amaral.
 
     The within-module degree is a measure of local hubness. Given a network
     and a partition of it nodes into communities, the within-module degree
