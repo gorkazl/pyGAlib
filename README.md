@@ -221,8 +221,8 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
-##### May 30, 2026 (Version 2.1)
- 
+##### June 26, 2026 (Release of Version 2.1)
+
 * **New functions** added:
     * Support functions `is_directed()` and `is_weighted()` added to _metrics.py_ module, to facilitate working with weighted graphs.
 * **Support to generate and randomize weigthed networks** added. New functions included to _models.py_ module:
@@ -234,9 +234,9 @@ limitations under the License.
     * `WeightedErdosRenyiGraph()` generates a weighted Erdos-Renyi graph with link weights sampled from a distribution of choice.
     * `WeightedRandomGraph()` generates a weighted random graph with link weights sampled from a distribution of choice.
 * New **example notebooks** added:
-    * [RichClub_Undirected](Example/RichClub_Undirected.ipynb) shows how to identify the presence of a rich-club in empirical (di)graphs.
-    * [WeightedGraphs_Intro](Examples/WeightedGraphs_Intro.ipynb) illustrates how to use the new functions to work with weighted (di)graphs.
-* Minor points and bug fixes:
+    * [RichClub_Undirected.ipynb](Examples/RichClub_Undirected.ipynb) shows how to identify the presence of a rich-club in empirical (di)graphs.
+    * [WeightedGraphs_Intro.ipynb](Examples/WeightedGraphs_Intro.ipynb) illustrates how to use the new functions to work with weighted (di)graphs.
+* Minor changes and bug fixes:
     * In *models.py* module, function renamed from `ModularHeterogeneousGraph()` to `ModularGraph()`.
     * Bug fix in `ErdosRenyiGraph()` function that prevented addition of self-loops even with `selfloops = True` option set.
     * `outdtype` option removed from graph generation functions in *models.py* module. For consistency, all graph generators return 2D arrays of `np.uint8` type, for the binary cases and `np.float64` for the weighted (di)graphs.
@@ -251,15 +251,6 @@ Stable version 2.0 checked, validated and released.
 * [Hatch](https://hatch.pypa.io/latest/) was chosen as the tool to build and publish the package. See the *pyproject.toml* file. 
 * Bug fixes to adapt to the various changes in Python and NumPy since last release.
 * Sample and validation scripts in the "*Examples/*" folder revised and adapted to recent changes in Python and NumPy. 
-
-##### March 14, 2024
-Small bugs fixed:
-
-- Normalization of `galib.metrics.Modularity()` function corrected.
-- Fixed the new  aliases for `int` and `float` in *Numpy*. All arrays are now declared as `np.int64` or `np.float64`, and individual numbers as standard Python `int` or `float`. 
-
-##### February 7, 2022
-Minor bug fixes. A remaining Python 2 to Python 3 conversion error was fixed, since standard library function `range()` no longer returns a list, but an iterator object.
 
  
 See the file *CHANGELOG.md* for a complete history of changes.
