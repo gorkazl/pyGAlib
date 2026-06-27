@@ -91,6 +91,7 @@ DispersionIndex
     Dispersion index of every node, for given a partition of the network.
 NodeRoles
     Computes all four parameters to characterise the roles of nodes.
+
 ParticipationIndex_GA
    Computes the participation index as defined by Guimera & Amaral (2005).
 Hubness_GA
@@ -1409,16 +1410,11 @@ def RandomPartition(N,M):
     """
     return None
 
-def PartitionMatrix(adjmatrix, partition):
+def PartitionMatrix(partition):
     """Computes a matrix encoding nodes belonging to a community in a partition.
-
-    The partition matrix P is a binary matrix of shape (N,ncomms) with
-    P(i,c) = 1 if node i belongs to community c, and P(i,c) = 0 otherwise.
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network. Weighted links are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -1426,22 +1422,27 @@ def PartitionMatrix(adjmatrix, partition):
     Returns
     -------
     partitionmatrix : ndarray of rank-2
-        The partition matrix of the network, for a given input partition.
+        The partition matrix P is a binary matrix of shape (N,ncoms) with
+        P(i,c) = 1 if node i belongs to community c, and P(i,c) = 0 otherwise.
 
     See Also
     --------
     AssortativityMatrix : Returns the assortativity matrix of a network for a given a partition.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     """
-    N = len(adjmatrix)
+    # Get the number of nodes and communities
     ncomms = len(partition)
+    N = 0
+    for com in partition:
+        N += len(com)
 
-    # 1) COMPUTE THE LOCAL HUBNESS AND CREATE THE PARTITION MATRIX
+    # 1) COMPUTE THE PARTITION MATRIX
     partitionmatrix = np.zeros((N,ncomms), np.uint8)
     for c, com in enumerate(partition):
         partitionmatrix[com,c] = 1
 
     return partitionmatrix
+
 
 def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     """Returns the assortativity matrix of network given a partition of nodes.
@@ -1716,11 +1717,8 @@ def ParticipationMatrix(adjmatrix, partition):
     partitionmatrix = np.zeros((N,ncomms), np.uint64)
 
     # 1) CONSTRUCT THE PARTITION MATRIX, S (1 if node in module c, 0 otherwise)
-    for c in range(ncomms):
-        partitionmatrix[partition[c],c] = 1
-    ## TODO: Test Replacing by the following
-    # for c, com in enumerate(partition):
-    #     partitionmatrix[com,c] = 1
+    for c, com in enumerate(partition):
+        partitionmatrix[com,c] = 1
 
     # 2) COMPUTE THE PARTICIPATION MATRIX
     # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
