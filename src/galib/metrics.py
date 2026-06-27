@@ -1443,7 +1443,6 @@ def PartitionMatrix(partition):
 
     return partitionmatrix
 
-
 def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     """Returns the assortativity matrix of network given a partition of nodes.
 
@@ -1593,10 +1592,6 @@ def GlobalHubness(adjmatrix):
     See Also
     --------
     LocalHubness : Given a partition, computes the local hubness of all nodes.
-    ParticipationIndex : Participation index of every node given a partition of the network.
-    DispersionIndex : Dispersion index of every node given a partition of the network.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationVectors : Computes the probability of nodes to belong to every community.
     NodeRoles : Computes all four parameters to characterise the roles of nodes.
 
     Citation
@@ -1640,10 +1635,6 @@ def LocalHubness(adjmatrix, partition):
     See Also
     --------
     GlobalHubness : Hubness of nodes within their community.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationVectors : Computes the probability of nodes to belong to every community.
-    ParticipationIndex : Participation index of every node given a partition of the network.
-    DispersionIndex : Dispersion index of every node given a partition of the network.
     NodeRoles : Computes all four parameters to characterise the roles of nodes.
 
     Citation
@@ -1699,12 +1690,10 @@ def ParticipationMatrix(adjmatrix, partition):
 
     See Also
     --------
-    GlobalHubness : Computes the global hubness of all nodes in a network.
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    PartitionMatrix : Computes a matrix encoding nodes belonging to a community in a partition.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
     ParticipationIndex : Participation index of every node given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
-    RolesNode :
 
     Citation
     --------
@@ -1738,18 +1727,16 @@ def ParticipationVectors(adjmatrix, partition):
 
     Returns
     -------
-    pmatrix : ndarray of rank-2 and shape N x n.
+    pvectors : ndarray of rank-2 and shape N x n.
         Every row contains the likelihood of the node to belong to each
         of the communities.
 
     See Also
     --------
-    GlobalHubness : Computes the global hubness of all nodes in a network.
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationIndex : Participation index of every node given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    RolesNode :
+    RolesNodes : Computes all four parameters to characterise the roles of nodes.
 
     Citation
     --------
@@ -1757,39 +1744,28 @@ def ParticipationVectors(adjmatrix, partition):
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
     """
+    # Get some helper data
     N = len(adjmatrix)
-    ncomms = len(partition)
-    commsizes = np.zeros(ncomms, np.float64)
-    partitionmatrix = np.zeros((N,ncomms), np.uint64)
+    commsizes = np.zeros(len(partition), np.float64)
+    for c,com in enumerate(partition):
+        commsizes[c] = len(com)
 
-    # 1) COMPUTE FIRST THE PARTICIPATION MATRIX
-    # 1.1) Construct the partition matrix
-    for c in range(ncomms):
-        partitionmatrix[partition[c],c] = 1
-        commsizes[c] = len(partition[c])
-        ## TODO: Test Replacing by the following
-        # for c, com in enumerate(partition):
-        #     partitionmatrix[com,c] = 1
+    # 1) Initiallise as the Participation Matrix
+    pvectors = ParticipationMatrix(adjmatrix, partition)
 
-    # 1.2) Compute the participation matrix
-    # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
-    pmatrix = np.dot(adjmatrix.astype(bool), partitionmatrix)
+    # 2) Now compute the participation vectors
+    # 2.1) The fraction of neighbours node i connects to
+    pvectors = pvectors.astype(np.float64)
+    for c, com in enumerate(partition):
+        _commsizes = commsizes.copy()
+        _commsizes[c] -= 1
+        pvectors[com] /= _commsizes
 
-    # 2) NOW COMPUTE THE PARTICIPATION VECTORS
-    pmatrix = pmatrix.astype(np.float64)
+    # 2.2) Finally, normalize the vectors to sum 1
     for i in range(N):
-        # 2.1) The fraction of neighbours node i connects with,
-        # in every module
-        for c in range(ncomms):
-            if partitionmatrix[i,c]:
-                pmatrix[i,c] /= (commsizes[c] - 1.0)
-            else:
-                pmatrix[i,c] /= commsizes[c]
+        pvectors[i] /= pvectors[i].sum()
 
-        # 2.2) Finally, normalize the vector to sum 1
-        pmatrix[i] /= pmatrix[i].sum()
-
-    return pmatrix
+    return pvectors
 
 def ParticipationIndex(adjmatrix, partition):
     """Participation index of every node, for given a partition of the network.
@@ -1815,11 +1791,9 @@ def ParticipationIndex(adjmatrix, partition):
 
     See Also
     --------
-    GlobalHubness : Computes the global hubness of all nodes in a network.
-    LocaHubness : Given a partition, computes the local hubness of all nodes.
-    DispersionIndex : Dispersion index of every node given a partition of the network.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
+    DispersionIndex : Dispersion index of every node given a partition of the network.
+    RolesNodes : Computes all four parameters to characterise the roles of nodes.
 
     Citation
     --------
@@ -1862,11 +1836,9 @@ def DispersionIndex(adjmatrix, partition):
 
     See Also
     --------
-    GlobalHubness : Computes the global hubness of all nodes in a network.
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
     ParticipationIndex : Participation index of every node given a partition of the network.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
+    RolesNodes : Computes all four parameters to characterise the roles of nodes.
 
     Citation
     --------
