@@ -1712,18 +1712,10 @@ def ParticipationMatrix(adjmatrix, partition):
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
     """
-    N = len(adjmatrix)
-    ncomms = len(partition)
-    partitionmatrix = np.zeros((N,ncomms), np.uint64)
-
-    # 1) CONSTRUCT THE PARTITION MATRIX, S (1 if node in module c, 0 otherwise)
-    for c, com in enumerate(partition):
-        partitionmatrix[com,c] = 1
-
-    # 2) COMPUTE THE PARTICIPATION MATRIX
-    # adjmatrix.astype(bool) for cases in which adjmatrix is weighted
+    # 1) Construct the partition matrix, s (1 if node in module c, 0 otherwise)
+    partitionmatrix = PartitionMatrix(partition)
+    # 2) Compute the participation matrix
     pmatrix = np.dot(adjmatrix.astype(bool), partitionmatrix)
-
     return pmatrix
 
 def ParticipationVectors(adjmatrix, partition):
