@@ -60,14 +60,16 @@ PathsAllinOne
 
 COMMUNITIES, COMPONENTS, K-CORES, ...
 -------------------------------------
-AssortativityMatrix
-    Returns the assortativity matrix of network given a partition of nodes.
-ConnectedComponents
-    Finds all the connected components in a network out of a distance matrix.
 K_Core
     Finds the K-core of a network with degree k >= kmin.
 K_Shells
     Returns the K-shells of a network for all k from kmin to kmax.
+ConnectedComponents
+    Finds all the connected components in a network out of a distance matrix.
+PartitionMatrix
+    Computes a matrix encoding nodes belonging to a community in a partition.
+AssortativityMatrix
+    Returns the assortativity matrix of network given a partition of nodes.
 Modularity
     Computes the Newman modularity given a partition of nodes.
 
@@ -1408,7 +1410,10 @@ def RandomPartition(N,M):
     return None
 
 def PartitionMatrix(adjmatrix, partition):
-    """Computes the partition matrix of a network for a given partition.
+    """Computes a matrix encoding nodes belonging to a community in a partition.
+
+    The partition matrix P is a binary matrix of shape (N,ncomms) with
+    P(i,c) = 1 if node i belongs to community c, and P(i,c) = 0 otherwise.
 
     Parameters
     ----------
@@ -1421,8 +1426,7 @@ def PartitionMatrix(adjmatrix, partition):
     Returns
     -------
     partitionmatrix : ndarray of rank-2
-        The partition matrix P is a binary matrix of shape (N,ncomms) with
-        P(i,c) = 1 if node i belongs to community c, and P(i,c) = 0 otherwise.
+        The partition matrix of the network, for a given input partition.
 
     See Also
     --------
