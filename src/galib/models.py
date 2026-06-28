@@ -101,13 +101,6 @@ WeightedRandomGraph
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
-## TO BE DECIDED:
-## - Shall we have only one ErdosRenyiGraph_Like() and RandomGraph_Like()
-##   including the weighted versions, or separate the weighted versions as
-##   WeightedERGraph_Like() and WeightedRandomGraph_Like() ??
-## - Shall we call these shorter like wErdosRenyiGraph() and wRandomGraph() ??
-
-
 # Standard library imports
 import warnings
 # Third party imports
@@ -117,8 +110,15 @@ import numpy.random
 from .metrics import is_directed, is_symmetric, Density
 from .tools import ExtractSubmatrix
 
-# TODO: Add security checks for user inputs, to avoid errors in implicit
-# comparisons like `if directed: `
+## TO BE DECIDED:
+## - Shall we have only one ErdosRenyiGraph_Like() and RandomGraph_Like()
+##   including the weighted versions, or separate the weighted versions as
+##   WeightedERGraph_Like() and WeightedRandomGraph_Like() ??
+## - Shall we call these shorter like wErdosRenyiGraph() and wRandomGraph() ??
+
+## TODO: Check if ValueError() calls should be replaced by KeyError()
+## TODO: Add security checks for user inputs, to avoid errors in implicit
+## comparisons like `if directed: `
 
 ###############################################################################
 """DETERMINISTIC AND CLASSIC GRAPH MODELS"""
