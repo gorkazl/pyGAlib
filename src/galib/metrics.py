@@ -107,6 +107,10 @@ import numpy as np
 # Local imports
 from . import tools
 
+## TODO: Check if KeyError() calls should be replaced by ValueError()
+## TODO: Add security checks for user inputs,
+## - e.g., to avoid errors in implicit comparisons like `if directed:`
+## TODO: Check if initial lines like N = len(adjmatrix) are always needed.
 
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
@@ -115,65 +119,67 @@ def is_directed(adjmatrix):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         A (weighted) adjacency matrix of a network. Weighted links are ignored.
 
     Returns
     -------
-    out : boolean
+    result : boolean
         True if `adjmatrix` represents a directed graph, and False if `adjmatrix`
         represents an undirected graph.
     """
     mask = adjmatrix.astype(bool)
-    out = (mask ^ mask.T).any()
-    return out.item()
+    result = (mask ^ mask.T).any()
+    return result.item()
 
 def is_symmetric(adjmatrix):
     """Checks whether a (weighted) matrix is symmetric or not.
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         A (weighted) adjacency matrix of a network.
 
     Returns
     -------
-    out : boolean
+    result : boolean
         True if `adjmatrix` represents a (weighted) undirected graph whose
         link weights are all symmetric. False if any link weight `adjmatrix[i,j]`
         differs from its reciprocal `adjmatrix[j,i]`. This can happen both if
         the network is undirected but weights are not symmetrics, or if the
         network is directed.
     """
-    out = np.allclose(adjmatrix, adjmatrix.T)
-    return out
+    result = np.allclose(adjmatrix, adjmatrix.T)
+    return result
 
 def Density(adjmatrix):
     """Returns the density of links in a network.
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. Weighted links are ignored.
 
     Returns
     -------
-    A scalar value between 0 and 1.
+    dens : float
+        A scalar value between 0 and 1.
     """
     N = len(adjmatrix)
     L = adjmatrix.astype('bool').sum()
 
     if adjmatrix.trace():
-        return float(L) / N**2
+        dens = float(L) / N**2
     else:
-        return float(L) / (N*(N-1))
+        dens = float(L) / (N*(N-1))
+    return dens
 
 def Degree(adjmatrix, directed=False):
     """Computes the number of neighbours of every node.
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     directed: Boolean, optional
         True if the network is directed, False otherwise.
@@ -184,16 +190,15 @@ def Degree(adjmatrix, directed=False):
     degarray : ndarray
         An array with the degree of every node in the undirected network.
     If 'directed=True'
-    degarray : A tuple containing two ndarrays, indegarray and outdegarray.
-        indegarray is the input degree of the every node and outdegarray is
-        is the output degree of every node.
+    degarray : Tuple with two ndarrays (`indegarray` and `outdegarray`)
+        `indegarray` is the input degree of the every node and `outdegarray` is
+        the output degree of every node.
 
     See Also
     --------
     Intensity : Computes the weighted degree of networks.
     ReciprocalDegree : Reciprocity of every node and excess degrees.
     """
-    N = len(adjmatrix)
     adjmatrix = adjmatrix.astype('bool')
 
     if directed:
@@ -210,7 +215,7 @@ def Intensity(adjmatrix, directed=False):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     directed: Boolean. optional
         True if the network is directed, False otherwise.
@@ -221,17 +226,15 @@ def Intensity(adjmatrix, directed=False):
     intensity : ndarray.
         The weighted degree of every node in the undirected network.
     If 'directed=True'
-    intensity : tuple containing two ndarrays, inintensity and outintensity
-        inintensity is the weighted input degree of every node in the
-        directed network, outintensity is the output degree of every node
-        in the directed network.
+    intensity : Tuple with two ndarrays (`ininintensity` and `outintensity`)
+        `inintensity` is the weighted input degree of every node in the
+        directed network and, `outintensity` is the output weighted degree of every
+        node in the directed network.
 
     See Also
     --------
     Degree : Computes the degree of every node in the network.
     """
-    N = len(adjmatrix)
-
     if directed:
         inintensity = adjmatrix.sum(axis=0)
         outintensity = adjmatrix.sum(axis=1)
@@ -249,7 +252,7 @@ def Reciprocity(adjmatrix):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
 
     Returns
@@ -275,6 +278,9 @@ def Reciprocity(adjmatrix):
     return reciprocity
 
 def ReciprocalDegree(adjmatrix, normed=False):
+    ## TODO: Reorganise and modernise this function.
+    ## - Avoid repeating the calculation in both cases, and use optional parameter 'norm' only if True.
+    ## - Replace add.reduce() by arr.sum(axis=??)
     """Returns the reciprocal degree and excess degrees of every nodes.
 
     The reciprocal degree, kr, of a node i is the number of neighbours with
@@ -286,19 +292,19 @@ def ReciprocalDegree(adjmatrix, normed=False):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     normed: Boolean. optional
         True if normalized output is desired, False otherwised.
 
     Returns
     --------
-    A tuple containing three arrays (kr, k-, k+). The arrays give the kr, k-
-    and k+ values for all the N nodes.
-    If the option 'normed=True' then kr, k- and k+ are given in fractions.
-        nkr = 2 * kr / (in-k + out-k)
-        nk- = k- / in-k
-        nk+ = k+ / out-k
+    degrecip : ndarray of length (N,)
+        The reciprocal degree of all the nodes.
+    degminus : ndarray of length (N,)
+        The excess input degree of all the nodes.
+    degplus : ndarray of length (N,)
+        The excess output degree of all the nodes.
 
     See Also
     --------
@@ -324,28 +330,28 @@ def ReciprocalDegree(adjmatrix, normed=False):
 
     if normed:
         # Normalize the reciprocal degrees of the nodes
-        recipdegree = np.add.reduce(recipadjmatrix)
-        degminus = indegree - recipdegree
-        degplus = outdegree - recipdegree
+        degrecip = np.add.reduce(recipadjmatrix)
+        degminus = indegree - degrecip
+        degplus = outdegree - degrecip
 
-        return 2.0 * recipdegree.astype(np.float64) / (indegree+outdegree), \
+        return 2.0 * degrecip.astype(np.float64) / (indegree+outdegree), \
                degminus.astype(np.float64)/indegree, \
                degplus.astype(np.float64)/outdegree
 
     else:
         # The reciprocal degree of the nodes
-        recipdegree = np.add.reduce(recipadjmatrix)
-        degminus = indegree - recipdegree
-        degplus = outdegree - recipdegree
+        degrecip = np.add.reduce(recipadjmatrix)
+        degminus = indegree - degrecip
+        degplus = outdegree - degrecip
 
-        return recipdegree, degminus, degplus
+        return degrecip, degminus, degplus
 
 def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     """Average neighbours' degree of nodes with given degree k, for all k.
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     knntype : string
         Defines the class of degree-degree correlation desired.
@@ -366,7 +372,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
 
     Returns
     --------
-    AvKnn : ndarray of dtype 'float64'. AvKnn has three rows:
+    AvKnn : ndarray of dtype `np.float64`. AvKnn has three rows:
             Row-0: the (output) degree, k'
             Row-1: average (input) degree of all neighbours of nodes with
             degree k = k'
@@ -399,8 +405,6 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     keylist = ('undirected', 'outin',  'outout', 'inout', 'inin', 'average')
     if knntype not in keylist:
         raise KeyError("Enter a valid knntype:", keylist)
-
-    N = len(adjmatrix)
 
     if knntype == 'undirected':
         if Reciprocity(adjmatrix) < 1.0:
@@ -471,7 +475,7 @@ def Clustering(adjmatrix, checkdirected=True):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     checkdirected : boolean (optional)
         If 'True', it calls Reciprocity() to make sure adjmatrix is undirected.
@@ -481,10 +485,9 @@ def Clustering(adjmatrix, checkdirected=True):
 
     Returns
     --------
-    A tuple containing two elements:
-    C : Scalar between 0 and 1.
-        The clustering coefficient of the network (2 * Ntriangles / Ntriads).
-    ClustNodes : ndarray of dtype=float64.
+    clustcoef : float
+        The clustering coefficient of the network.
+    clustnodes : ndarray length (N,) and dtype `np.float64`.
         An array of length N with the clustering of every node.
 
     Notes
@@ -506,6 +509,7 @@ def Clustering(adjmatrix, checkdirected=True):
     adjmatrix[np.diag_indices(len(adjmatrix))] = 0
 
     # 1) COMPUTE THE NUMBER OF TRIANGLES EACH NODE PARTICIPATES IN
+    ## TODO: replace this by np.linalg.matrix_power() ??
     pow2matrix = np.dot(adjmatrix,adjmatrix)
     ntriangles = np.zeros(N, np.float64)
     for i in range(N):
@@ -521,16 +525,16 @@ def Clustering(adjmatrix, checkdirected=True):
     # Avoid Error for very sparse networks with no diads
     Ndiads = ndiads.sum()
     if Ndiads == 0:
-        coefficient = 0
-        cnodes = np.zeros(N, np.float64)
+        clustcoef = 0
+        clustnodes = np.zeros(N, np.float64)
     # Compute clustering if at least one triad has been found
     else:
-        coefficient = ntriangles.sum() / Ndiads
+        clustcoef = ntriangles.sum() / Ndiads
         if 0 in ndiads:
             ndiads = np.where(ndiads==0,1,ndiads)
-        cnodes = ntriangles / ndiads
+        clustnodes = ntriangles / ndiads
 
-    return coefficient, cnodes
+    return clustcoef, clustnodes
 
 def k_Density(adjmatrix, rctype='undirected'):
     """Computes the density of subnetworks made of nodes with degree >= k',
@@ -549,7 +553,7 @@ def k_Density(adjmatrix, rctype='undirected'):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     rctype : string, optional
         Defines how to make use of the degrees depending on whether the
@@ -567,7 +571,7 @@ def k_Density(adjmatrix, rctype='undirected'):
 
     Returns
     -------
-    kdensity : ndarray of dtype=float64
+    kdensity : ndarray of 1D and dtype `np.float64`
         An array of length k_max containing, for each index k, the k-density
         of the network.
 
@@ -633,6 +637,8 @@ def k_Density(adjmatrix, rctype='undirected'):
     return kdensity
 
 def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
+    ## TODO: Double check the outputs and docstring.
+    ## Why is `richclub` of dtype np.float64 !? It should be int.
     """Identifies the subset of hubs with dense interconnectivity.
 
     Conceptually, a network is said to have a rich-club when it contains hubs
@@ -644,7 +650,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     See original paper by S. Zhou and R.J. Modragon, IEEE Communication
     Letters 8(3), 180-182 (2004).
 
-    NOTE
+    NOTE:
     Unfortunately, rich-club identification also implies a few arbitrary choices
     and no strict criteria are commonly agreed. This function returns as the
     rich-club the set of nodes remaining in the graph at the point when
@@ -659,7 +665,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     kdensthreshold : float
         The value k-density needs to arrive, for the presence of a rich-club to
@@ -680,12 +686,12 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
 
     Returns
     -------
-    kdensity : ndarray of dtype=float64
+    kdensity : ndarray of dtype `np.float64`
         An array of length k_max containing, for each index k, the k-density
         of the network.
     kdecision : integer
         The degree at which k-density overcomes value 'kdensthreshold'.
-    richclub : ndarray of rank-1
+    richclub : A 1D ndarray of dtype `np.float64`
         The indices of the nodes forming the rich club.
 
     See Also
@@ -767,7 +773,7 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='un
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     nbins : integer
         The number of bins in which the range s=0 to s=smax will be divided.
@@ -800,9 +806,9 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='un
 
     Returns
     -------
-    strengthlist: ndarray of length 'nbins'
+    strengthlist: ndarray of length (nbins,)
         The values of node strength, from s=0 to s=smax, in 'nbins' steps.
-    kdensity : ndarray of length 'nbins'
+    kdensity : ndarray of length (nbins,)
         An array of length 'nbins' containing, at each index i, the weighted
         k-density for the subnetwork formed by the nodes with strength s >= s',
         where s' = strengthlist[i].
@@ -883,7 +889,7 @@ def MatchingIndex(adjmatrix, normed=True):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
 
     normed : Boolean, optional
@@ -900,7 +906,7 @@ def MatchingIndex(adjmatrix, normed=True):
 
     Returns
     -------
-    MImatrix : ndarray of rank-2 of ndtype 'float64'
+    MImatrix : ndarray of shape (N,N) and dtype `float64`
         A matrix containing the matching index for all pairs of nodes.
 
     Notes
@@ -946,11 +952,13 @@ def MatchingIndex(adjmatrix, normed=True):
 ################################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
 def FloydWarshall(adjmatrix, weighted_dist = False):
+    ## TODO: Test giving distmatrix np.uint64 from the beginning.
+    ## Does this make the function faster out of the box, without Numba ?
     """Computes the pathlength between all pairs of nodes in a network..
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     weighted_dist : boolean, optional
         True if the path distance shall be computed considering the weights
@@ -960,7 +968,7 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
 
     Returns
     -------
-    distmatrix : ndarray of rank-2
+    distmatrix : ndarray of shape (N,N)
         The pairwise distance matrix dij of the shortest path between
         nodes i and j.
     """
@@ -1006,14 +1014,14 @@ def PathsAllinOne(adjmatrix):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
 
     Returns
     -------
-    distmatrix : ndarray of rank-2
+    distmatrix : ndarray of shape (N,N)
         The pairwise distance matrix between all nodes.
-    betweenness : ndarray
+    betweenness : ndarray of length (N,)
         An array containing the betweenness centrality of every node in the
         network. Result is in absolute values, i.e., the total number of
         paths in which the node participates as intermediate node.
@@ -1144,7 +1152,7 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     start : integer
         The node from which the tree search starts.
@@ -1160,7 +1168,7 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
 
     Returns
     -------
-    paths : lists of lists
+    paths : list of lists
         The list of all the shortest paths between nodes 'start' and 'end'.
         LEAVE EMPTY at function call!! See Usage.
 
@@ -1201,7 +1209,7 @@ def ConnectedComponents(distmatrix, directed=False, showall=True):
 
     Parameters
     ----------
-    distmatrix : ndarray of rank-2
+    distmatrix : ndarray of shape (N,N)
         The pairwise graph distance matrix of the network, usually the
         output of function FloydWarshall().
     directed : boolean, optional
@@ -1263,7 +1271,7 @@ def K_Core(adjmatrix, kmin):
 
     Parameters
     ----------
-    adjmatrix : ndarray
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     kmin : integer
         The degree for which the k-core is desired.
@@ -1330,7 +1338,7 @@ def K_Shells(adjmatrix):
 
     Parameters
     ----------
-    adjmatrix : ndarray
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
 
     Returns
@@ -1421,9 +1429,9 @@ def PartitionMatrix(partition):
 
     Returns
     -------
-    partitionmatrix : ndarray of rank-2
-        The partition matrix P is a binary matrix of shape (N,ncoms) with
-        P(i,c) = 1 if node i belongs to community c, and P(i,c) = 0 otherwise.
+    partitionmatrix : ndarray of shape (N,M) and dtype `np.uint8`
+        The partition matrix P is a binary matrix where P(i,c) = 1 if node i
+        belongs to community c, and P(i,c) = 0 otherwise.
 
     See Also
     --------
@@ -1431,13 +1439,13 @@ def PartitionMatrix(partition):
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     """
     # Get the number of nodes and communities
-    ncomms = len(partition)
+    M = len(partition)
     N = 0
     for com in partition:
         N += len(com)
 
     # 1) COMPUTE THE PARTITION MATRIX
-    partitionmatrix = np.zeros((N,ncomms), np.uint8)
+    partitionmatrix = np.zeros((N,M), np.uint8)
     for c, com in enumerate(partition):
         partitionmatrix[com,c] = 1
 
@@ -1448,7 +1456,7 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1466,8 +1474,8 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
 
     Returns
     -------
-    assortmatrix : ndarray of rank-2 and dtype=float64
-        Assortativity matrix of shape Nc x Nc, where Nc is the number of
+    assortmatrix : ndarray of shape (M,M) and dtype `np.float64`
+        Assortativity matrix of shape (M,M), where M is the number of
         subsets of nodes in 'partition'.
 
     Notes
@@ -1484,16 +1492,15 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     if norm not in keylist:
         raise KeyError("Enter a valid norm:", keylist)
 
-    N = len(adjmatrix)
-    Ncoms = len(partition)
+    M = len(partition)
 
     # Calculate the assortativity matrix
-    assortmatrix = np.zeros((Ncoms,Ncoms), np.float64)
+    assortmatrix = np.zeros((M,M), np.float64)
 
     if norm == 'linkprobability':
-        for c1 in range(Ncoms):
+        for c1 in range(M):
             com1 = partition[c1]
-            for c2 in range(Ncoms):
+            for c2 in range(M):
                 com2 = partition[c2]
                 submat = tools.ExtractSubmatrix(adjmatrix, com1, com2)
                 assortmatrix[c1,c2] = submat.sum()
@@ -1505,8 +1512,8 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
                     assortmatrix[c1,c2] /= (maxweight * len(com1) * len(com2))
 
     else:
-        for c1 in range(Ncoms):
-            for c2 in range(Ncoms):
+        for c1 in range(M):
+            for c2 in range(M):
                 submat = tools.ExtractSubmatrix(adjmatrix, partition[c1], \
                                                   partition[c2])
                 assortmatrix[c1,c2] = submat.sum()
@@ -1529,7 +1536,7 @@ def Modularity(adjmatrix, partition):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1537,7 +1544,7 @@ def Modularity(adjmatrix, partition):
 
     Returns
     -------
-    Q : float scalar
+    Q : float
         The modularity value of the network for the given partition
 
     Notes
@@ -1557,16 +1564,16 @@ def Modularity(adjmatrix, partition):
 
     # Compute the modularity
     Q = 0.0
-    L_norm = 1./L
+    L_inv = 1./L
     for s, community in enumerate(partition):
         submat = tools.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
         Q += np.float64(submat.sum())
         # Minus the expected fraction of links
         productsubmat = np.outer(outdegree[community], indegree[community])
-        Q -= productsubmat.sum() * L_norm
+        Q -= productsubmat.sum() * L_inv
 
-    return Q * L_norm
+    return Q * L_inv
 
 
 
@@ -1581,12 +1588,12 @@ def GlobalHubness(adjmatrix):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. Weighted links are ignored.
 
     Returns
     -------
-    globalhubness : ndarray (float64)
+    globalhubness : ndarray of length (N,) and dtype `np.float64`
         Global hubness of every node.
 
     See Also
@@ -1599,7 +1606,6 @@ def GlobalHubness(adjmatrix):
     F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
     "Individual nodeʼs contribution to the mesoscale of complex networks."
     New Journal of Physics 16:125006 (2014).
-
     """
     N = len(adjmatrix)
 
@@ -1621,7 +1627,7 @@ def LocalHubness(adjmatrix, partition):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. Weighted links are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1629,7 +1635,7 @@ def LocalHubness(adjmatrix, partition):
 
     Returns
     -------
-    localhubness : ndarray (float64)
+    localhubness : ndarray of length (N,) and dtype `np.float64`
         Local hubness of every node.
 
     See Also
@@ -1644,7 +1650,6 @@ def LocalHubness(adjmatrix, partition):
     New Journal of Physics 16:125006 (2014).
     """
     N = len(adjmatrix)
-    ncomms = len(partition)
 
     localhubness = np.zeros(N, np.float64)
     for n, com in enumerate(partition):
@@ -1663,22 +1668,23 @@ def LocalHubness(adjmatrix, partition):
     return localhubness
 
 def LocalDegree(adjmatrix, partition):
-        ## TO BE WRITTEN !!
+        ## TODO: Write me !!
     """Number of links that nodes make inside their module, for a given partition.
     """
     return None
 
 def ParticipationMatrix(adjmatrix, partition):
+    ## TODO: Revise this docstring.
     """
     Number of links nodes make across modules, given a partition of the network.
 
-    A matrix of shape N x n, where N is the number of nodes and n is the
-    number of communities. Elements a(i,s) of the matrix are the number of
+    A matrix of shape (N,M), where N is the number of nodes and M is the
+    number of modules (or communities). Elements a(i,s) of the matrix are the number of
     neighbours (internal degree) that node i has in community s.
 
     Parameters
     ----------
-    adjmatrix : ndarray
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1686,7 +1692,8 @@ def ParticipationMatrix(adjmatrix, partition):
 
     Returns
     -------
-    pmatrix : ndarray of rank-2 and shape N x n.
+    pmatrix : ndarray of shape (N,M)
+        The participation matrix of the network, for the given partition
 
     See Also
     --------
@@ -1719,7 +1726,7 @@ def ParticipationVectors(adjmatrix, partition):
 
     Parameters
     ----------
-    adjmatrix : ndarray
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1727,9 +1734,9 @@ def ParticipationVectors(adjmatrix, partition):
 
     Returns
     -------
-    pvectors : ndarray of rank-2 and shape N x n.
-        Every row contains the likelihood of the node to belong to each
-        of the communities.
+    p_vectors : ndarray of shape (N,M) and dtype `np.float64`.
+        Rows of the matrix inform of the probability of the corresponding node
+        to belong to each of the M communities.
 
     See Also
     --------
@@ -1751,21 +1758,21 @@ def ParticipationVectors(adjmatrix, partition):
         commsizes[c] = len(com)
 
     # 1) Initiallise as the Participation Matrix
-    pvectors = ParticipationMatrix(adjmatrix, partition)
+    p_vectors = ParticipationMatrix(adjmatrix, partition)
 
     # 2) Now compute the participation vectors
     # 2.1) The fraction of neighbours node i connects to
-    pvectors = pvectors.astype(np.float64)
+    p_vectors = p_vectors.astype(np.float64)
     for c, com in enumerate(partition):
         _commsizes = commsizes.copy()
         _commsizes[c] -= 1
-        pvectors[com] /= _commsizes
+        p_vectors[com] /= _commsizes
 
     # 2.2) Finally, normalize the vectors to sum 1
     for i in range(N):
-        pvectors[i] /= pvectors[i].sum()
+        p_vectors[i] /= p_vectors[i].sum()
 
-    return pvectors
+    return p_vectors
 
 def ParticipationIndex(adjmatrix, partition):
     """Participation index of every node, for given a partition of the network.
@@ -1778,7 +1785,7 @@ def ParticipationIndex(adjmatrix, partition):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. Weighted links are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1786,8 +1793,8 @@ def ParticipationIndex(adjmatrix, partition):
 
     Returns
     -------
-    nodeparticip : ndarray of dtype=Float64 and rank-N
-        The participation index of each node.
+    p_index : ndarray of length (N,) and dtype `np.float64`.
+        The participation index of all the nodes.
 
     See Also
     --------
@@ -1802,13 +1809,13 @@ def ParticipationIndex(adjmatrix, partition):
     New Journal of Physics 16:125006 (2014).
     """
     # 1) Compute first the participation vectors
-    particvectors = ParticipationVectors(adjmatrix,partition)
+    p_vectors = ParticipationVectors(adjmatrix,partition)
 
     # 2) Reduce the vector of each node into a single normalised scalar
-    ncomms = np.float64(len(partition))
-    nodeparticip = 1. - ncomms / np.sqrt(ncomms - 1) * particvectors.std(axis=1)
+    M = np.float64(len(partition))
+    p_index = 1.0  - ( M / np.sqrt(M - 1) * p_vectors.std(axis=1) )
 
-    return nodeparticip
+    return p_index
 
 def DispersionIndex(adjmatrix, partition):
     """Dispersion index of every node, for given a partition of the network.
@@ -1823,7 +1830,7 @@ def DispersionIndex(adjmatrix, partition):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. Weighted links are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1831,7 +1838,7 @@ def DispersionIndex(adjmatrix, partition):
 
     Returns
     -------
-    DispersionIndex : ndarray of dtype=Float64 and rank-N
+    d_index : ndarray of length (N,) and dtype `np.float64`.
         The participation index of each node.
 
     See Also
@@ -1848,20 +1855,22 @@ def DispersionIndex(adjmatrix, partition):
     """
     N = len(adjmatrix)
     # 1) Compute first the participation vectors
-    particvectors = ParticipationVectors(adjmatrix,partition)
+    p_vectors = ParticipationVectors(adjmatrix, partition)
 
     # 2) Reduce the vector of each node into a single normalised scalar
-    DispersionIndex = np.zeros(N, np.float64)
+    d_index = np.zeros(N, np.float64)
     for i in range(N):
-        idx = particvectors[i].nonzero()[0]
-        vector = particvectors[i,idx]
-        ncomms = np.float64(len(vector))
-        if ncomms > 1:
-            DispersionIndex[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
+        idx = p_vectors[i].nonzero()[0]
+        vector = p_vectors[i,idx]
+        Mi = np.float64(len(vector))
+        if Mi > 1:
+            d_index[i] = 1. - Mi / np.sqrt(Mi - 1) * vector.std()
 
-    return DispersionIndex
+    return d_index
 
 def RolesNodes(adjmatrix, partition):
+    ## TODO: Revise and simplify this function.
+    ## Homogenise nomenclature of variables.
     """Computes all four parameters to characterise the roles of nodes.
 
     Following the definitions in Klimm et al. New J. Phys. 16:125006 (2014),
@@ -1871,7 +1880,7 @@ def RolesNodes(adjmatrix, partition):
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. Weighted links are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
@@ -1879,13 +1888,13 @@ def RolesNodes(adjmatrix, partition):
 
     Returns
     -------
-    globalhubness : ndarray (float64)
+    globalhubness : ndarray of length (N,) and dtype `np.float64`.
         Global hubness of every node.
-    localhubness : ndarray (float64)
+    localhubness : ndarray of length (N,) and dtype `np.float64`.
         Local hubness of every node.
-    nodeparticip : ndarray of dtype=Float64 and rank-N
+    nodeparticip : ndarray of length (N,) and dtype `np.float64`.
         The participation index of each node.
-    DispersionIndex : ndarray of dtype=Float64 and rank-N
+    dispersionindex : ndarray of length (N,) and dtype `np.float64`.
         The participation index of each node.
 
     See Also
@@ -1903,7 +1912,7 @@ def RolesNodes(adjmatrix, partition):
     New Journal of Physics 16:125006 (2014).
     """
     N = len(adjmatrix)
-    ncomms = len(partition)
+    M = len(partition)
 
     # 1) COMPUTE THE GLOBAL HUBNESS
     dens = Density(adjmatrix)
@@ -1914,8 +1923,8 @@ def RolesNodes(adjmatrix, partition):
 
     # 2) COMPUTE THE LOCAL HUBNESS AND CREATE THE PARTITION MATRIX
     localhubness = np.zeros(N, np.float64)
-    commsizes = np.zeros(ncomms, np.float64)
-    partitionmatrix = np.zeros((N,ncomms), np.uint64)
+    commsizes = np.zeros(M, np.float64)
+    partitionmatrix = np.zeros((N,M), np.uint64)
     for c, com in enumerate(partition):
         commsizes[c] = len(partition[c])
         partitionmatrix[com,c] = 1
@@ -1934,7 +1943,7 @@ def RolesNodes(adjmatrix, partition):
     particvectors = np.dot(adjmatrix.astype(bool), partitionmatrix)
     particvectors = particvectors.astype(np.float64)
     for i in range(N):
-        for c in range(ncomms):
+        for c in range(M):
             if partitionmatrix[i,c]:
                 particvectors[i,c] /= (commsizes[c] - 1.0)
             else:
@@ -1945,21 +1954,24 @@ def RolesNodes(adjmatrix, partition):
 
     # 4) COMPUTE THE PARTICIPATION AND DISPERSION INDICES
     # The participation index
-    norm = np.float64(ncomms) / np.sqrt(ncomms - 1.0)
+    norm = np.float64(M) / np.sqrt(M - 1.0)
     nodeparticip = 1. - norm * particvectors.std(axis=1)
 
     # The dispersion index
-    DispersionIndex = np.zeros(N, np.float64)
+    dispersionindex = np.zeros(N, np.float64)
     for i in range(N):
         idx = particvectors[i].nonzero()[0]
         vector = particvectors[i,idx]
-        ncomms = np.float64(len(vector))
-        if ncomms > 1:
-            DispersionIndex[i] = 1. - ncomms / np.sqrt(ncomms - 1) * vector.std()
+        Mi = np.float64(len(vector))
+        if Mi > 1:
+            dispersionindex[i] = 1. - Mi / np.sqrt(Mi - 1) * vector.std()
 
-    return globalhubness, localhubness, nodeparticip, DispersionIndex
+    return globalhubness, localhubness, nodeparticip, dispersionindex
 
 def ParticipationIndex_GA(participmatrix):
+    ## TODO: Revise and simplify this function.
+    ## - Change inputs to adjmatrix + partition ??
+    ## - Homogenise the nomenclature of the variables.
     """Computes the participation index as defined by Guimera & Amaral.
 
     Given a partition of the network into communities, the participation
@@ -1976,7 +1988,7 @@ def ParticipationIndex_GA(participmatrix):
 
     Returns
     -------
-    participindex : ndarray of rank-1 and size N
+    participindex : ndarray of length (N,) and dtype `np.float64`.
         Participation index of every node.
 
     Notes
@@ -2009,6 +2021,9 @@ def ParticipationIndex_GA(participmatrix):
     return participindex
 
 def Hubness_GA(participmatrix, partition):
+    ## TODO: Revise and simplify this function.
+    ## - Change inputs to adjmatrix + partition ?? Homogenise.
+    ## - Homogenise the nomenclature of the variables.
     """Computes the within-module degree defined by Guimera & Amaral.
 
     The within-module degree is a measure of local hubness. Given a network
@@ -2019,7 +2034,7 @@ def Hubness_GA(participmatrix, partition):
 
     Parameters
     ----------
-    participmatrix : ndarray of rank-2
+    participmatrix : ndarray shape (N,M)
         Elements a(i,s) of the matrix are the number of neighbours (internal
         degree) that node i has in community s. Is the output of function
         ParticipationMatrix().
@@ -2029,7 +2044,7 @@ def Hubness_GA(participmatrix, partition):
 
     Returns
     -------
-    zscore : ndarray of rank-1
+    zscore : ndarray of length (N,) and dtype `np.float64`.
         The within-module degree of every node in the network.
 
     See Also
@@ -2040,7 +2055,7 @@ def Hubness_GA(participmatrix, partition):
     ParticipationIndex : Returns the participation index of all nodes given
         a partition.
     """
-    N, ncomms = np.shape(participmatrix)
+    N = len(participmatrix)
 
     zscore = np.zeros(N, np.float64)
     for s, community in enumerate(partition):
