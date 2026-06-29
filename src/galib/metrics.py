@@ -66,6 +66,12 @@ K_Shells
     Returns the K-shells of a network for all k from kmin to kmax.
 ConnectedComponents
     Finds all the connected components in a network out of a distance matrix.
+
+RandomPartition
+    ## TO BE WRITTEN !!
+    Generates a partition of N nodes into M modules, randomly assigned.
+ShufflePartition
+    Randomises a partition, conserving the number of communities and their sizes.
 PartitionMatrix
     Computes a matrix encoding nodes belonging to a community in a partition.
 AssortativityMatrix
@@ -104,13 +110,15 @@ Hubness_GA
 # Standard library imports
 # Third party imports
 import numpy as np
+import numpy.random
 # Local imports
 from . import tools
 
 ## TODO: Check if KeyError() calls should be replaced by ValueError()
-## TODO: Add security checks for user inputs,
+## TODO: Add security checks at the beginning of functions.
 ## - e.g., to avoid errors in implicit comparisons like `if directed:`
-## TODO: Check if initial lines like N = len(adjmatrix) are always needed.
+## TODO: Check if initial lines like N = len(adjmatrix) are needed.
+
 
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
@@ -1406,17 +1414,62 @@ def K_Shells(adjmatrix):
     return kshells
 
 
-def ShufflePartition(partition):
+def RandomPartition(N,M):
     ## TODO: Write this function !!
-    """
+    """Generates a partition of N nodes into M modules, randomly assigned.
     """
     return None
 
-def RandomPartition(N,M):
-    ## TODO: Write this function !!
+def ShufflePartition(partition, sortnodes=False):
+    ## TODO: I could still try to make it faster, but anyway, quite a fast operation.
+    ## This will hardly ever be a bottleneck in any workflow.
+    """Randomizes a partition, conserving the number of communities and their sizes.
+
+    NOTE! The function returns a new object instead of shuffling, in-place, the
+    nodes of the input partition.
+
+    Parameters
+    ----------
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
+    sortnodes : boolean, optional, default: False
+        If True, sorts the nodes in each community (module) in ascending order.
+
+    Returns
+    -------
+    newpartition : list of lists
+       A partition of same shape as the input `partition`, but with the nodes randomly
+       reassigned across the communities.
+
+    See Also
+    --------
+    RandomPartition : Generates a partition of N nodes into M modules, randomly assigned.
+    PartitionMatrix : Given a partition of the network, it returns the participation matrix.
     """
-    """
-    return None
+    # Get basic information
+    Ncomms = np.array( [len(com) for com in partition], np.int64 )
+    N = Ncomms.sum()
+    M = len(partition)
+
+    # Create and randomise a list of the nodes
+    nodelist = np.arange(N, dtype=np.int64)
+    numpy.random.shuffle(nodelist)
+
+    # Split the nodes into modules (communities) of same size as the original
+    newpartition = []
+    i0 = 0
+    for c, Nc in enumerate(Ncomms):
+        newcom = nodelist[i0:i0+Nc].tolist()
+        newpartition.append(newcom)
+        i0 += Nc
+
+    # Sort the nodes in the modules, if requested
+    if sortnodes==True:
+        for com in newpartition:
+            com.sort()
+
+    return newpartition
 
 def PartitionMatrix(partition):
     """Computes a matrix encoding nodes belonging to a community in a partition.
