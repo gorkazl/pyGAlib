@@ -221,15 +221,17 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
-##### mmmm dd, 2026 (Version 2.2)
+##### month day, 2026 (Version 2.2)
 
-This version adds changes and extension to the metrics to characterise the roles of nodes in modular networks.
+This version is a polishing and extension of the *galib.metrics*, with particular emphasis on the metrics to characterise the roles of nodes in modular networks.
 
 * New functions added:
-    * `PartitionMatrix()` ... finish this ...
-    * `RandomPartition()` ... finish this ...
     * `ShufflePartition()` ... finish this ...
-* Minor changes and bug fixes:
+    * `RandomPartition()` ... finish this ...
+    * `PartitionMatrix()` ... finish this ...
+* Internal changes and bug fixes *galib.metrics* module:
+    * Polishing of docstrings.
+    * Homogeneization of variable names.
     * Function `metrics.NodeParticipation()` renamed as `metrics.ParticipationIndex()`
     * Function `metrics.NodeDispersion()` renamed as `metrics.DispersionIndex()`.
 
