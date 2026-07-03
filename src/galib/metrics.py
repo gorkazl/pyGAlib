@@ -68,7 +68,7 @@ ConnectedComponents
     Finds all the connected components in a network out of a distance matrix.
 
 RandomPartition
-    ## TO BE WRITTEN !!
+    ## TO BE WRITTEN
     Generates a partition of N nodes into M modules, randomly assigned.
 ShufflePartition
     Randomises a partition, conserving the number of communities and their sizes.
