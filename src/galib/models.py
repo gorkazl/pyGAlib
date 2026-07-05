@@ -118,7 +118,9 @@ from .tools import ExtractSubmatrix
 
 ## TODO: Check if ValueError() calls should be replaced by KeyError()
 ## TODO: Add security checks for user inputs, to avoid errors in implicit
-## comparisons like `if directed: `
+## comparisons like `if directed:`
+## TODO: Check if we should replace calls like `int( N * numpy.random.rand() )`
+## by `numpy.random.randint()`
 
 ###############################################################################
 """DETERMINISTIC AND CLASSIC GRAPH MODELS"""
@@ -481,6 +483,7 @@ def BarabasiAlbertGraph(N, m):
         neighbours = []
         while counter < m:
             # 2.2) Choose a node at random
+            ## TODO: Check if should replace by random.choice(nodelist)
             jid = int(len(nodelist)*numpy.random.rand())
             j = nodelist[jid]
             # Avoid double links
@@ -560,7 +563,7 @@ def ScaleFreeGraph(N, L, exponent=3.0, directed=False):
     while counter <= L:
 
         # 2.1) Choose two nodes to connect
-        xhead = numpy.random.rand()     # A random number between 0 and 1
+        xhead = numpy.random.rand()
         xsum = np.sum(np.sign(nodecumprobability-xhead))
         head = int(0.5*(N-xsum))
 
