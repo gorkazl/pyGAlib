@@ -1414,11 +1414,63 @@ def K_Shells(adjmatrix):
     return kshells
 
 
-def RandomPartition(N,M):
-    ## TODO: Write this function !!
-    """Generates a partition of N nodes into M modules, randomly assigned.
+# def RandomPartition(N,M):
+#     ## TODO: Write this function !!
+#     """Generates a partition of N nodes into M modules, randomly assigned.
+#     """
+#     return None
+
+def RandomPartition(N, Ncomms, sortnodes=False):
+    """Randomises a partition, conserving the number of communities and their sizes.
+
+    Parameters
+    ----------
+    N : integer
+        Number of nodes
+    Ncomms : list, tuple or array of integers
+        A list containing the desired size (number of nodes) for every
+        module in the network.
+
+    Returns
+    -------
+    newpartition : list of lists
+       A partition of N nodes randomly assigned into modules of the desired sizes.
+
+    See Also
+    --------
+    ShufflePartition : Randomizes a partition, conserving the number of communities and their sizes.
+    PartitionMatrix : Given a partition of the network, it returns the participation matrix.
     """
-    return None
+    # 0) SECURITY CHECKS
+    # Check N is an integer (or interpretable as an integer)
+    if int(N) == N:
+        N = int(N)
+    else:
+        raise TypeError( "N must be integer" )
+    # Check if Ncomms matches N
+    Ncomms = np.array(Ncomms, dtype=np.int64)
+    if N != Ncomms.sum():
+        raise ValueError( f'Number of nodes not aligned. N: {N} and sum(Ncomms): {Ncomms.sum()}' )
+
+    # 1) GENERATE THE PARTITION
+    # Create and randomise a list of N nodes
+    nodelist = np.arange(N, dtype=np.int64)
+    numpy.random.shuffle(nodelist)
+
+    # Split the list of nodes into modules (communities) of the given sizes
+    newpartition = []
+    i0 = 0
+    for c, Nc in enumerate(Ncomms):
+        newcom = nodelist[i0:i0+Nc].tolist()
+        newpartition.append(newcom)
+        i0 += Nc
+
+    # Sort the nodes in the modules, if requested
+    if sortnodes==True:
+        for com in newpartition:
+            com.sort()
+
+    return newpartition
 
 def ShufflePartition(partition, sortnodes=False):
     """Randomizes a partition, conserving the number of communities and their sizes.
