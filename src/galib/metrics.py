@@ -1421,8 +1421,6 @@ def RandomPartition(N,M):
     return None
 
 def ShufflePartition(partition, sortnodes=False):
-    ## TODO: I could still try to make it faster, but anyway, quite a fast operation.
-    ## This will hardly ever be a bottleneck in any workflow.
     """Randomizes a partition, conserving the number of communities and their sizes.
 
     NOTE! The function returns a new object instead of shuffling, in-place, the
@@ -1450,7 +1448,6 @@ def ShufflePartition(partition, sortnodes=False):
     # Get basic information
     Ncomms = np.array( [len(com) for com in partition], np.int64 )
     N = Ncomms.sum()
-    M = len(partition)
 
     # Create and randomise a list of the nodes
     nodelist = np.arange(N, dtype=np.int64)
