@@ -68,9 +68,11 @@ ConnectedComponents
     Finds all the connected components in a network out of a distance matrix.
 
 RandomPartition
-    ## TO BE WRITTEN
-    Generates a partition of N nodes into M modules, randomly assigned.
+    Generates a partition of N nodes into M modules, with nodes randomly assigned.
+RandomPartition_WithSizes
+    Generates a partition of nodes, with given community sizes.
 ShufflePartition
+    TODO: Rewrite the function!
     Randomises a partition, conserving the number of communities and their sizes.
 PartitionMatrix
     Computes a matrix encoding nodes belonging to a community in a partition.
@@ -1441,7 +1443,7 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
     See Also
     --------
     RandomPartition_Like :   xxxxxxx
-    RandomPartition_FromSizes :  xxxxxxx
+    RandomPartition_WithSizes : Generates a partition of nodes, with given community sizes.
     ShufflePartition : Randomizes a partition, conserving the number of communities and their sizes.
     PartitionMatrix : Given a partition of the network, it returns the participation matrix.
     """
@@ -1494,7 +1496,71 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
 
     return newpartition
 
+def RandomPartition_WithSizes(comsizes, sortnodes=False):
+    """Generates a partition of nodes, with given community sizes.
+
+    Parameters
+    ----------
+    N : integer
+        Number of nodes
+    comsizes : array-like of 1D
+        A list of target sizes for each community in the partition.
+    sortnodes : boolean, optional, default: False
+        If `True`, the indices of the nodes are sorted in ascending order, within
+        every community.
+
+    Returns
+    -------
+    newpartition : list of lists
+       A partition of N nodes randomly assigned into M modules of specified sizes.
+
+    See Also
+    --------
+    RandomPartition_Like :   xxxxxxx
+    RandomPartition : Generates a partition of N nodes into M modules, with nodes randomly assigned.
+    ShufflePartition : Randomizes a partition, conserving the number of communities and their sizes.
+    PartitionMatrix : Given a partition of the network, it returns the participation matrix.
+    """
+    # 0) SECURITY CHECKS
+    try:
+        # Check if all are sizes are integers
+        are_integers = [int(value) == value for value in comsizes]
+        if all(are_integers):
+            comsizes = np.array(comsizes, np.int64)
+        else:
+            raise ValueError()
+
+        # Check if all sizes are positive
+        if not (comsizes > 0).all():
+            raise ValueError()
+    # except (ValueError, TypeError):
+    except Exception:
+        raise RuntimeError(f"comsizes must be a 1D array-like of positive integers, got {comsizes}")
+
+    # 1) GENERATE THE RANDOM PARTITION
+    # Create and randomly shuffle a list of N nodes
+    N = comsizes.sum()
+    nodelist = np.arange(N, dtype=np.int64)
+    numpy.random.shuffle(nodelist)
+    # Find a set of random indices, where the list of nodes will be divided
+    splitpoints = comsizes.cumsum()[:-1]
+    # Divide the list of nodes into the desired number of communities of sizes
+    newpartition = np.array_split(nodelist, splitpoints)
+
+    # Sort the nodes in the modules, if requested
+    if sortnodes==True:
+        for com in newpartition:
+            com.sort()
+
+    # Turn the communities into lists
+    for c,com in enumerate(newpartition):
+        newpartition[c] = com.tolist()
+
+    return newpartition
+
 def ShufflePartition(partition, sortnodes=False):
+    ## TODO: Rewrite this function using what learned for the others!
+    ## Or also rename as RandomPartition_Like()
     """Randomizes a partition, conserving the number of communities and their sizes.
 
     NOTE! The function returns a new object instead of shuffling, in-place, the
