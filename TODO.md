@@ -25,6 +25,7 @@
 
 ### This and that...
 
+1. Port all random number generation, shuffling and choices to the new `numpy.random.Generator.whatever_it_means`. Understand that properly and safely first, to avoid breaking behaviour.
 1. Identify further functions which could be accelarated using Numba package, and write the Numba-based duplicates.
 2. Write a function for the Dijkstra algorithm.
 3. Write a function to calculate the Katz centrality.
