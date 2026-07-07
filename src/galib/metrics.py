@@ -1526,7 +1526,7 @@ def PartitionMatrix(partition):
     Parameters
     ----------
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
+        A sequence of subsets of indices given as sequences (lists, tuples or
         arrays).
 
     Returns
