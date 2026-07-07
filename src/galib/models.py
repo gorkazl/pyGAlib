@@ -949,7 +949,7 @@ def ModularPreservingGraph(adjmatrix, partition, directed=None, selfloops=None):
 
 ################################################################################
 """MODULAR AND HIERARCHICAL GRAPH MODELS"""
-def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
+def ModularGraph(comsizes, pintlist, pext, directed=False, selfloops=False):
     """
     Generates a random modular network of given module sizes and densities.
 
@@ -963,7 +963,7 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
 
     Parameters
     ----------
-    Nsizelist : list, tuple or array of integers
+    comsizes : list, tuple or array of integers
         A list containing the desired size (number of nodes) for every
         module in the network.
     pintlist : list, tuple or array of floats
@@ -987,7 +987,7 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
 
     Usage and examples
     ------------------
-    Setting Nsizelist = [100,200,300], pintlist = [0.3, 0.3, 0.5] and
+    Setting comsizes = [100,200,300], pintlist = [0.3, 0.3, 0.5] and
     pext = 0.01 will generate a random graph of size N = 600 nodes with
     three modules of sizes N1 = 100, N2 = 200 and N3 = 300 nodes respectively.
     Each module is an Erdos-Renyi random graph with link probability
@@ -1006,8 +1006,8 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
     if selfloops not in (True, False):
         raise ValueError( "'selfloops' must be True or False" )
 
-    if len(Nsizelist) != len(pintlist):
-        raise TypeError( "Parameters 'Nsizelist' and 'pintlist' not aligned." )
+    if len(comsizes) != len(pintlist):
+        raise TypeError( "Parameters 'comsizes' and 'pintlist' not aligned." )
     if (pext < 0.0 or pext > 1.0):
         raise ValueError("Probability 'pext' out of bounds, insert value between 0 and 1" )
     for c in range(len(pintlist)):
@@ -1015,24 +1015,24 @@ def ModularGraph(Nsizelist, pintlist, pext, directed=False, selfloops=False):
             raise ValueError( "Probability 'pintlist' out of bounds. Insert values between 0 and 1" )
 
     # 1) PREPARE TO CREATE THE NETWORK
-    N = np.add.reduce(Nsizelist)
-    ncommunities = len(Nsizelist)
+    N = np.add.reduce(comsizes)
+    ncommunities = len(comsizes)
     adjmatrix = np.zeros((N,N), np.uint8)
 
     # Define the partition
     counter = 0
     partition = []
     for c in range(ncommunities):
-        com = np.arange(counter,counter+Nsizelist[c])
+        com = np.arange(counter,counter+comsizes[c])
         partition.append(com)
-        counter += Nsizelist[c]
+        counter += comsizes[c]
 
     # 2) GENERATE THE RANDOM MODULAR NETWORK
     for c1, com1 in enumerate(partition):
-        N1 = Nsizelist[c1]
+        N1 = comsizes[c1]
 
         for c2, com2 in enumerate(partition):
-            N2 = Nsizelist[c2]
+            N2 = comsizes[c2]
 
             # 2.0) Choose the probability to use
             if c1 == c2: pthres = pintlist[c1]

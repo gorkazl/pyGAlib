@@ -1420,14 +1420,14 @@ def K_Shells(adjmatrix):
 #     """
 #     return None
 
-def RandomPartition(N, Ncomms, sortnodes=False):
+def RandomPartition(N, comsizes, sortnodes=False):
     """Randomises a partition, conserving the number of communities and their sizes.
 
     Parameters
     ----------
     N : integer
         Number of nodes
-    Ncomms : list, tuple or array of integers
+    comsizes : list, tuple or array of integers
         A list containing the desired size (number of nodes) for every
         module in the network.
 
@@ -1447,10 +1447,10 @@ def RandomPartition(N, Ncomms, sortnodes=False):
         N = int(N)
     else:
         raise TypeError( "N must be integer" )
-    # Check if Ncomms matches N
-    Ncomms = np.array(Ncomms, dtype=np.int64)
-    if N != Ncomms.sum():
-        raise ValueError( f'Number of nodes not aligned. N: {N} and sum(Ncomms): {Ncomms.sum()}' )
+    # Check if comsizes matches N
+    comsizes = np.array(comsizes, dtype=np.int64)
+    if N != comsizes.sum():
+        raise ValueError( f'Number of nodes not aligned. N: {N} and sum(comsizes): {comsizes.sum()}' )
 
     # 1) GENERATE THE PARTITION
     # Create and randomise a list of N nodes
@@ -1460,7 +1460,7 @@ def RandomPartition(N, Ncomms, sortnodes=False):
     # Split the list of nodes into modules (communities) of the given sizes
     newpartition = []
     i0 = 0
-    for c, Nc in enumerate(Ncomms):
+    for c, Nc in enumerate(comsizes):
         newcom = nodelist[i0:i0+Nc].tolist()
         newpartition.append(newcom)
         i0 += Nc
@@ -1498,8 +1498,8 @@ def ShufflePartition(partition, sortnodes=False):
     PartitionMatrix : Given a partition of the network, it returns the participation matrix.
     """
     # Get basic information
-    Ncomms = np.array( [len(com) for com in partition], np.int64 )
-    N = Ncomms.sum()
+    comsizes = np.array( [len(com) for com in partition], np.int64 )
+    N = comsizes.sum()
 
     # Create and randomise a list of the nodes
     nodelist = np.arange(N, dtype=np.int64)
@@ -1508,7 +1508,7 @@ def ShufflePartition(partition, sortnodes=False):
     # Split the nodes into modules (communities) of same size as the original
     newpartition = []
     i0 = 0
-    for c, Nc in enumerate(Ncomms):
+    for c, Nc in enumerate(comsizes):
         newcom = nodelist[i0:i0+Nc].tolist()
         newpartition.append(newcom)
         i0 += Nc
@@ -1770,7 +1770,7 @@ def LocalHubness(adjmatrix, partition):
     return localhubness
 
 def LocalDegree(adjmatrix, partition):
-        ## TODO: Write me !!
+    ## TODO: Write me !!
     """Number of links that nodes make inside their module, for a given partition.
     """
     return None
