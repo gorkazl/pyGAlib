@@ -1414,61 +1414,83 @@ def K_Shells(adjmatrix):
     return kshells
 
 
-# def RandomPartition(N,M):
-#     ## TODO: Write this function !!
-#     """Generates a partition of N nodes into M modules, randomly assigned.
-#     """
-#     return None
-
-def RandomPartition(N, comsizes, sortnodes=False):
-    """Randomises a partition, conserving the number of communities and their sizes.
+def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
+    ## TODO: add a 3rd algorithm that returns communities of quasi same size,
+    ## but with some variance. (e.g., sampled from a Poisson distribution.)
+    """Generates a partition of N nodes into M modules, with nodes randomly assigned.
 
     Parameters
     ----------
     N : integer
         Number of nodes
-    comsizes : list, tuple or array of integers
-        A list containing the desired size (number of nodes) for every
-        module in the network.
+    M : integer
+        The number of communities (modules) desired.
+    comsize_dist : string, optional, default: 'uniform'
+        Method to stablish the sizes of the communities. If 'uniform', tries to split
+        the N nodes into M modules of equal size (as close as possible). If 'random',
+        modules of random sizes are returned such that sum(com_sizes) = N.
+    sortnodes : boolean, optional, default: False
+        If `True`, the indices of the nodes are sorted in ascending order, within
+        every community.
 
     Returns
     -------
     newpartition : list of lists
-       A partition of N nodes randomly assigned into modules of the desired sizes.
+       A partition of N nodes (indices) randomly assigned into M modules.
 
     See Also
     --------
+    RandomPartition_Like :   xxxxxxx
+    RandomPartition_FromSizes :  xxxxxxx
     ShufflePartition : Randomizes a partition, conserving the number of communities and their sizes.
     PartitionMatrix : Given a partition of the network, it returns the participation matrix.
     """
     # 0) SECURITY CHECKS
-    # Check N is an integer (or interpretable as an integer)
-    if int(N) == N:
-        N = int(N)
-    else:
-        raise TypeError( "N must be integer" )
-    # Check if comsizes matches N
-    comsizes = np.array(comsizes, dtype=np.int64)
-    if N != comsizes.sum():
-        raise ValueError( f'Number of nodes not aligned. N: {N} and sum(comsizes): {comsizes.sum()}' )
+    # Check that N is a positive integer
+    if not isinstance(N, (int, np.integer)):
+        raise TypeError( f"N must be a positive integer,  got '{N}'" )
+    if N < 1:
+        raise ValueError( f"N must be a positive integer,  got '{N}'" )
 
-    # 1) GENERATE THE PARTITION
-    # Create and randomise a list of N nodes
+    # Check that M is actually an integer
+    if not isinstance(M, (int, np.integer)):
+        raise TypeError( f"M must be a positive integer smaller than N, got '{M}'" )
+
+    # Deal with trivial cases and errors
+    if M == 1:
+        return [ list(range(N)) ]
+    elif M == N:
+        return [ [i] for i in range(N) ]
+    elif M < 1 or M > N:
+        raise ValueError( f"M must be a positive integer smaller than N, got '{M}'" )
+
+    # 1) GENERATE THE RANDOM PARTITION
+    # Create and shuffle a list of N nodes
     nodelist = np.arange(N, dtype=np.int64)
     numpy.random.shuffle(nodelist)
 
-    # Split the list of nodes into modules (communities) of the given sizes
-    newpartition = []
-    i0 = 0
-    for c, Nc in enumerate(comsizes):
-        newcom = nodelist[i0:i0+Nc].tolist()
-        newpartition.append(newcom)
-        i0 += Nc
+    if comsize_dist == 'uniform':
+        newpartition = np.array_split(nodelist, M)
+
+    elif comsize_dist == 'random':
+        # Find a set of random indices, where the list of nodes will be divided
+        _indexlist = np.arange(1,N-1)
+        splitpoints = numpy.random.choice(_indexlist, M-1, replace=False)
+        splitpoints.sort()
+        # Divide the list of nodes into the desired number of communities of sizes
+        newpartition = np.array_split(nodelist, splitpoints)
+
+    else:
+        raise ValueError( f"comsize_dist must be one of 'uniform' or 'random' (got '{comsize_dist}') " )
 
     # Sort the nodes in the modules, if requested
     if sortnodes==True:
         for com in newpartition:
             com.sort()
+
+    # Turn the communities into lists
+    for c,com in enumerate(newpartition):
+        newpartition[c] = com.tolist()
 
     return newpartition
 
