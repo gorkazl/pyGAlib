@@ -102,7 +102,6 @@ WeightedRandomGraph
 
 """
 # Standard library imports
-import warnings
 # Third party imports
 import numpy as np
 import numpy.random
