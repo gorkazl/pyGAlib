@@ -1534,7 +1534,7 @@ def RandomPartition_WithSizes(comsizes, sortnodes=False):
         if not (comsizes > 0).all():
             raise ValueError()
     # except (ValueError, TypeError):
-    except Exception:
+    except (ValueError, TypeError):
         raise RuntimeError(f"comsizes must be a 1D array-like of positive integers, got {comsizes}")
 
     # 1) GENERATE THE RANDOM PARTITION
