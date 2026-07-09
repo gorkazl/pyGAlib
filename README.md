@@ -226,14 +226,14 @@ limitations under the License.
 This version is a polishing and extension of the *galib.metrics*, with particular emphasis on the metrics to characterise the roles of nodes in modular networks.
 
 * New functions added:
-    * `ShufflePartition()` ... finish this ...
-    * `RandomPartition()` ... finish this ...
-    * `RandomPartition_WithSizes()` ... finish this ...
-    * `RandomPartition_Like()` ... finish this ...
+    * `RandomPartition()`: Generates a partition of N nodes into M modules, with nodes randomly assigned.
+    * `RandomPartition_WithSizes()`: Generates a partition of given community sizes, with node indices randomly assigned.
+    * `RandomPartition_Like()`: Randomises an input partition, conserving the community (module) sizes.
+    * `ShufflePratition()`: Alias for `RandomPartition_Like()`
     * `PartitionMatrix()` ... finish this ...
-* Internal changes and bug fixes *galib.metrics* module:
+* Internal changes and bug fixes for *galib.metrics* module:
     * Polishing of docstrings.
-    * Homogeneization of variable names.
+    * Homogenised variable names and descriptions.
     * Function `metrics.NodeParticipation()` renamed as `metrics.ParticipationIndex()`
     * Function `metrics.NodeDispersion()` renamed as `metrics.DispersionIndex()`.
 
