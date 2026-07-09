@@ -111,6 +111,7 @@ Hubness_GA
 
 """
 # Standard library imports
+import warnings
 # Third party imports
 import numpy as np
 import numpy.random
@@ -2021,6 +2022,13 @@ def ParticipationIndex(adjmatrix, partition):
 
     return p_index
 
+def NodeParticipation(adjmatrix, partition):
+    ## TODO: Double-check this works correctly !!
+    ## I dunno why, but it is not printing the warning :/
+    warnings.warn( "Function renamed and will be removed in future versions, please use `ParticipationIndex` instead.",
+                    DeprecationWarning)
+    return ParticipationIndex(adjmatrix, partition)
+
 def DispersionIndex(adjmatrix, partition):
     """Dispersion index of every node, for given a partition of the network.
 
@@ -2071,6 +2079,13 @@ def DispersionIndex(adjmatrix, partition):
             d_index[i] = 1. - Mi / np.sqrt(Mi - 1) * vector.std()
 
     return d_index
+
+def NodeDispersion(adjmatrix, partition):
+    ## TODO: Double-check this works correctly !!
+    ## I dunno why, but it is not printing the warning :/
+    warnings.warn( "Function renamed and will be removed in future versions, please use `DispersionIndex` instead.",
+                    DeprecationWarning)
+    return DispersionIndex(adjmatrix, partition)
 
 def RolesNodes(adjmatrix, partition):
     ## TODO: Revise and simplify this function.
