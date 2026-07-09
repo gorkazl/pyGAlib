@@ -70,10 +70,9 @@ ConnectedComponents
 RandomPartition
     Generates a partition of N nodes into M modules, with nodes randomly assigned.
 RandomPartition_WithSizes
-    Generates a partition of nodes, with given community sizes.
-ShufflePartition
-    TODO: Rewrite the function!
-    Randomises a partition, conserving the number of communities and their sizes.
+    Generates a partition of given community sizes, with node indices randomly assigned.
+RandomPartition_Like
+    Randomises an input partition, conserving the community (module) sizes.
 PartitionMatrix
     Computes a matrix encoding nodes belonging to a community in a partition.
 AssortativityMatrix
@@ -1442,10 +1441,10 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
 
     See Also
     --------
-    RandomPartition_Like :   xxxxxxx
-    RandomPartition_WithSizes : Generates a partition of nodes, with given community sizes.
-    ShufflePartition : Randomizes a partition, conserving the number of communities and their sizes.
+    RandomPartition_WithSizes : Generates a partition of given community sizes, with node indices randomly assigned.
+    RandomPartition_Like : Randomises an input partition, conserving the community (module) sizes.
     PartitionMatrix : Given a partition of the network, it returns the participation matrix.
+
     """
     # 0) SECURITY CHECKS
     # Check that N is a positive integer
@@ -1497,7 +1496,7 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
     return newpartition
 
 def RandomPartition_WithSizes(comsizes, sortnodes=False):
-    """Generates a partition of nodes, with given community sizes.
+    """Generates a partition of given community sizes, with node indices randomly assigned.
 
     Parameters
     ----------
@@ -1516,10 +1515,11 @@ def RandomPartition_WithSizes(comsizes, sortnodes=False):
 
     See Also
     --------
-    RandomPartition_Like :   xxxxxxx
     RandomPartition : Generates a partition of N nodes into M modules, with nodes randomly assigned.
+    RandomPartition_Like : Randomises an input partition, conserving the community (module) sizes.
     ShufflePartition : Randomizes a partition, conserving the number of communities and their sizes.
     PartitionMatrix : Given a partition of the network, it returns the participation matrix.
+
     """
     # 0) SECURITY CHECKS
     try:
@@ -1558,53 +1558,63 @@ def RandomPartition_WithSizes(comsizes, sortnodes=False):
 
     return newpartition
 
-def ShufflePartition(partition, sortnodes=False):
-    ## TODO: Rewrite this function using what learned for the others!
-    ## Or also rename as RandomPartition_Like()
-    """Randomizes a partition, conserving the number of communities and their sizes.
-
-    NOTE! The function returns a new object instead of shuffling, in-place, the
-    nodes of the input partition.
+def RandomPartition_Like(partition, sortnodes=False):
+    """Randomises an input partition, conserving the community (module) sizes.
 
     Parameters
     ----------
-    partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
+    partition : sequence (list or tuple)
+        A sequence of sequences (lists, tuples or ndarrays), containing the indices of
+        the nodes in each community. Examples of valid inputs are:
+            - [[2, 4], [1, 3, 5]]
+            - ((2, 4), (1, 3, 5))
+            - [np.array((2,4)), np.array((1,3,5))]
     sortnodes : boolean, optional, default: False
         If True, sorts the nodes in each community (module) in ascending order.
 
     Returns
     -------
-    newpartition : list of lists
-       A partition of same shape as the input `partition`, but with the nodes randomly
-       reassigned across the communities.
+    newpartition : list
+       A list of lists of same sizes as in input `partition`, but with the nodes randomly
+       reassigned across the communities. For the examples above, newpartition would
+       be, e.g., [[1, 5], [2, 3, 4]]
 
     See Also
     --------
     RandomPartition : Generates a partition of N nodes into M modules, randomly assigned.
-    PartitionMatrix : Given a partition of the network, it returns the participation matrix.
+    RandomPartition_WithSizes : Generates a partition of given community sizes, with node indices randomly assigned.
+    PartitionMatrix : Given a partition of the network, returns its partition matrix.
+
     """
-    # Get basic information
-    comsizes = np.array( [len(com) for com in partition], np.int64 )
-    N = comsizes.sum()
+    # 1) FLATTEN the partition into a 1D array, while doing NECESSARY CHECKS
+    nodelist = [node for com in partition for node in com ]
+    # Make sure all the items are integer(-like) numbers
+    are_integers = [int(idx)==idx for idx in nodelist]
+    if all(are_integers):
+        nodelist = np.array(nodelist, dtype=np.int64)
+    else:
+        raise ValueError( "partition shall contain sequences of positive integers, e.g. [[4,2],[1,3,5]]")
+    # Make sure all indices are positive
+    if (nodelist < 0).any():
+        raise ValueError( "Indices in partition shall be positive integers" )
 
-    # Create and randomise a list of the nodes
-    nodelist = np.arange(N, dtype=np.int64)
+    # 2) RANDOMISE AND SPLIT INTO COMMUNITIES
+    # Shuffle the list of nodes
     numpy.random.shuffle(nodelist)
-
-    # Split the nodes into modules (communities) of same size as the original
-    newpartition = []
-    i0 = 0
-    for c, Nc in enumerate(comsizes):
-        newcom = nodelist[i0:i0+Nc].tolist()
-        newpartition.append(newcom)
-        i0 += Nc
+    # Find where to split nodelist to conserve community sizes in 'partition'
+    comsizes = np.array( [len(com) for com in partition], np.int64 )
+    splitpoints = comsizes.cumsum()[:-1]
+    # Split the list of nodes into communities
+    newpartition = np.array_split(nodelist, splitpoints)
 
     # Sort the nodes in the modules, if requested
     if sortnodes==True:
         for com in newpartition:
             com.sort()
+
+    # Turn the communities into lists
+    for c,com in enumerate(newpartition):
+        newpartition[c] = com.tolist()
 
     return newpartition
 
