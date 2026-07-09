@@ -73,6 +73,8 @@ RandomPartition_WithSizes
     Generates a partition of given community sizes, with node indices randomly assigned.
 RandomPartition_Like
     Randomises an input partition, conserving the community (module) sizes.
+ShufflePartition
+    Alias for RandomPartition_Like
 PartitionMatrix
     Computes a matrix encoding nodes belonging to a community in a partition.
 AssortativityMatrix
@@ -1617,6 +1619,8 @@ def RandomPartition_Like(partition, sortnodes=False):
         newpartition[c] = com.tolist()
 
     return newpartition
+
+ShufflePartition = RandomPartition_Like
 
 def PartitionMatrix(partition):
     """Computes a matrix encoding nodes belonging to a community in a partition.
