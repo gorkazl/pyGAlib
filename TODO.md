@@ -25,16 +25,17 @@
 
 ### This and that...
 
-1. Port all random number generation, shuffling and choices to the new `numpy.random.Generator.whatever_it_means`. Understand that properly and safely first, to avoid breaking behaviour.
-1. Identify further functions which could be accelarated using Numba package, and write the Numba-based duplicates.
-2. Write a function for the Dijkstra algorithm.
-3. Write a function to calculate the Katz centrality.
-4. Add further data I/O conversions to other graph formats: igraph, graphML (.xml), DOT (.dot), etc. 
-5. Identify and modify all functions whose unweighted version could be improved using Boolean operators: maybe ``ReciprocalDegree()``, ``RichClub()``, ``MatchingIndex()``, ``ConnectedComponents()``, ``K_Core()``, ``K_Shells()``, ``Modularity()``, etc.
-6. Support for weighted network metrics (ACHTUNG!! I won't accept just any algorithm for weighted networks, since many do not make sense.)
-7. Write tests for all functions.
-8. Finish and publish documentation.
-9. *Suggest your own…*
+1. Update all random number generation, shuffling and choices to the new `numpy.random.Generator.whatever_it_means`. Understand that properly and safely first, to avoid breaking behaviour.
+2. Add the two functions to generate surrogates for spatial (weighted) networks. See file "*Examples/SpatialLattices.py*" with legacy code from SiReNetA.
+3. Identify further functions which could be accelarated using Numba package, and write the Numba-based duplicates.
+4. Write a function for the Dijkstra algorithm.
+5. Write a function to calculate Katz centrality.
+6. Add further data I/O conversions to other graph formats: igraph, graphML (.xml), DOT (.dot), etc. 
+7. Identify and modify all functions whose unweighted version could be improved using Boolean operators: maybe ``ReciprocalDegree()``, ``RichClub()``, ``MatchingIndex()``, ``ConnectedComponents()``, ``K_Core()``, ``K_Shells()``, ``Modularity()``, etc.
+8. Support for weighted network metrics (ACHTUNG!! I won't accept just any algorithm for weighted networks, since many do not make sense.)
+9. Write tests for all functions.
+10. Finish and publish documentation.
+11. *Suggest your own…*
 
 
 ### It would be nice to ...
