@@ -20,7 +20,7 @@ measures will be added to GAlib in future releases.
 BASIC CONNECTIVITY DESCRIPTORS
 ------------------------------
 is_directed
-    Checks whether a (weighted) matrix represents a directed or undirected  graph.
+    Checks whether a (weighted) matrix represents a directed or undirected graph.
 is_symmetric
     Checks whether a (weighted) matrix is symmetric or not.
 
@@ -122,6 +122,8 @@ from . import tools
 ## TODO: Add security checks at the beginning of functions.
 ## - e.g., to avoid errors in implicit comparisons like `if directed:`
 ## TODO: Check if initial lines like N = len(adjmatrix) are needed.
+## TODO: Add Clustering function for directed graphs (?)
+## TODO: Add Clustering for weighted graphs (?)
 
 
 ################################################################################
@@ -489,11 +491,6 @@ def Clustering(adjmatrix, checkdirected=True):
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
-    checkdirected : boolean (optional)
-        If 'True', it calls Reciprocity() to make sure adjmatrix is undirected.
-        If 'False', it skips the check and runs a bit faster. Only recommended
-        for large networks and in exceptional cases when you exactly know the
-        input adjacency matrix is undirected.
 
     Returns
     --------
@@ -509,19 +506,21 @@ def Clustering(adjmatrix, checkdirected=True):
     is provided because it costs no additional resources and the data is
     useful for an further statistical analysis.
     """
-    N = len(adjmatrix)
-    adjmatrix = np.where(adjmatrix,1,0).astype(np.float64)
-
-    # 0) SECURITY CHECKS
-    if checkdirected:
-        if Reciprocity(adjmatrix) < 1.0:
-            raise TypeError("Please introduce an undirected adjacency matrix.")
+    # 0) SECURITY CHECKS AND PREPARE FOR CALCULATIONS
+    if is_directed(adjmatrix) == True:
+        raise ValueError(
+            "Clustering coefficient only computable for undirected graphs. Directed adjacency matrix entered."
+        )
 
     # Remove diagonal entries, in case there is any self-loop
-    adjmatrix[np.diag_indices(len(adjmatrix))] = 0
+    N = len(adjmatrix)
+    if adjmatrix.trace() != 0:
+        adjmatrix[np.diag_indices(N)] = 0
+
+    # Convert adjmatrix to float, speeds the calculation up
+    adjmatrix = adjmatrix.astype(bool).astype(np.float64)
 
     # 1) COMPUTE THE NUMBER OF TRIANGLES EACH NODE PARTICIPATES IN
-    ## TODO: replace this by np.linalg.matrix_power() ??
     pow2matrix = np.dot(adjmatrix,adjmatrix)
     ntriangles = np.zeros(N, np.float64)
     for i in range(N):
