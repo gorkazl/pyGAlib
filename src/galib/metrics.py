@@ -84,10 +84,10 @@ Modularity
 
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
 ----------------------------------------------------
-GlobalHubness
-    Computes the global hubness of the nodes in a network.
 LocalHubness
     Computes the internal hubness of nodes, for a given partition of the network.
+GlobalHubness
+    Computes the global hubness of the nodes in a network.
 LocalDegree
     Number of links that nodes make inside their module, for a given partition.
 ParticipationMatrix
@@ -122,8 +122,7 @@ from . import tools
 ## TODO: Add security checks at the beginning of functions.
 ## - e.g., to avoid errors in implicit comparisons like `if directed:`
 ## TODO: Check if initial lines like N = len(adjmatrix) are needed.
-## TODO: Add Clustering function for directed graphs (?)
-## TODO: Add Clustering for weighted graphs (?)
+## TODO: Revise description of optional parameters and default values.
 
 
 ################################################################################
@@ -1783,44 +1782,9 @@ def Modularity(adjmatrix, partition):
 
 ################################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
-def GlobalHubness(adjmatrix):
-    """Computes the global hubness of the nodes in a network.
-
-    Hubness is the degree of a node weighted by the expected degree
-    distribution in random graphs of same size and density. See Equation (4)
-    of Klimm et al. New J. Phys. 16:125006 (2014).
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. Weighted links are ignored.
-
-    Returns
-    -------
-    globalhubness : ndarray of length (N,) and dtype `np.float64`
-        Global hubness of every node.
-
-    See Also
-    --------
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
-    NodeRoles : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
-    """
-    N = len(adjmatrix)
-
-    dens = Density(adjmatrix)
-    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
-    degree = Degree(adjmatrix)
-
-    globalhubness = invnorm * (degree - (N-1)*dens)
-    return globalhubness
-
 def LocalHubness(adjmatrix, partition):
+    ## TODO: Add 'normed=False' parameter. Return local degree or the normed hubness.
+    ## TODO: Remove the call to GlobalHubness(), write the code, that's it.
     """Computes the internal hubness of nodes, for a given partition of the network.
 
     Hubness is the degree of a node weighted by the expected degree
@@ -1828,6 +1792,12 @@ def LocalHubness(adjmatrix, partition):
     of Klim et al. New J. Phys. 16:125006 (2014).
     Local hubness is the hubness applied to the subgraph formed by the
     community the node belongs to.
+
+    Reference
+    ---------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
 
     Parameters
     ----------
@@ -1846,12 +1816,6 @@ def LocalHubness(adjmatrix, partition):
     --------
     GlobalHubness : Hubness of nodes within their community.
     NodeRoles : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
     """
     N = len(adjmatrix)
 
@@ -1871,11 +1835,57 @@ def LocalHubness(adjmatrix, partition):
 
     return localhubness
 
-def LocalDegree(adjmatrix, partition):
-    ## TODO: Write me !!
-    """Number of links that nodes make inside their module, for a given partition.
+def GlobalHubness(adjmatrix, normed=True):
+    """Computes the global hubness of all nodes in a network.
+
+    Global hubness is a metric of importance of a node, namely, the degree of
+    the nodes which can be conveniently normalised for comparison across networks
+    of different sizes or densities.
+
+    Reference
+    ---------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of shape (N,N)
+        The adjacency matrix of the network. Weighted links are ignored.
+    normed : boolean, optional default: True
+        If True, the degrees are weighted, as compared to the expected degree
+        distribution in random graphs of same size and density.
+        If False, the usual degree of the nodes is returned.
+
+    Returns
+    -------
+    globalhubness : ndarray of length (N,) and dtype `np.float64`
+        Global hubness of every node.
+
+    See Also
+    --------
+    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    NodeRoles : Computes all four parameters needed to characterise the roles of nodes.
+
+    Citation
+    --------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
     """
-    return None
+    N = len(adjmatrix)
+    degree = Degree(adjmatrix)
+
+    if normed == True:
+        dens = Density(adjmatrix)
+        invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
+        globalhubness = invnorm * (degree - (N-1)*dens)
+    elif normed == False:
+        globalhubness = degree
+    else:
+        raise ValueError( "'normed' must be boolean." )
+
+    return globalhubness
 
 def ParticipationMatrix(adjmatrix, partition):
     ## TODO: Revise this docstring.
@@ -1885,6 +1895,12 @@ def ParticipationMatrix(adjmatrix, partition):
     A matrix of shape (N,M), where N is the number of nodes and M is the
     number of modules (or communities). Elements a(i,s) of the matrix are the number of
     neighbours (internal degree) that node i has in community s.
+
+    Reference
+    ---------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
 
     Parameters
     ----------
@@ -1905,12 +1921,6 @@ def ParticipationMatrix(adjmatrix, partition):
     ParticipationVectors : Computes the probability of nodes to belong to every community.
     ParticipationIndex : Participation index of every node given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
     """
     # 1) Construct the partition matrix, s (1 if node in module c, 0 otherwise)
     partitionmatrix = PartitionMatrix(partition)
@@ -1927,6 +1937,12 @@ def ParticipationVectors(adjmatrix, partition):
     k_ic is the degree of i in c and N_c is the size of the community.
     If i belongs to community c, then the norm is (N_c -1). Finally, the
     fractions are normalised such that their sum is 1.
+
+    Reference
+    ---------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
 
     Parameters
     ----------
@@ -1948,12 +1964,6 @@ def ParticipationVectors(adjmatrix, partition):
     ParticipationIndex : Participation index of every node given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
     RolesNodes : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
     """
     # Get some helper data
     N = len(adjmatrix)
@@ -1987,6 +1997,12 @@ def ParticipationIndex(adjmatrix, partition):
     For a detailed definition see Equation (7) of Klimm et al. New J. Phys.
     16:125006 (2014).
 
+    Reference
+    ---------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
@@ -2005,12 +2021,6 @@ def ParticipationIndex(adjmatrix, partition):
     ParticipationVectors : Computes the probability of nodes to belong to every community.
     DispersionIndex : Dispersion index of every node given a partition of the network.
     RolesNodes : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
     """
     # 1) Compute first the participation vectors
     p_vectors = ParticipationVectors(adjmatrix,partition)
@@ -2039,6 +2049,12 @@ def DispersionIndex(adjmatrix, partition):
     For a detailed definition see Equation (7) of Klimm et al. New J. Phys.
     16:125006 (2014).
 
+    Reference
+    ---------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
+
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
@@ -2057,12 +2073,6 @@ def DispersionIndex(adjmatrix, partition):
     ParticipationIndex : Participation index of every node given a partition of the network.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
     RolesNodes : Computes all four parameters to characterise the roles of nodes.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
     """
     N = len(adjmatrix)
     # 1) Compute first the participation vectors
@@ -2089,12 +2099,19 @@ def NodeDispersion(adjmatrix, partition):
 def RolesNodes(adjmatrix, partition):
     ## TODO: Revise and simplify this function.
     ## Homogenise nomenclature of variables.
+    ## TODO: Add hubness normalization parameter.
     """Computes all four parameters to characterise the roles of nodes.
 
     Following the definitions in Klimm et al. New J. Phys. 16:125006 (2014),
     it computes the four parameters that characterise the roles that nodes
     take in a network given a partition of its nodes into communites, classes
     or any predefined categories.
+
+    Reference
+    ---------
+    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
+    "Individual nodeʼs contribution to the mesoscale of complex networks."
+    New Journal of Physics 16:125006 (2014).
 
     Parameters
     ----------
@@ -2122,12 +2139,6 @@ def RolesNodes(adjmatrix, partition):
     ParticipationIndex : Participation index of every node given a partition of the network.
     ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
-
-    Citation
-    --------
-    F. Klimm, J. Borge-Holthoefer, N. Wessel, J. Kurths & G. Zamora-López,
-    "Individual nodeʼs contribution to the mesoscale of complex networks."
-    New Journal of Physics 16:125006 (2014).
     """
     N = len(adjmatrix)
     M = len(partition)
@@ -2190,6 +2201,7 @@ def ParticipationIndex_GA(participmatrix):
     ## TODO: Revise and simplify this function.
     ## - Change inputs to adjmatrix + partition ??
     ## - Homogenise the nomenclature of the variables.
+    ## - Add reference to their papers.
     """Computes the participation index as defined by Guimera & Amaral.
 
     Given a partition of the network into communities, the participation
@@ -2242,6 +2254,7 @@ def Hubness_GA(participmatrix, partition):
     ## TODO: Revise and simplify this function.
     ## - Change inputs to adjmatrix + partition ?? Homogenise.
     ## - Homogenise the nomenclature of the variables.
+    ## - Add references to their papers.
     """Computes the within-module degree defined by Guimera & Amaral.
 
     The within-module degree is a measure of local hubness. Given a network
