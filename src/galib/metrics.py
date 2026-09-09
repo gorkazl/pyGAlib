@@ -2106,6 +2106,31 @@ def NodeDispersion(adjmatrix, partition):
                     category=FutureWarning)
     return DispersionIndex(adjmatrix, partition)
 
+def MaxDispersionCurve(M, num=101):
+    """Relation between largest possible participation and dispersion indices.
+
+    Parameters
+    ----------
+    M : scalar
+        The number of modules in a network.
+    num : scalar
+        Number of points the range [0,1] is divided. Does not change the results,
+        only the resolution of the resulting curve.
+
+    Returns
+    -------
+    ppoints : ndarray of shape (num,)
+        Values of the participation index.
+    dpoints : ndarray of shape (num,)
+        Values of the dispersion index.
+    """
+    M = float(M)
+    dpoints = np.linspace(0,1,num)
+    x = 0.5 * (2.0 - dpoints)
+    ppoints = 1.0 - np.sqrt( M/(M-1.0) * ( x**2 + (1.0 - x)**2 - 1.0/M ) )
+
+    return ppoints, dpoints
+
 def RolesNodes(adjmatrix, partition):
     ## TODO: Revise and simplify this function.
     ## Homogenise nomenclature of variables.
