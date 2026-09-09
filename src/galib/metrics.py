@@ -1782,16 +1782,13 @@ def Modularity(adjmatrix, partition):
 
 ################################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
-def LocalHubness(adjmatrix, partition):
-    ## TODO: Add 'normed=False' parameter. Return local degree or the normed hubness.
-    ## TODO: Remove the call to GlobalHubness(), write the code, that's it.
-    """Computes the internal hubness of nodes, for a given partition of the network.
+def LocalHubness(adjmatrix, partition, normed=True):
+    """Computes the internal hubness of all nodes, for a given partition of the network.
 
-    Hubness is the degree of a node weighted by the expected degree
-    distribution in random graphs of same size and density. Seee Equation (4)
-    of Klim et al. New J. Phys. 16:125006 (2014).
-    Local hubness is the hubness applied to the subgraph formed by the
-    community the node belongs to.
+    Local hubness is a measure of relevance of a node, within the network module
+    (community) it belongs to. In simple version it is the number of connections
+    nodes make inside the module (internal degree), but these can be conveniently
+    normalised for comparison across modules of different sizes and densities.
 
     Reference
     ---------
@@ -1806,6 +1803,10 @@ def LocalHubness(adjmatrix, partition):
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
+    normed : boolean, optional default: True
+        If True, the degrees are weighted, as compared to the expected degree
+        distribution in random graphs of same size and density.
+        If False, the usual degree of the nodes is returned.
 
     Returns
     -------
@@ -1814,23 +1815,32 @@ def LocalHubness(adjmatrix, partition):
 
     See Also
     --------
-    GlobalHubness : Hubness of nodes within their community.
-    NodeRoles : Computes all four parameters to characterise the roles of nodes.
+    GlobalHubness : The hubness of all nodes in a network.
+    NodeRoles : Computes all four parameters needed to characterise the roles of nodes.
     """
     N = len(adjmatrix)
-
     localhubness = np.zeros(N, np.float64)
-    for n, com in enumerate(partition):
 
+    for com in partition:
         # Skip nodes of only one node
         if len(com) == 1: continue
 
         # Compute the hubness of nodes in the isolated community
         subnet = tools.ExtractSubmatrix(adjmatrix,com)
-        hubness = GlobalHubness(subnet)
+        degree = Degree(subnet)
 
-        if np.isnan(hubness.min()): continue
+        if normed == True:
+            n = len(subnet)
+            dens = Density(subnet)
+            invnorm = 1. / np.sqrt((n-1) * dens * (1.0 - dens))
+            hubness = invnorm * (degree - (n-1)*dens)
+            if np.isnan(hubness.min()): continue
+        elif normed == False:
+            hubness = degree
+        else:
+            raise ValueError( "'normed' must be boolean." )
 
+        # Add the results for each community in the general array
         localhubness[com] = hubness
 
     return localhubness
