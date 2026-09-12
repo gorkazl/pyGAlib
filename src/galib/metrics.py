@@ -120,7 +120,6 @@ from . import tools
 
 ## TODO: Add security checks at the beginning of functions.
 ## - e.g., to avoid errors in implicit comparisons like `if directed:`
-## TODO: Check if initial lines like N = len(adjmatrix) are needed.
 ## TODO: Revise description of optional parameters and default values.
 
 
@@ -733,7 +732,6 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         degree = 0.5 * (indegree + outdegree)
 
     # 1) DO THE CALCULATIONS
-    N = len(adjmatrix)
     # Compute the k-density for all values of k, from 0 to kmax
     kdensity = k_Density(adjmatrix, rctype=rctype)
 
@@ -1759,7 +1757,6 @@ def Modularity(adjmatrix, partition):
     undirected networks according to input 'matrix'.
     """
     # Prepare for calculations
-    N = len(adjmatrix)
     L = adjmatrix.sum()
 
     indegree, outdegree = Intensity(adjmatrix, directed=True)
