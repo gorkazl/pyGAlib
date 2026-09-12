@@ -118,7 +118,6 @@ import numpy.random
 # Local imports
 from . import tools
 
-## TODO: Check if KeyError() calls should be replaced by ValueError()
 ## TODO: Add security checks at the beginning of functions.
 ## - e.g., to avoid errors in implicit comparisons like `if directed:`
 ## TODO: Check if initial lines like N = len(adjmatrix) are needed.
