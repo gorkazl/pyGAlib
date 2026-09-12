@@ -415,13 +415,13 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     """
 
     # 0) Security checks and prepare data for calculations
-    keylist = ('undirected', 'outin',  'outout', 'inout', 'inin', 'average')
-    if knntype not in keylist:
-        raise KeyError("Enter a valid knntype:", keylist)
+    optlist = ('undirected', 'outin',  'outout', 'inout', 'inin', 'average')
+    if knntype not in optlist:
+        raise ValueError( f"'{knntype}' not a valid input for optional parameter `knntype`. Please, enter one of: {optlist}." )
 
     if knntype == 'undirected':
-        if Reciprocity(adjmatrix) < 1.0:
-            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
+        if is_directed(adjmatrix) == True:
+            raise ValueError("Option knntype = 'undirected' requires an undirected adjacency matrix")
         indegree, outdegree = Degree(adjmatrix, True)
     elif knntype == 'outin':
         indegree, outdegree = Degree(adjmatrix, True)
@@ -508,7 +508,7 @@ def Clustering(adjmatrix, checkdirected=True):
     # 0) SECURITY CHECKS AND PREPARE FOR CALCULATIONS
     if is_directed(adjmatrix) == True:
         raise ValueError(
-            "Clustering coefficient only computable for undirected graphs. Directed adjacency matrix entered."
+            "Clustering coefficient only computable for undirected graphs. Directed adjacency matrix encountered."
         )
 
     # Remove diagonal entries, in case there is any self-loop
@@ -590,9 +590,9 @@ def k_Density(adjmatrix, rctype='undirected'):
     RichClub : Identifies the subset of hubs with dense interconnectivity.
     """
     # 0) SECURITY CHECKS
-    keylist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
-    if rctype not in keylist:
-        raise KeyError("Enter a valid rctype:", keylist)
+    optlist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
+    if rctype not in optlist:
+        raise ValueError( f"'{rctype}' not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
 
     # Convert the network in binary
     adjmatrix = adjmatrix.astype('bool')
@@ -600,8 +600,8 @@ def k_Density(adjmatrix, rctype='undirected'):
     # Select the proper data
     indegree, outdegree = Degree(adjmatrix, True)
     if rctype == 'undirected':
-        if Reciprocity(adjmatrix) < 1.0:
-            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
+        if is_directed(adjmatrix) == True:
+            raise TypeError("Option rctype = 'undirected' requires an undirected adjacency matrix")
         degree = outdegree
     elif rctype == 'outputs' or rctype == 'outdegree':
         degree = outdegree
@@ -711,10 +711,10 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     """
     # 0) SECURITY CHECKS
     if kdensthreshold < 0.0 or kdensthreshold > 1.0:
-        raise ValueError("kdensthreshold parameter out of bounds. Please enter a value between 0 and 1.")
-    keylist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
-    if rctype not in keylist:
-        raise KeyError("Enter a valid rctype:", keylist)
+        raise ValueError("`kdensthreshold` parameter out of bounds. Please enter values between 0 and 1.")
+    optlist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
+    if rctype not in optlist:
+        raise ValueError( f"'{rctype}' not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
 
     # 1) PREPARE FOR THE CALCULATIONS
     # Convert the network in binary
@@ -723,8 +723,8 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     # Select the proper data
     indegree, outdegree = Degree(adjmatrix, True)
     if rctype == 'undirected':
-        if Reciprocity(adjmatrix) < 1.0:
-            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
+        if is_directed(adjmatrix) == True:
+            raise TypeError("Option rctype = 'undirected' requires an undirected adjacency matrix")
         degree = outdegree
     elif rctype == 'outputs' or rctype == 'outdegree':
         degree = outdegree
@@ -828,17 +828,17 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='un
     k_Density : Calculates the k-density in unweighted graphs.
     """
     # 0) SECURITY CHECKS
-    keylist = ('undirected', 'outputs', 'inputs', 'average')
-    if rctype not in keylist:
-        raise KeyError("Enter a valid rctype:", keylist)
+    optlist = ('undirected', 'outputs', 'inputs', 'average')
+    if rctype not in optlist:
+        raise ValueError( f"'{rctype}' not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
     if maxweight == None:
         maxweight = adjmatrix.max()
 
     # Select the proper data
     indegree, outdegree = Intensity(adjmatrix, True)
     if rctype == 'undirected':
-        if Reciprocity(adjmatrix) < 1.0:
-            raise TypeError("Option 'undirected' requires an undirected adjacency matrix")
+        if is_directed(adjmatrix) == True:
+            raise TypeError("Option rctype = 'undirected' requires an undirected adjacency matrix")
         degree = outdegree
     elif rctype == 'outputs':
         degree = outdegree
@@ -1594,7 +1594,7 @@ def RandomPartition_Like(partition, sortnodes=False):
     if all(are_integers):
         nodelist = np.array(nodelist, dtype=np.int64)
     else:
-        raise ValueError( "partition shall contain sequences of positive integers, e.g. [[4,2],[1,3,5]]")
+        raise ValueError( "Partition shall contain sequences of positive integers, e.g. [[4,2],[1,3,5]]")
     # Make sure all indices are positive
     if (nodelist < 0).any():
         raise ValueError( "Indices in partition shall be positive integers" )
@@ -1691,9 +1691,9 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     ParticipationMatrix : Probability of nodes to belong to a community.
     """
     # Security check
-    keylist = [None, 'linkfraction', 'linkprobability']
-    if norm not in keylist:
-        raise KeyError("Enter a valid norm:", keylist)
+    optlist = [None, 'linkfraction', 'linkprobability']
+    if norm not in optlist:
+        raise ValueError( f"'{norm}' not a valid input for optional parameter `norm`. Please, enter one of: {optlist}." )
 
     M = len(partition)
 
@@ -1838,7 +1838,7 @@ def LocalHubness(adjmatrix, partition, normed=True):
         elif normed == False:
             hubness = degree
         else:
-            raise ValueError( "'normed' must be boolean." )
+            raise ValueError( "`normed` must be boolean." )
 
         # Add the results for each community in the general array
         localhubness[com] = hubness
@@ -1893,7 +1893,7 @@ def GlobalHubness(adjmatrix, normed=True):
     elif normed == False:
         globalhubness = degree
     else:
-        raise ValueError( "'normed' must be boolean." )
+        raise ValueError( "`normed` must be boolean." )
 
     return globalhubness
 
