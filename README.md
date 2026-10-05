@@ -226,12 +226,14 @@ limitations under the License.
 This version is a polishing and extension of the *galib.metrics*, with particular emphasis on the metrics to characterise the roles of nodes in modular networks.
 
 * New functions added:
+    * `is_binary()` : Checks whether an adjacency matrix is binary or weighted.
     * `RandomPartition()`: Generates a partition of N nodes into M modules, with nodes randomly assigned.
     * `RandomPartition_WithSizes()`: Generates a partition of given community sizes, with node indices randomly assigned.
     * `RandomPartition_Like()`: Randomises an input partition, conserving the community (module) sizes.
     * `ShufflePratition()`: Alias for `RandomPartition_Like()`
     * `PartitionMatrix()` ... finish this ...
-* Internal changes and bug fixes for *galib.metrics* module:
+* Internal changes to *galib.metrics* module:
+    * All functions were revised and improved, if required. Many of the improvements are "silent" (no input / output consequences for the user).
     * Polishing of docstrings.
     * Homogenised variable names and descriptions.
     * Function `metrics.NodeParticipation()` renamed as `metrics.ParticipationIndex()`
@@ -241,7 +243,7 @@ This version is a polishing and extension of the *galib.metrics*, with particula
 ##### June 26, 2026 (Release of Version 2.1)
 
 * **New functions** added:
-    * Support functions `is_directed()`, `is_symmetric()` and `is_binary()` added to _metrics.py_ module, to facilitate working with weighted graphs.
+    * Support functions `is_directed()` and `is_symmetric()` added to _metrics.py_ module, to facilitate working with weighted graphs.
 * **Support to generate and randomize weigthed networks** added. New functions included to _models.py_ module:
     * `SeedRandomWeights()` adds random weights (sampled from a distribution of choice) to the links of an existing (di)graph.
     * `ShuffleWeights()` conserves the links of a (di)graph in-place, but randomly reassigns their weights.
