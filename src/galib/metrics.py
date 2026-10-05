@@ -307,9 +307,6 @@ def Reciprocity(adjmatrix):
     return reciprocity
 
 def ReciprocalDegree(adjmatrix, normed=False):
-    ## TODO: Reorganise and modernise this function.
-    ## - Avoid repeating the calculation in both cases, and use optional parameter 'norm' only if True.
-    ## - Replace add.reduce() by arr.sum(axis=??)
     """Returns the reciprocal degree and excess degrees of every nodes.
 
     The reciprocal degree, kr, of a node i is the number of neighbours with
@@ -345,35 +342,25 @@ def ReciprocalDegree(adjmatrix, normed=False):
     computation ignores the weights of the arcs in the case of weighted
     adjacency matrices.
     """
-    # Check whether the matrix is binary of weighted
-    if adjmatrix.max() != 1:
-        adjmatrix = np.where(adjmatrix != 0, 1, 0)
+    # Convert adjmatrix into a binary, get the input / output degrees
+    mask = adjmatrix.astype(np.bool)
+    indegree = mask.sum(axis=0)
+    outdegree = mask.sum(axis=1)
 
-    # Compute the input and output degrees
-    indegree, outdegree = Degree(adjmatrix, True)
-
-    # Find the symmetric and assymmetric links
-    rest = abs(adjmatrix - adjmatrix.T)
-    recipadjmatrix = (adjmatrix + adjmatrix.T - rest)/2
-    del rest
+    # Get the reciprocal degree and the excess degrees
+    mask_und = mask * mask.T
+    degrecip = mask_und.sum(axis=0)
+    degminus = indegree - degrecip
+    degplus = outdegree - degrecip
 
     if normed:
         # Normalize the reciprocal degrees of the nodes
-        degrecip = np.add.reduce(recipadjmatrix)
-        degminus = indegree - degrecip
-        degplus = outdegree - degrecip
+        degrecip = 2.0 * degrecip.astype(np.float64) / (indegree+outdegree)
+        degminus = degminus.astype(np.float64) / indegree
+        degplus = degplus.astype(np.float64) / outdegree
 
-        return 2.0 * degrecip.astype(np.float64) / (indegree+outdegree), \
-               degminus.astype(np.float64)/indegree, \
-               degplus.astype(np.float64)/outdegree
+    return degrecip, degminus, degplus
 
-    else:
-        # The reciprocal degree of the nodes
-        degrecip = np.add.reduce(recipadjmatrix)
-        degminus = indegree - degrecip
-        degplus = outdegree - degrecip
-
-        return degrecip, degminus, degplus
 
 def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     """Average neighbours' degree of nodes with given degree k, for all k.
