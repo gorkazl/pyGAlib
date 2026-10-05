@@ -163,6 +163,24 @@ def is_symmetric(adjmatrix):
     result = np.allclose(adjmatrix, adjmatrix.T)
     return result
 
+def is_binary(adjmatrix):
+    """Checks whether an adjmatrix represents a binary graph (or a weighted)
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of shape (N,N)
+        A (weighted) adjacency matrix of a network.
+
+    Returns
+    -------
+    result : boolean
+        True if `adjmatrix` represents a binary (unweighted) graph.
+        False if `adjmatrix` is a weighted graph.
+    """
+    mask = adjmatrix.astype(np.bool)
+    result = np.allclose(adjmatrix * mask)
+    return result
+
 def Density(adjmatrix):
     """Returns the density of links in a network.
 
@@ -210,15 +228,15 @@ def Degree(adjmatrix, directed=False):
     Intensity : Computes the weighted degree of networks.
     ReciprocalDegree : Reciprocity of every node and excess degrees.
     """
-    adjmatrix = adjmatrix.astype('bool')
+    mask = adjmatrix.astype('bool')
 
     if directed:
-        indegree = adjmatrix.sum(axis=0)
-        outdegree = adjmatrix.sum(axis=1)
+        indegree = mask.sum(axis=0)
+        outdegree = mask.sum(axis=1)
         return indegree, outdegree
 
     else:
-        degree = adjmatrix.sum(axis=1)
+        degree = mask.sum(axis=1)
         return degree
 
 def Intensity(adjmatrix, directed=False):
@@ -959,8 +977,6 @@ def MatchingIndex(adjmatrix, normed=True):
 ################################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
 def FloydWarshall(adjmatrix, weighted_dist = False):
-    ## TODO: Test giving distmatrix np.uint64 from the beginning.
-    ## Does this make the function faster out of the box, without Numba ?
     """Computes the pathlength between all pairs of nodes in a network..
 
     Parameters

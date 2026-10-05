@@ -241,7 +241,7 @@ This version is a polishing and extension of the *galib.metrics*, with particula
 ##### June 26, 2026 (Release of Version 2.1)
 
 * **New functions** added:
-    * Support functions `is_directed()` and `is_weighted()` added to _metrics.py_ module, to facilitate working with weighted graphs.
+    * Support functions `is_directed()`, `is_symmetric()` and `is_binary()` added to _metrics.py_ module, to facilitate working with weighted graphs.
 * **Support to generate and randomize weigthed networks** added. New functions included to _models.py_ module:
     * `SeedRandomWeights()` adds random weights (sampled from a distribution of choice) to the links of an existing (di)graph.
     * `ShuffleWeights()` conserves the links of a (di)graph in-place, but randomly reassigns their weights.
