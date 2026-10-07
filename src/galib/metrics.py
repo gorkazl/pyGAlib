@@ -47,7 +47,7 @@ Reciprocity
 ReciprocalDegree
     Returns the reciprocal degree and excess degrees of every nodes.
 RichClub
-    Identifies the subset of hubs with dense interconnectivity.
+    Checks for the presence of a subset of hubs with dense interconnectivity.
 
 PATHS AND GRAPH DISTANCE FUNCTIONS
 ----------------------------------
@@ -228,15 +228,15 @@ def Degree(adjmatrix, directed=False):
     Intensity : Computes the weighted degree of networks.
     ReciprocalDegree : Reciprocity of every node and excess degrees.
     """
-    mask = adjmatrix.astype('bool')
+    adjmatrix = adjmatrix.astype('bool')
 
     if directed:
-        indegree = mask.sum(axis=0)
-        outdegree = mask.sum(axis=1)
+        indegree = adjmatrix.sum(axis=0)
+        outdegree = adjmatrix.sum(axis=1)
         return indegree, outdegree
 
     else:
-        degree = mask.sum(axis=1)
+        degree = adjmatrix.sum(axis=1)
         return degree
 
 def Intensity(adjmatrix, directed=False):
@@ -342,13 +342,13 @@ def ReciprocalDegree(adjmatrix, normed=False):
     computation ignores the weights of the arcs in the case of weighted
     adjacency matrices.
     """
-    # Convert adjmatrix into a binary, get the input / output degrees
-    mask = adjmatrix.astype(np.bool)
-    indegree = mask.sum(axis=0)
-    outdegree = mask.sum(axis=1)
+    # Make a binary copy of the network, get the input / output degrees
+    adjmatrix = adjmatrix.astype(np.bool)
+    indegree = adjmatrix.sum(axis=0)
+    outdegree = adjmatrix.sum(axis=1)
 
     # Get the reciprocal degree and the excess degrees
-    mask_und = mask * mask.T
+    mask_und = adjmatrix * adjmatrix.T
     degrecip = mask_und.sum(axis=0)
     degminus = indegree - degrecip
     degplus = outdegree - degrecip
@@ -652,7 +652,7 @@ def k_Density(adjmatrix, rctype='undirected'):
 def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     ## TODO: Double check the outputs and docstring.
     ## Why is `richclub` of dtype np.float64 !? It should be int.
-    """Identifies the subset of hubs with dense interconnectivity.
+    """Checks for the presence of a subset of hubs with dense interconnectivity.
 
     Conceptually, a network is said to have a rich-club when it contains hubs
     (largely connected nodes) and those hubs are densely interconnected
