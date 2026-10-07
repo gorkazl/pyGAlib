@@ -47,7 +47,7 @@ Reciprocity
 ReciprocalDegree
     Returns the reciprocal degree and excess degrees of every nodes.
 RichClub
-    Checks for the presence of a subset of hubs with dense interconnectivity.
+    Looks for the presence of a subset of hubs with dense interconnectivity.
 
 PATHS AND GRAPH DISTANCE FUNCTIONS
 ----------------------------------
@@ -650,7 +650,7 @@ def k_Density(adjmatrix, rctype='undirected'):
     return kdensity
 
 def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
-    """Checks for the presence of a subset of hubs with dense interconnectivity.
+    """Looks for the presence of a subset of hubs with dense interconnectivity.
 
     Conceptually, a network is said to have a rich-club when two conditions meet:
     1) The network contains hubs (nodes with many connections), and
