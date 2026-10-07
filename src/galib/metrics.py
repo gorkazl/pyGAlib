@@ -712,7 +712,8 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     kdecision : integer
         The degree at which k-density overcomes value 'kdensthreshold'.
     richclub : A 1D ndarray of dtype `np.float64`
-        The indices of the nodes forming the rich club.
+        The indices of the nodes with degree k >= kdecision. This will be empty
+        if k-density curve does not overcome `kdensthreshold` at any point.
 
     See Also
     --------
