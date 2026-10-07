@@ -650,31 +650,38 @@ def k_Density(adjmatrix, rctype='undirected'):
     return kdensity
 
 def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
-    ## TODO: Double check the outputs and docstring.
-    ## Why is `richclub` of dtype np.float64 !? It should be int.
     """Checks for the presence of a subset of hubs with dense interconnectivity.
 
-    Conceptually, a network is said to have a rich-club when it contains hubs
-    (largely connected nodes) and those hubs are densely interconnected
-    forming a cluster (or community).
+    Conceptually, a network is said to have a rich-club when two conditions meet:
+    1) The network contains hubs (nodes with many connections), and
+    2) those hubs are densely connected with each other, thus forming a cluster
+    (module or community).
+
+    Unfortunately, no strict criteria exist to determine when a node is to be
+    considered as a a hub, nor when a set of hubs is sufficiently interconnected
+    to be considered a rich-club. Thus, both hub and rich-club identification are
+    bound by some level of subjective interpretation and "common-sense".
+    This function allows users some flexibility on the selection.
+
     The identification of a rich-club relies on the k-density, a metric that
     iteratively calculates the density of the subnetwork formed by the nodes
     with degree larger than (or equal to) k', for all k' from 0 to kmax.
-    See original paper by S. Zhou and R.J. Modragon, IEEE Communication
-    Letters 8(3), 180-182 (2004).
+    If k-density decays, specially at large k, is indicative of the absence of a
+    rich-club because the nodes with large degree are not well connected with
+    each other. However, if k-density (monotonically) grows with degree k, this
+    is indicative that a rich-club may be present. The question is then to decide
+    which level of k-density is sufficient.
 
-    NOTE:
-    Unfortunately, rich-club identification also implies a few arbitrary choices
-    and no strict criteria are commonly agreed. This function returns as the
-    rich-club the set of nodes remaining in the graph at the point when
-    k-density first reaches a given threshold: 'kdensthreshold'. The rich-club
-    will be empty if k-density does not reach the value. 'kdensthreshold' is
-    an optional parameter. Initially 'kdensthreshold' is set to 0.8, which is a
-    very large density, rarely achieved as the internal density by communities
-    found in empirical networks by community detection methods. However, we
-    recommend the user to explore different values of threshold and, specially,
-    to always study the evolution of k-density as a function of degree k,
-    information that is also returned by the function.
+    Here, this is controled by optional parameter `kdensthreshold`. For a
+    given threshold, the function returns both the degree k' at which k-density
+    overcomes `kdensthreshold` and the surviving set of hubs at that iteration,
+    which are consider to form the rich-club. By default `kdensthreshold` is set
+    to 0.8, which is a convenience choice because typical modules found in
+    complex networks rarely achieve such large internal density. Thus, it is
+    very unlikely that k-density will reach 0.8 in any empirical network just by
+    chance. However, we recommend users to visually inspect the curve resulting
+    from k-density (to validate it displays a growing trend), and then to explore
+    various values for  `kdensthreshold.
 
     Parameters
     ----------
@@ -720,7 +727,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         raise ValueError( f"'{rctype}' not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
 
     # 1) PREPARE FOR THE CALCULATIONS
-    # Convert the network in binary
+    # Make a binary copy of the network
     adjmatrix = adjmatrix.astype('bool')
 
     # Select the proper data
@@ -750,7 +757,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         kdecision = np.nan
         richclub = np.empty(0, dtype=np.int64)
 
-    return (kdensity, kdecision, richclub)
+    return kdensity, kdecision, richclub
 
 def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
     """Computes the ratio of link weights among the nodes with strength > s',
