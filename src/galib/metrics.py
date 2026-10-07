@@ -681,7 +681,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     very unlikely that k-density will reach 0.8 in any empirical network just by
     chance. However, we recommend users to visually inspect the curve resulting
     from k-density (to validate it displays a growing trend), and then to explore
-    various values for  `kdensthreshold.
+    various values for  `kdensthreshold`.
 
     Parameters
     ----------
