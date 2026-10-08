@@ -1423,7 +1423,6 @@ def K_Shells(adjmatrix):
 
     return kshells
 
-
 def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
     ## TODO: add a 3rd algorithm that returns communities of quasi same size,
     ## but with some variance. (e.g., sampled from a Poisson distribution.)
@@ -1663,6 +1662,8 @@ def PartitionMatrix(partition):
     return partitionmatrix
 
 def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
+    # TODO: Revise and simplify.
+    # e.g., use enumerate()
     """Returns the assortativity matrix of network given a partition of nodes.
 
     Parameters
@@ -1834,7 +1835,7 @@ def LocalHubness(adjmatrix, partition, normed=True):
 
         # Compute the hubness of nodes in the isolated community
         subnet = tools.ExtractSubmatrix(adjmatrix,com)
-        degree = Degree(subnet)
+        degree = Degree(subnet).astype(np.float64)
 
         if normed == True:
             n = len(subnet)
@@ -1891,7 +1892,7 @@ def GlobalHubness(adjmatrix, normed=True):
     New Journal of Physics 16:125006 (2014).
     """
     N = len(adjmatrix)
-    degree = Degree(adjmatrix)
+    degree = Degree(adjmatrix).astype(np.float64)
 
     if normed == True:
         dens = Density(adjmatrix)
