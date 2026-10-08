@@ -23,6 +23,8 @@ is_directed
     Checks whether a (weighted) matrix represents a directed or undirected graph.
 is_symmetric
     Checks whether a (weighted) matrix is symmetric or not.
+is_binary
+    Checks whether an adjmatrix represents a binary graph (or a weighted).
 
 AvNeighboursDegree
     Average neighbours' degree of nodes with given degree k, for all k.
@@ -88,8 +90,6 @@ LocalHubness
     Computes the internal hubness of nodes, for a given partition of the network.
 GlobalHubness
     Computes the global hubness of the nodes in a network.
-LocalDegree
-    Number of links that nodes make inside their module, for a given partition.
 ParticipationMatrix
     Number of links nodes make across modules, given a partition of the network.
 ParticipationVectors
@@ -99,7 +99,7 @@ ParticipationIndex
 DispersionIndex
     Dispersion index of every node, for given a partition of the network.
 NodeRoles
-    Computes all four parameters to characterise the roles of nodes.
+    Returns all four parameters to characterise the roles of nodes in modular networks.
 
 ParticipationIndex_GA
    Computes the participation index as defined by Guimera & Amaral (2005).
@@ -121,7 +121,7 @@ from . import tools
 ## - e.g., to avoid errors in implicit comparisons like `if directed:`
 ## TODO: Revise description of optional parameters and default values.
 ## - e.g., mention of `parameters` or ``parameters`` in the docstrings + error messages ??
-
+## Sort metrics alphabetically, within each category ?
 
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
@@ -360,7 +360,6 @@ def ReciprocalDegree(adjmatrix, normed=False):
         degplus = degplus.astype(np.float64) / outdegree
 
     return degrecip, degminus, degplus
-
 
 def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     """Average neighbours' degree of nodes with given degree k, for all k.
@@ -969,6 +968,7 @@ def MatchingIndex(adjmatrix, normed=True):
 
 
 
+
 ################################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
 def FloydWarshall(adjmatrix, weighted_dist = False):
@@ -1211,6 +1211,7 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
         queue.pop()
 
     return paths
+
 
 
 
@@ -1788,6 +1789,7 @@ def Modularity(adjmatrix, partition):
 
 
 
+
 ################################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
 def LocalHubness(adjmatrix, partition, normed=False):
@@ -1882,7 +1884,7 @@ def GlobalHubness(adjmatrix, normed=False):
 
     See Also
     --------
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
+    LocalHubness : Computes the internal hubness of nodes, for a given partition of the network.
     NodeRoles : Computes all four parameters needed to characterise the roles of nodes.
 
     Citation
@@ -2135,11 +2137,8 @@ def MaxDispersionCurve(M, num=101):
 
     return ppoints, dpoints
 
-def RolesNodes(adjmatrix, partition):
-    ## TODO: Revise and simplify this function.
-    ## Homogenise nomenclature of variables.
-    ## TODO: Add hubness normalization parameter.
-    """Computes all four parameters to characterise the roles of nodes.
+def RolesNodes(adjmatrix, partition, normedhubs=False):
+    """Returns all four parameters to characterise the roles of nodes in modular networks.
 
     Following the definitions in Klimm et al. New J. Phys. 16:125006 (2014),
     it computes the four parameters that characterise the roles that nodes
@@ -2159,6 +2158,10 @@ def RolesNodes(adjmatrix, partition):
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
+    normedhubs : boolean, optional default: False
+        If `True`, the degrees are weighted, as compared to the expected degree
+        distribution in random graphs of same size and density.
+        If `False`, the usual degree of the nodes is returned.
 
     Returns
     -------
@@ -2173,68 +2176,33 @@ def RolesNodes(adjmatrix, partition):
 
     See Also
     --------
-    GlobalHubness : Computes the global hubness of all nodes in a network.
-    LocalHubness : Given a partition, computes the local hubness of all nodes.
-    ParticipationIndex : Participation index of every node given a partition of the network.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationVectors : Computes the probability of nodes to belong to every community.
+    GlobalHubness : Computes the global hubness of the nodes in a network.
+    LocalHubness : Computes the internal hubness of nodes, for a given partition of the network.
+    ParticipationIndex : Participation index of every node, for given a partition of the network.
+    DispersionIndex : Dispersion index of every node, for given a partition of the network.
     """
+    # 1) COMPUTE THE GLOBAL AND LOCAL HUBNESS
+    globalhubness = GlobalHubness(adjmatrix, normed=normedhubs)
+    localhubness = LocalHubness(adjmatrix, partition, normed=normedhubs)
+
+    # 2) COMPUTE THE PARTICIPATION AND DISPERSION INDICES
+    p_vectors = ParticipationVectors(adjmatrix, partition)
+
+    # The dispersion index of all nodes
     N = len(adjmatrix)
-    M = len(partition)
-
-    # 1) COMPUTE THE GLOBAL HUBNESS
-    dens = Density(adjmatrix)
-    invnorm = 1. / np.sqrt((N-1) * dens * (1.0 - dens))
-    degree = Degree(adjmatrix)
-
-    globalhubness = invnorm * (degree - (N-1)*dens)
-
-    # 2) COMPUTE THE LOCAL HUBNESS AND CREATE THE PARTITION MATRIX
-    localhubness = np.zeros(N, np.float64)
-    commsizes = np.zeros(M, np.float64)
-    partitionmatrix = np.zeros((N,M), np.uint64)
-    for c, com in enumerate(partition):
-        commsizes[c] = len(partition[c])
-        partitionmatrix[com,c] = 1
-
-        # Skip nodes of only one node
-        if len(com) == 1: continue
-
-        # Compute the hubness of nodes in the isolated community
-        subnet = tools.ExtractSubmatrix(adjmatrix,com)
-        hubness = GlobalHubness(subnet)
-
-        if np.isnan(hubness.min()): continue
-        localhubness[com] = hubness
-
-    # 3) COMPUTE THE PARTICIPATION VECTORS
-    particvectors = np.dot(adjmatrix.astype(bool), partitionmatrix)
-    particvectors = particvectors.astype(np.float64)
+    d_index = np.zeros(N, np.float64)
     for i in range(N):
-        for c in range(M):
-            if partitionmatrix[i,c]:
-                particvectors[i,c] /= (commsizes[c] - 1.0)
-            else:
-                particvectors[i,c] /= commsizes[c]
-
-        # Finally, normalize the vector to sum 1
-        particvectors[i] /= particvectors[i].sum()
-
-    # 4) COMPUTE THE PARTICIPATION AND DISPERSION INDICES
-    # The participation index
-    norm = np.float64(M) / np.sqrt(M - 1.0)
-    nodeparticip = 1. - norm * particvectors.std(axis=1)
-
-    # The dispersion index
-    dispersionindex = np.zeros(N, np.float64)
-    for i in range(N):
-        idx = particvectors[i].nonzero()[0]
-        vector = particvectors[i,idx]
+        idx = p_vectors[i].nonzero()[0]
+        vector = p_vectors[i,idx]
         Mi = np.float64(len(vector))
         if Mi > 1:
-            dispersionindex[i] = 1. - Mi / np.sqrt(Mi - 1) * vector.std()
+            d_index[i] = 1. - Mi / np.sqrt(Mi - 1) * vector.std()
 
-    return globalhubness, localhubness, nodeparticip, dispersionindex
+    # The participation index of all nodes
+    M = np.float64(len(partition))
+    p_index = 1.0  - ( M / np.sqrt(M - 1) * p_vectors.std(axis=1) )
+
+    return globalhubness, localhubness, p_index, d_index
 
 def ParticipationIndex_GA(participmatrix):
     ## TODO: Revise and simplify this function.
