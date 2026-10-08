@@ -1790,7 +1790,7 @@ def Modularity(adjmatrix, partition):
 
 ################################################################################
 """ROLES OF NODES IN NETWORKS WITH COMMUNITY (ASSORTATIVE) ORGANIZATION"""
-def LocalHubness(adjmatrix, partition, normed=True):
+def LocalHubness(adjmatrix, partition, normed=False):
     """Computes the internal hubness of all nodes, for a given partition of the network.
 
     Local hubness is a measure of relevance of a node, within the network module
@@ -1811,7 +1811,7 @@ def LocalHubness(adjmatrix, partition, normed=True):
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
-    normed : boolean, optional default: True
+    normed : boolean, optional default: False
         If True, the degrees are weighted, as compared to the expected degree
         distribution in random graphs of same size and density.
         If False, the usual degree of the nodes is returned.
@@ -1853,7 +1853,7 @@ def LocalHubness(adjmatrix, partition, normed=True):
 
     return localhubness
 
-def GlobalHubness(adjmatrix, normed=True):
+def GlobalHubness(adjmatrix, normed=False):
     """Computes the global hubness of all nodes in a network.
 
     Global hubness is a metric of importance of a node, namely, the degree of
@@ -1870,7 +1870,7 @@ def GlobalHubness(adjmatrix, normed=True):
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. Weighted links are ignored.
-    normed : boolean, optional default: True
+    normed : boolean, optional default: False
         If True, the degrees are weighted, as compared to the expected degree
         distribution in random graphs of same size and density.
         If False, the usual degree of the nodes is returned.
