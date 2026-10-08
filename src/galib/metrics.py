@@ -2049,8 +2049,6 @@ def ParticipationIndex(adjmatrix, partition):
     return p_index
 
 def NodeParticipation(adjmatrix, partition):
-    ## TODO: Double-check this works correctly !!
-    ## I dunno why, but it is not printing the warning :/
     warnings.warn( "Function renamed and will be removed in future versions, please use `ParticipationIndex` instead.",
                     category=FutureWarning)
     return ParticipationIndex(adjmatrix, partition)
@@ -2107,8 +2105,6 @@ def DispersionIndex(adjmatrix, partition):
     return d_index
 
 def NodeDispersion(adjmatrix, partition):
-    ## TODO: Double-check this works correctly !!
-    ## I dunno why, but it is not printing the warning :/
     warnings.warn( "Function renamed and will be removed in future versions, please use `DispersionIndex` instead.",
                     category=FutureWarning)
     return DispersionIndex(adjmatrix, partition)
