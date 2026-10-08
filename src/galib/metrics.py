@@ -106,7 +106,6 @@ ParticipationIndex_GA
 Hubness_GA
     Computes the within-module degree defined by Guimera & Amaral (2005).
 
-
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
@@ -121,6 +120,7 @@ from . import tools
 ## TODO: Add security checks at the beginning of functions.
 ## - e.g., to avoid errors in implicit comparisons like `if directed:`
 ## TODO: Revise description of optional parameters and default values.
+## - e.g., mention of `parameters` or ``parameters`` in the docstrings + error messages ??
 
 
 ################################################################################
