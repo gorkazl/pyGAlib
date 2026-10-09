@@ -122,6 +122,9 @@ from . import tools
 ## TODO: Revise description of optional parameters and default values.
 ## - e.g., mention of `parameters` or ``parameters`` in the docstrings + error messages ??
 ## Sort metrics alphabetically, within each category ?
+## TODO: Homogenise policy and docstrings regarding functions accepting weighted
+## and whether they just ignore or use them.
+## - Merge Degree and intensity into one function ? Well ... explicit is better than implicit.
 
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
