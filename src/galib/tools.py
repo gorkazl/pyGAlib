@@ -425,6 +425,9 @@ def SavePartition(filepath, partition, sep=' '):
         outfile.write(text)
 
 def ExtractSubmatrix(adjmatrix, nodelist1, nodelist2=[]):
+    ## TODO: Revise and simplify, modernise (if possible)
+    ## TODO: Check if you could just use boolean masks, faster but more memory?
+    ## TODO: Set nodelist2=None
     """Returns the sub-matrix composed by a set of nodes.
 
     Parameters

@@ -178,7 +178,7 @@ def is_binary(adjmatrix):
         False if `adjmatrix` is a weighted graph.
     """
     mask = adjmatrix.astype(np.bool)
-    result = np.allclose(adjmatrix * mask)
+    result = np.allclose(adjmatrix, mask)
     return result
 
 def Density(adjmatrix):
@@ -1740,6 +1740,8 @@ def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
     return assortmatrix
 
 def Modularity(adjmatrix, partition):
+    ## TODO: Shall I compute, getting first the assortativity matrix ?
+    ## TODO: Add other modularity types !!
     """Computes the Newman-Girvan modularity given a partition of nodes.
 
     It computes modularity for both weighted or unweighted and for directed
