@@ -225,8 +225,11 @@ limitations under the License.
 
 This version is a polishing and extension of the *galib.metrics*, with particular emphasis on the metrics to characterise the roles of nodes in modular networks.
 
+* Property checks added:
+    * `is_binary()`: Checks whether an adjmatrix represents a binary graph (or a weighted).
+    * `has_self_loops()`: Checks whether an adjmatrix contains self-loops (diagonal entries).
+
 * New functions added:
-    * `is_binary()` : Checks whether an adjacency matrix is binary or weighted.
     * `RandomPartition()`: Generates a partition of N nodes into M modules, with nodes randomly assigned.
     * `RandomPartition_WithSizes()`: Generates a partition of given community sizes, with node indices randomly assigned.
     * `RandomPartition_Like()`: Randomises an input partition, conserving the community (module) sizes.

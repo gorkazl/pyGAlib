@@ -17,15 +17,19 @@ digraphs. Most of functions accept weighted networks as input but they
 ignore the weights unless explicitely specified. Support for weighted
 measures will be added to GAlib in future releases.
 
-BASIC CONNECTIVITY DESCRIPTORS
-------------------------------
+ELEMENTARY PROPERTY CHECKS
+--------------------------
 is_directed
-    Checks whether a (weighted) matrix represents a directed or undirected graph.
+    Checks whether a graph (adjacency matrix) is directed or undirected.
 is_symmetric
-    Checks whether a (weighted) matrix is symmetric or not.
+    Checks whether the link weights of a graph are reciprocal or not.
 is_binary
     Checks whether an adjmatrix represents a binary graph (or a weighted).
+has_self_loops
+    Checks whether an adjmatrix contains self-loops (diagonal entries).
 
+BASIC CONNECTIVITY DESCRIPTORS
+------------------------------
 AvNeighboursDegree
     Average neighbours' degree of nodes with given degree k, for all k.
 Clustering
@@ -129,7 +133,7 @@ from . import tools
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def is_directed(adjmatrix):
-    """Checks whether a (weighted) matrix represents a directed or undirected graph.
+    """Checks whether a graph (adjacency matrix) is directed or undirected.
 
     Parameters
     ----------
@@ -139,15 +143,15 @@ def is_directed(adjmatrix):
     Returns
     -------
     result : boolean
-        True if `adjmatrix` represents a directed graph, and False if `adjmatrix`
-        represents an undirected graph.
+        Returns True if the adjacency matrix represents a directed graph;
+        False otherwise (it represents an undirected graph).
     """
     mask = adjmatrix.astype(bool)
     result = (mask ^ mask.T).any()
     return result.item()
 
 def is_symmetric(adjmatrix):
-    """Checks whether a (weighted) matrix is symmetric or not.
+    """Checks whether the link weights of a graph are reciprocal or not.
 
     Parameters
     ----------
@@ -157,11 +161,10 @@ def is_symmetric(adjmatrix):
     Returns
     -------
     result : boolean
-        True if `adjmatrix` represents a (weighted) undirected graph whose
-        link weights are all symmetric. False if any link weight `adjmatrix[i,j]`
-        differs from its reciprocal `adjmatrix[j,i]`. This can happen both if
-        the network is undirected but weights are not symmetrics, or if the
-        network is directed.
+        Returns True when all link weights of the adjacency matrix are reciprocal,
+        say ``w[i,j] = w[j,i]``. This also implies the graph is undirected.
+        Returns False if there is at least one link whose weights are not
+        reciprocal (``w[i,j] != w[j,i]``).
     """
     result = np.allclose(adjmatrix, adjmatrix.T)
     return result
@@ -177,20 +180,44 @@ def is_binary(adjmatrix):
     Returns
     -------
     result : boolean
-        True if `adjmatrix` represents a binary (unweighted) graph.
-        False if `adjmatrix` is a weighted graph.
+        Returns True if the adjacency matrix represents a binary (unweighted)
+        graph; False, if at least one of the links is weighted with a value
+        distinct from 1.
     """
     mask = adjmatrix.astype(np.bool)
     result = np.allclose(adjmatrix, mask)
     return result
 
+def has_self_loops(adjmatrix):
+    """Checks whether an adjmatrix contains self-loops (diagonal entries).
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of shape (N,N)
+        The adjacency matrix of the network. If weighted, link weights are ignored.
+
+    Returns
+    -------
+    result : boolean
+        Returns True if the input adjacency matrix contains non-zero diagonal
+        entries (or self-loops); False otherwise.
+    """
+    mask = adjmatrix.diagonal().astype(bool)
+    result = mask.all().item()
+    return result
+
+
+
+
+################################################################################
+"""CONNECTIVITY AND DEGREE STATISTICS"""
 def Density(adjmatrix):
     """Returns the density of links in a network.
 
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. Weighted links are ignored.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
 
     Returns
     -------
@@ -1814,7 +1841,7 @@ def LocalHubness(adjmatrix, partition, normed=False):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. Weighted links are ignored.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -1876,7 +1903,7 @@ def GlobalHubness(adjmatrix, normed=False):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. Weighted links are ignored.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     normed : boolean, optional default: False
         If True, the degrees are weighted, as compared to the expected degree
         distribution in random graphs of same size and density.
@@ -2031,7 +2058,7 @@ def ParticipationIndex(adjmatrix, partition):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. Weighted links are ignored.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -2081,7 +2108,7 @@ def DispersionIndex(adjmatrix, partition):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. Weighted links are ignored.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -2159,7 +2186,7 @@ def RolesNodes(adjmatrix, partition, normedhubs=False):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. Weighted links are ignored.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
