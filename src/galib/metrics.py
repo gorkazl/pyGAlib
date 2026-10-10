@@ -203,7 +203,7 @@ def has_self_loops(adjmatrix):
         entries (or self-loops); False otherwise.
     """
     mask = adjmatrix.diagonal().astype(bool)
-    result = mask.all().item()
+    result = mask.any().item()
     return result
 
 
