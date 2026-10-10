@@ -1692,80 +1692,121 @@ def PartitionMatrix(partition):
 
     return partitionmatrix
 
-def AssortativityMatrix(adjmatrix, partition, norm=None, maxweight=1.0):
-    # TODO: Revise and simplify.
-    # e.g., use enumerate()
+def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, selfloops=None):
     """Returns the assortativity matrix of network given a partition of nodes.
+
+    In general, when the nodes of a network can be labeled into various categories,
+    if the nodes of same category are more connected with each other than with the
+    nodes of other categories, the network will be assortative. On the contrary,
+    if nodes of same category are less connected than with nodes of other
+    categories, the network is said to be disassortative.
+
+    Given a labelling of the nodes into M categories, the assortativity matrix
+    is a reduction of a network into a M x M matrix, with each entry representing
+    the number of connections between the nodes of same (diagonal entries) or
+    different categories (extra-diagonal entries). The assortativity matrix can
+    either encode the total number of connections, or the connection probability
+    (ratio) of connections, if normalised. Accordingly, if the network is
+    weighted, the assortativity matrix will represent either the total weight or
+    the average weight within and across categories.
+
+    References
+    ----------
+    M.E.J. Newman (2002) Assortative Mixing in Networks. Phys Rev E 89(29),
+    208701. DOI: https://doi.org/10.1103/PhysRevLett.89.208701
 
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The (weighted) adjacency matrix of the network.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays). 'partition' may contain any arbitrary grouping of network
-        nodes, e.g., overlapping subsets are also accepted.
-    norm : boolean or string, optional
-        Defines the kind of normalization for the counts of links:
-        - If norm=None, returns the number of links between subsets of nodes.
-        - If norm='linkfraction', returns the number of links divided by the
-        total number of links in the network.
-        - If norm='linkprobability' returns the number of links between two
-        subsets, divided by the total number of possible links between them.
-    maxweight : floating-point scalar, optional
-        Largest possible weight of the links.
+        arrays). The indices of the nodes sorted per category.
+    weighted : boolean, optional, default: False
+        Sets whether adjmatrix should be treated as a weighted or a binary
+        connectivity. If True, the function will use the link weights (if any)
+        and compute the total (or mean) weights across categories. If False,
+        only the binary connectivity is considered.
+    normed : boolean, optional default: False
+        If True, returns the average connectivity within and between categories.
+        For binary case that means the link probability and, for weighted graphs,
+        the average connection weights between nodes in the two categories.
+        If False, returns the total number of links, or the total weight,
+        between categories.
+    selfloops : None or boolean, default : None
+        Controls whether the self-loops (diagonal entries in `adjmatrix` are
+        taken on account or not. Default is set to None, meaning the function
+        checks whether `adjmatrix` contains self-loops or not, and acts accordingly.
+        If True, forces self-loops to be considered (which alters normalization
+        even if no self-loop is present in `adjmatrix`). If False, the function
+        ommits any self-loops in `adjmatrix` and normalises accordingly.
 
     Returns
     -------
     assortmatrix : ndarray of shape (M,M) and dtype `np.float64`
         Assortativity matrix of shape (M,M), where M is the number of
-        subsets of nodes in 'partition'.
-
-    Notes
-    -----
-    The function accepts weighted adjacency matrices but assumes link
-    weights to lie between 0 and 'maxweight'. See documentation.
+        categories of nodes in `partition`.
 
     See Also
     --------
+    Modularity : Computes the Newman modularity given a partition of nodes.
     ParticipationMatrix : Probability of nodes to belong to a community.
     """
-    # Security check
-    optlist = [None, 'linkfraction', 'linkprobability']
-    if norm not in optlist:
-        raise ValueError( f"'{norm}' not a valid input for optional parameter `norm`. Please, enter one of: {optlist}." )
+    # 0) SECURITY CHECKS AND SETUP
+    if weighted not in (True, False):
+        raise ValueError( "`weighted` must be True or False" )
+    if normed not in (True, False):
+        raise ValueError( "`normed` must be True or False" )
+    if selfloops not in (None, True, False):
+        raise ValueError( "`selfloops` must be None, True or False" )
 
+    # Check if the original network accepts self-loops, or adjust accordingly
+    if selfloops == None:
+        if has_self_loops(adjmatrix): selfloops = True
+        else: selfloops = False
+
+    # 1) COMPUTE THE "RAW" ASSORTATIVITY MATRIX
     M = len(partition)
-
-    # Calculate the assortativity matrix
     assortmatrix = np.zeros((M,M), np.float64)
+    # Deal with the diagonal blocks
+    for c1,com1 in enumerate(partition):
+        submatrix = tools.ExtractSubmatrix(adjmatrix, com1)
+        if weighted == False:
+            submatrix = submatrix.astype(bool)
+        if selfloops == True:
+            assortmatrix[c1,c1] = submatrix.sum()
+        else:
+            assortmatrix[c1,c1] = submatrix.sum() - submatrix.trace()
 
-    if norm == 'linkprobability':
-        for c1 in range(M):
-            com1 = partition[c1]
-            for c2 in range(M):
-                com2 = partition[c2]
-                submat = tools.ExtractSubmatrix(adjmatrix, com1, com2)
-                assortmatrix[c1,c2] = submat.sum()
-                # Normalise, avoiding self-loops
-                if c1 == c2:
-                    ncom1 = len(com1)
-                    assortmatrix[c1,c2] /= (maxweight * ncom1*(ncom1-1))
-                else:
-                    assortmatrix[c1,c2] /= (maxweight * len(com1) * len(com2))
+        # Deal with the extra-diagonal blocks
+        for c2,com2 in enumerate(partition):
+            if c2 == c1: continue
+            submatrix = tools.ExtractSubmatrix(adjmatrix, com1, com2)
+            if weighted == False:
+                submatrix = submatrix.astype(bool)
+            assortmatrix[c1,c2] = submatrix.sum()
 
-    else:
-        for c1 in range(M):
-            for c2 in range(M):
-                submat = tools.ExtractSubmatrix(adjmatrix, partition[c1], \
-                                                  partition[c2])
-                assortmatrix[c1,c2] = submat.sum()
+    # 2) NORMALISE, IF REQUESTED
+    if normed == True:
+        _normmatrix = np.zeros((M,M), np.float64)
+        # Normalization of the diagonal blocks
+        for c1,com1 in enumerate(partition):
+            N1 = len(com1)
+            if N1 == 1:
+                _normmatrix[c1,c1] = 1.0
+            elif selfloops == True:
+                _normmatrix[c1,c1] = N1 * N1
+            elif selfloops == False:
+                _normmatrix[c1,c1] = N1 * (N1-1)
 
-        if norm == 'linkfraction' and maxweight == 1.0:
-            assortmatrix /= adjmatrix.sum()
-        elif norm == 'linkfraction' and maxweight != 1.0:
-            L = len(adjmatrix.flatten().nonzero()[0])
-            assortmatrix /= (maxweight*L)
+            # Normalization of the extra-diagonal blocks
+            for c2,com2 in enumerate(partition):
+                if c2 == c1: continue
+                N2 = len(com2)
+                _normmatrix[c1,c2] = N1 * N2
+
+        # Normalise the raw assortativity matrix
+        assortmatrix /= _normmatrix
 
     return assortmatrix
 
