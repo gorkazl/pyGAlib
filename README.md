@@ -223,7 +223,7 @@ limitations under the License.
 
 ##### month day, 2026 (Version 2.2)
 
-This version is a polishing and extension of the *galib.metrics*, with particular emphasis on the metrics to characterise the roles of nodes in modular networks.
+This version is a polishing and extension of the *galib.metrics*, with particular emphasis on the metrics to characterise the roles of nodes in modular networks. Many improvements are "silent" (no input / output consequences for the user). Introduced incompatibilities are explicitely mentioned below.
 
 * Property checks added:
     * `is_binary()`: Checks whether an adjmatrix represents a binary graph (or a weighted).
@@ -236,11 +236,11 @@ This version is a polishing and extension of the *galib.metrics*, with particula
     * `ShufflePratition()`: Alias for `RandomPartition_Like()`
     * `PartitionMatrix()` ... finish this ...
 * Internal changes to *galib.metrics* module:
-    * All functions were revised and improved, if required. Many of the improvements are "silent" (no input / output consequences for the user).
     * Polishing of docstrings.
     * Homogenised variable names and descriptions.
-    * Function `metrics.NodeParticipation()` renamed as `metrics.ParticipationIndex()`
-    * Function `metrics.NodeDispersion()` renamed as `metrics.DispersionIndex()`.
+    * Function `NodeParticipation()` renamed as `ParticipationIndex()`
+    * Function `NodeDispersion()` renamed as `DispersionIndex()`.
+    * Function `AssortativityMatrix()` revised. Incompatible with previous version due to changes in optional parameters. Corrects behaviour for networks with self-loops and modules (categories) made of a single node.
 
 
 ##### June 26, 2026 (Release of Version 2.1)
