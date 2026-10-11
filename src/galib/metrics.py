@@ -90,7 +90,7 @@ ShufflePartition
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
 ----------------------------------------------------
 ParticipationMatrix
-    Number of links nodes make across modules, given a partition of the network.
+    Summarises the number of links each node makes across modules.
 ParticipationVectors
     Probability of nodes to belong to each module, given a partition of the network.
 
@@ -174,7 +174,7 @@ def is_directed(adjmatrix):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        A (weighted) adjacency matrix of a network. Weighted links are ignored.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
 
     Returns
     -------
@@ -216,7 +216,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     knntype : string
         Defines the class of degree-degree correlation desired.
         -'undirected' Use this only if 'adjmatrix' is an undirected adjacency
@@ -340,7 +340,7 @@ def Clustering(adjmatrix, checkdirected=True):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
 
     Returns
     --------
@@ -403,7 +403,7 @@ def Degree(adjmatrix, directed=False):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     directed: Boolean, optional
         True if the network is directed, False otherwise.
 
@@ -507,7 +507,7 @@ def k_Density(adjmatrix, rctype='undirected'):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     rctype : string, optional
         Defines how to make use of the degrees depending on whether the
         network is directed or undirected.
@@ -739,7 +739,7 @@ def MatchingIndex(adjmatrix, normed=True):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
 
     normed : Boolean, optional
         If 'normed=False', returns the number of common neighbours
@@ -809,7 +809,7 @@ def ReciprocalDegree(adjmatrix, normed=False):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     normed: Boolean. optional
         True if normalized output is desired, False otherwised.
 
@@ -860,7 +860,7 @@ def Reciprocity(adjmatrix):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
 
     Returns
     -------
@@ -921,7 +921,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     kdensthreshold : float
         The value k-density needs to arrive, for the presence of a rich-club to
         be is considered. Real value bounded between 0 and 1.
@@ -1013,7 +1013,7 @@ def PathsAllinOne(adjmatrix):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
 
     Returns
     -------
@@ -1201,7 +1201,7 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     start : integer
         The node from which the tree search starts.
     end : integer
@@ -1305,7 +1305,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
     See Also
     --------
     Modularity : Computes the Newman modularity given a partition of nodes.
-    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
+    ParticipationMatrix : Summarises the number of links each node makes across modules.
     """
     # 0) SECURITY CHECKS AND SETUP
     if weighted not in (True, False):
@@ -1439,7 +1439,7 @@ def K_Core(adjmatrix, kmin):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     kmin : integer
         The degree for which the k-core is desired.
 
@@ -1506,7 +1506,7 @@ def K_Shells(adjmatrix):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
 
     Returns
     -------
@@ -1585,7 +1585,7 @@ def Modularity(adjmatrix, partition):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -1640,7 +1640,7 @@ def PartitionMatrix(partition):
     See Also
     --------
     AssortativityMatrix : Returns the assortativity matrix of a network for a given a partition.
-    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
+    ParticipationMatrix : Summarises the number of links each node makes across modules.
     """
     # Get the number of nodes and communities
     M = len(partition)
@@ -1868,11 +1868,12 @@ def RandomPartition_WithSizes(comsizes, sortnodes=False):
 def ParticipationMatrix(adjmatrix, partition):
     ## TODO: Revise this docstring.
     """
-    Number of links nodes make across modules, given a partition of the network.
+    Summarises the number of links each node makes across modules.
 
-    A matrix of shape (N,M), where N is the number of nodes and M is the
-    number of modules (or communities). Elements a(i,s) of the matrix are the number of
-    neighbours (internal degree) that node i has in community s.
+    In a network with nodes divided into communities (or categories) the
+    participation matrix is a matrix of shape (N,M), where N is the number of
+    nodes and M is the number of modules (or categories). It elements represent
+    the number of links each node make in each of the modules.
 
     Reference
     ---------
@@ -1883,7 +1884,7 @@ def ParticipationMatrix(adjmatrix, partition):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -1925,7 +1926,7 @@ def ParticipationVectors(adjmatrix, partition):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -1938,7 +1939,7 @@ def ParticipationVectors(adjmatrix, partition):
 
     See Also
     --------
-    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
+    ParticipationMatrix : Summarises the number of links each node makes across modules.
     ParticipationIndex : Participation index of every node, for given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
     NodeRoles : Returns all four parameters to characterise the roles of nodes in modular networks.
@@ -2356,7 +2357,7 @@ def ParticipationIndex_GA(adjmatrix, partition):
     See Also
     --------
     ParticipationIndex : Participation index of every node, for given a partition of the network.
-    ParticipationMatrix : The number of neighbours of a node in all communities.
+    ParticipationMatrix : Summarises the number of links each node makes across modules.
     LocalHubness_GA : Returns the z-score of node's local degree.
     """
     # 1) Compute first the participation vectors
