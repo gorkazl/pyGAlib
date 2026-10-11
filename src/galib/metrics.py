@@ -106,9 +106,9 @@ NodeRoles
     Returns all four parameters to characterise the roles of nodes in modular networks.
 
 ParticipationIndex_GA
-   Computes the participation index as defined by Guimera & Amaral (2005).
+    Computes the participation index as defined by Guimera & Amaral (2005).
 Hubness_GA
-    Computes the within-module degree defined by Guimera & Amaral (2005).
+    Computes the within-module degree of nodes, as defined by Guimera & Amaral (2025)
 
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
@@ -127,6 +127,7 @@ from . import tools
 ## - e.g., mention of `parameters` or ``parameters`` in the docstrings + error messages ??
 ## Sort metrics alphabetically, within each category ?
 ## - Merge Degree and intensity into one function ? Well ... explicit is better than implicit.
+## TODO: Allow calculations for weighted networks in metrics for roles of nodes.
 
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
@@ -1896,7 +1897,7 @@ def LocalHubness(adjmatrix, partition, normed=False):
 
     See Also
     --------
-    GlobalHubness : The hubness of all nodes in a network.
+    GlobalHubness : Computes the global hubness of the nodes in a network.
     NodeRoles : Computes all four parameters needed to characterise the roles of nodes.
     """
     N = len(adjmatrix)
@@ -1951,7 +1952,7 @@ def GlobalHubness(adjmatrix, normed=False):
     Returns
     -------
     globalhubness : ndarray of length (N,) and dtype `np.float64`
-        Global hubness of every node.
+        The global hubness of every node.
 
     See Also
     --------
@@ -2276,7 +2277,7 @@ def RolesNodes(adjmatrix, partition, normedhubs=False):
     return globalhubness, localhubness, p_index, d_index
 
 def ParticipationIndex_GA(adjmatrix, partition):
-    """Participation index of every node, as defined by Guimera & Amaral.
+    """Computes the participation index as defined by Guimera & Amaral (2005).
 
     Given a partition of the network into communities, the participation
     index quantifies how much are the links of a node distributed along
@@ -2310,7 +2311,6 @@ def ParticipationIndex_GA(adjmatrix, partition):
     --------
     ParticipationIndex : Participation index of every node, for given a partition of the network.
     ParticipationMatrix : The number of neighbours of a node in all communities.
-    ParticipationIndex : Returns the participation index of all nodes.
     LocalHubness_GA : Returns the z-score of node's local degree.
     """
     # 1) Compute first the participation vectors
@@ -2323,12 +2323,8 @@ def ParticipationIndex_GA(adjmatrix, partition):
 
     return p_index
 
-def Hubness_GA(participmatrix, partition):
-    ## TODO: Revise and simplify this function.
-    ## - Change inputs to adjmatrix + partition ?? Homogenise.
-    ## - Homogenise the nomenclature of the variables.
-    ## - Add references to their papers.
-    """Computes the within-module degree defined by Guimera & Amaral.
+def Hubness_GA(adjmatrix, partition):
+    """Computes the within-module degree of nodes, as defined by Guimera & Amaral (2005).
 
     The within-module degree is a measure of local hubness. Given a network
     and a partition of it nodes into communities, the within-module degree
@@ -2338,10 +2334,8 @@ def Hubness_GA(participmatrix, partition):
 
     Parameters
     ----------
-    participmatrix : ndarray shape (N,M)
-        Elements a(i,s) of the matrix are the number of neighbours (internal
-        degree) that node i has in community s. Is the output of function
-        ParticipationMatrix().
+    adjmatrix : ndarray of shape (N,N)
+        The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays).
@@ -2353,20 +2347,24 @@ def Hubness_GA(participmatrix, partition):
 
     See Also
     --------
-    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
-    ParticipationIndex_GA : Returns the participation index (based on Guimera
-        & Amaral's definiton) of all nodes given a partition.
+    LocalHubness : Computes the internal hubness of nodes, for a given partition of the network.
+    GlobalHubness : Computes the global hubness of the nodes in a network.
     ParticipationIndex : Participation index of every node, for given a partition of the network.
+    ParticipationIndex_GA : Computes the participation index as defined by Guimera & Amaral (2005).
     """
-    N = len(participmatrix)
+    # 1) Compute first the participation vectors
+    p_matrix = ParticipationMatrix(adjmatrix,partition)
 
+    # 2) Compute the hubness of the nodes
+    N = len(adjmatrix)
     zscore = np.zeros(N, np.float64)
-    for s, community in enumerate(partition):
-        klist = participmatrix[community,s]
+    for c,com in enumerate(partition):
+        if len(com) == 1: continue
+        klist = p_matrix[com,c].astype(np.float64)
         avklist = klist.mean()
         devklist = klist.std()
 
-        zscore[community] = (participmatrix[community,s] - avklist) / devklist
+        zscore[com] = (klist - avklist) / devklist
 
     return zscore
 

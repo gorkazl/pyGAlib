@@ -241,6 +241,8 @@ This version is a polishing and extension of the *galib.metrics*, with particula
     * Function `NodeParticipation()` renamed as `ParticipationIndex()`
     * Function `NodeDispersion()` renamed as `DispersionIndex()`.
     * Function `AssortativityMatrix()` revised. Incompatible with previous version due to changes in optional parameters. Corrects behaviour for networks with self-loops and modules (categories) made of a single node.
+    * Function `ParticipationIndex_GA()` revised. Incompatible with previous version, input parameters were changed. It now requires `adjmatrix` and `partition` as input arguments.
+    * Function `Hubness_GA()` revised. Incompatible with previous version since input `participmatrix` was replaced by `adjmatrix`.
 
 
 ##### June 26, 2026 (Release of Version 2.1)
