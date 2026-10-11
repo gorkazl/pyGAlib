@@ -1675,7 +1675,7 @@ def PartitionMatrix(partition):
     See Also
     --------
     AssortativityMatrix : Returns the assortativity matrix of a network for a given a partition.
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
+    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
     """
     # Get the number of nodes and communities
     M = len(partition)
@@ -1748,7 +1748,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
     See Also
     --------
     Modularity : Computes the Newman modularity given a partition of nodes.
-    ParticipationMatrix : Probability of nodes to belong to a community.
+    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
     """
     # 0) SECURITY CHECKS AND SETUP
     if weighted not in (True, False):
@@ -2010,7 +2010,7 @@ def ParticipationMatrix(adjmatrix, partition):
     --------
     PartitionMatrix : Computes a matrix encoding nodes belonging to a community in a partition.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
-    ParticipationIndex : Participation index of every node given a partition of the network.
+    ParticipationIndex : Participation index of every node, for given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
     """
     # 1) Construct the partition matrix, s (1 if node in module c, 0 otherwise)
@@ -2051,8 +2051,8 @@ def ParticipationVectors(adjmatrix, partition):
 
     See Also
     --------
-    ParticipationMatrix : Given a partition of the network, it returns the participation matrix.
-    ParticipationIndex : Participation index of every node given a partition of the network.
+    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
+    ParticipationIndex : Participation index of every node, for given a partition of the network.
     DispersionIndex : Dispersion index of every node given a partition of the network.
     RolesNodes : Computes all four parameters to characterise the roles of nodes.
     """
@@ -2159,7 +2159,7 @@ def DispersionIndex(adjmatrix, partition):
 
     See Also
     --------
-    ParticipationIndex : Participation index of every node given a partition of the network.
+    ParticipationIndex : Participation index of every node, for given a partition of the network.
     ParticipationVectors : Computes the probability of nodes to belong to every community.
     RolesNodes : Computes all four parameters to characterise the roles of nodes.
     """
@@ -2275,12 +2275,8 @@ def RolesNodes(adjmatrix, partition, normedhubs=False):
 
     return globalhubness, localhubness, p_index, d_index
 
-def ParticipationIndex_GA(participmatrix):
-    ## TODO: Revise and simplify this function.
-    ## - Change inputs to adjmatrix + partition ??
-    ## - Homogenise the nomenclature of the variables.
-    ## - Add reference to their papers.
-    """Computes the participation index as defined by Guimera & Amaral.
+def ParticipationIndex_GA(adjmatrix, partition):
+    """Participation index of every node, as defined by Guimera & Amaral.
 
     Given a partition of the network into communities, the participation
     index quantifies how much are the links of a node distributed along
@@ -2289,15 +2285,16 @@ def ParticipationIndex_GA(participmatrix):
 
     Parameters
     ----------
-    participmatrix : ndarray
-        A matrix of shape N x n, where N is the number of nodes and n is the
-        number of communities. Elements, a_is, of the matrix are the number of
-        neighbours (degree) that node i has in community s.
+    adjmatrix : ndarray of shape (N,N)
+        The adjacency matrix of the network. If weighted, link weights are ignored.
+    partition : list, tuple or array_like
+        A sequence of subsets of nodes given as sequences (lists, tuples or
+        arrays).
 
     Returns
     -------
-    participindex : ndarray of length (N,) and dtype `np.float64`.
-        Participation index of every node.
+    p_index : ndarray of length (N,) and dtype `np.float64`.
+        The participation index of all the nodes.
 
     Notes
     -----
@@ -2311,22 +2308,20 @@ def ParticipationIndex_GA(participmatrix):
 
     See Also
     --------
+    ParticipationIndex : Participation index of every node, for given a partition of the network.
     ParticipationMatrix : The number of neighbours of a node in all communities.
     ParticipationIndex : Returns the participation index of all nodes.
     LocalHubness_GA : Returns the z-score of node's local degree.
     """
-    N, npart = np.shape(participmatrix)
-    participindex = np.zeros(N, np.float64)
+    # 1) Compute first the participation vectors
+    p_matrix = ParticipationMatrix(adjmatrix,partition).astype(np.float64).T
 
-    for i in range(N):
-        a = participmatrix[i].sum()
-        if a > 0: norm_i = 1./a
-        else: norm_i = 0.
-        for c in range(npart):
-            participindex[i] += (norm_i*participmatrix[i][c])**2
+    # 2) Reduce the vector of each node into a single normalised scalar
+    _degree = p_matrix.sum(axis=0)
+    p_index = p_matrix / _degree
+    p_index = 1.0  - (p_index**2).sum(axis=0)
 
-    participindex = 1. - participindex
-    return participindex
+    return p_index
 
 def Hubness_GA(participmatrix, partition):
     ## TODO: Revise and simplify this function.
@@ -2358,11 +2353,10 @@ def Hubness_GA(participmatrix, partition):
 
     See Also
     --------
-    ParticipationMatrix : The number of neighbours of a node in all communities.
+    ParticipationMatrix : Number of links nodes make across modules, given a partition of the network.
     ParticipationIndex_GA : Returns the participation index (based on Guimera
         & Amaral's definiton) of all nodes given a partition.
-    ParticipationIndex : Returns the participation index of all nodes given
-        a partition.
+    ParticipationIndex : Participation index of every node, for given a partition of the network.
     """
     N = len(participmatrix)
 
