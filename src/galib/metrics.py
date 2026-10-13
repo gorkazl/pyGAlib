@@ -40,10 +40,10 @@ Density
     Returns the density of links in a network.
 Intensity
     The total strength of a node in a weighted network.
-k_Density
+K_Density
     Computes the density of subnetworks made of nodes with degree >= k',
     for all k' = 0 to kmax.
-k_DensityW
+K_DensityWeighted
     Computes the ratio of link weights among the nodes with strength > s',
     for s' = 0 to s' = smax.
 MatchingIndex
@@ -497,8 +497,7 @@ def Intensity(adjmatrix, directed=False):
         intensity = adjmatrix.sum(axis=0)
         return intensity
 
-def k_Density(adjmatrix, rctype='undirected'):
-    ## TODO: Rename to K_Density() for coherence with K_Core() and K_Shells
+def K_Density(adjmatrix, rctype='undirected'):
     """Computes the density of subnetworks made of nodes with degree >= k',
     for all k' = 0 to kmax.
 
@@ -540,6 +539,7 @@ def k_Density(adjmatrix, rctype='undirected'):
     See Also
     --------
     RichClub : Identifies the subset of hubs with dense interconnectivity.
+    K_DensityWeighted : Computes the ratio of link weights among the nodes with strength > s', for s' = 0 to s' = smax.
     """
     # 0) SECURITY CHECKS
     optlist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
@@ -598,8 +598,7 @@ def k_Density(adjmatrix, rctype='undirected'):
 
     return kdensity
 
-def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
-    ## TODO: Rename to K_DensityWeighted() for coherence with K_Core() and K_Shells
+def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
     """Computes the ratio of link weights among the nodes with strength > s',
     for s' = 0 to s' = smax.
 
@@ -674,7 +673,7 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='un
 
     See Also
     --------
-    k_Density : Calculates the k-density in unweighted graphs.
+    K_Density : Computes the density of subnetworks made of nodes with degree >= k', for all k' = 0 to kmax.
     """
     # 0) SECURITY CHECKS
     optlist = ('undirected', 'outputs', 'inputs', 'average')
