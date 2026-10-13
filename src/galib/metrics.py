@@ -458,7 +458,6 @@ def Degree(adjmatrix, directed=None):
     return degrees
 
 def Density(adjmatrix):
-    ## TODO: Re-write using has_self_loops()
     """Returns the density of links in a network.
 
     Parameters
@@ -473,8 +472,9 @@ def Density(adjmatrix):
     """
     N = len(adjmatrix)
     L = adjmatrix.astype('bool').sum()
+    selfloops = has_self_loops(adjmatrix)
 
-    if adjmatrix.trace():
+    if selfloops == True:
         dens = float(L) / N**2
     else:
         dens = float(L) / (N*(N-1))
