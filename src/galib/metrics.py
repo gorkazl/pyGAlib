@@ -211,6 +211,9 @@ def is_symmetric(adjmatrix):
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
+    ## TODO: Revise and retest function.
+    ## TODO: Add security check for fulloutput
+    ## TODO: SymmetriseMatrixAverage() no longer exist. Replace by tools.SymmetriseMatrix()
     """Average neighbours' degree of nodes with given degree k, for all k.
 
     Parameters
@@ -266,6 +269,9 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     """
 
     # 0) Security checks and prepare data for calculations
+    if fulloutput not in (True, False):
+        raise ValueError( f"Optional parameter 'fulloutput' shall be boolean, {fulloutput} entered" )
+
     optlist = ('undirected', 'outin',  'outout', 'inout', 'inin', 'average')
     if knntype not in optlist:
         raise ValueError( f"'{knntype}' not a valid input for optional parameter `knntype`. Please, enter one of: {optlist}." )
@@ -290,6 +296,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
         indeg, outdeg = Degree(adjmatrix, True)
         avdeg = 0.5 * (indeg + outdeg)
         indegree = avdeg; outdegree = avdeg
+        ## TODO: Replace by tools.SymmetriseMatrix() and test
         adjmatrix = SymmetriseMatrixAverage(adjmatrix)
 
     # 1) Find the degrees k of all the neighbours of nodes with given degree k'
@@ -434,6 +441,7 @@ def Degree(adjmatrix, directed=False):
         return degree
 
 def Density(adjmatrix):
+    ## TODO: Re-write using has_self_loops()
     """Returns the density of links in a network.
 
     Parameters
@@ -490,6 +498,7 @@ def Intensity(adjmatrix, directed=False):
         return intensity
 
 def k_Density(adjmatrix, rctype='undirected'):
+    ## TODO: Rename to K_Density() for coherence with K_Core() and K_Shells
     """Computes the density of subnetworks made of nodes with degree >= k',
     for all k' = 0 to kmax.
 
@@ -590,6 +599,7 @@ def k_Density(adjmatrix, rctype='undirected'):
     return kdensity
 
 def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
+    ## TODO: Rename to K_DensityWeighted() for coherence with K_Core() and K_Shells
     """Computes the ratio of link weights among the nodes with strength > s',
     for s' = 0 to s' = smax.
 
@@ -731,6 +741,7 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='un
     return strengthlist, kdensity
 
 def MatchingIndex(adjmatrix, normed=True):
+    ## TODO: Try new algorithm using adjmatrix**2, or a propagation algorithm
     """Computes the number of common neighbours of every pair of nodes.
 
     The matching index of two nodes i and j is the number of common
@@ -852,6 +863,8 @@ def ReciprocalDegree(adjmatrix, normed=False):
     return degrecip, degminus, degplus
 
 def Reciprocity(adjmatrix):
+    ## TODO: Rename internally to mask_und and mask_dir, following nomenclature
+    ## in models.py module.
     """Computes the fraction of reciprocal links to total number of links.
 
     Both weighted and unweighted input matrices are permitted. Weights
@@ -1002,6 +1015,8 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
 ################################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
 def PathsAllinOne(adjmatrix):
+    ## TODO: Revise and modernise (if anything usefull ?)
+    ## TODO: Check if can replace by a propagator algorithm, say, power of matrices
     """Returns pathlength and betweenness. Finds all shortest paths and cycles.
 
     This function computes in a single run the following network properties:
@@ -1126,12 +1141,13 @@ def PathsAllinOne(adjmatrix):
     if recip == 1:
         betweenness = (0.5*betweenness).astype(np.int64)
 
-
     # 4) CLEAN TRASH AND FINISH
     del dicnet
     return distmatrix, betweenness, allpaths, allcycles
 
 def FloydWarshall(adjmatrix, weighted_dist = False):
+    ## TODO: Can I replace algorithm by a propagarot matrix, using powers of Aij?
+    ## Would that be any faster, or use less memory ??
     """Computes the pathlength between all pairs of nodes in a network..
 
     Parameters
@@ -1366,6 +1382,8 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
     return assortmatrix
 
 def ConnectedComponents(distmatrix, directed=False, showall=True):
+    ## TODO: Revise and modernise (if anything useful)
+    ## TODO: Set default directed=None, and automatically check?
     """Finds all the connected components in a network out of a distance
     matrix.
 
@@ -1431,6 +1449,8 @@ def ConnectedComponents(distmatrix, directed=False, showall=True):
     return components
 
 def K_Core(adjmatrix, kmin):
+    ## TODO: Revise and modernise (if anything useful)
+    ## - Rename kmin ?
     """Finds the K-core of a network with degree k >= kmin.
 
     A k-core is the largest subgraph for which all nodes have degree >= k
@@ -1496,6 +1516,8 @@ def K_Core(adjmatrix, kmin):
     return list(nodelist)
 
 def K_Shells(adjmatrix):
+    ## TODO: Revise and modernise (if anything useful)
+    ## - Rename to K_CoreDecomposition?
     """Returns the K-shells of a network for all k from kmin to kmax.
 
     A k-core is the largest subgraph for which all nodes have degree >= k
@@ -1795,6 +1817,7 @@ def RandomPartition_Like(partition, sortnodes=False):
 
     return newpartition
 
+## TODO: Implement this alias as a proper function definition
 ShufflePartition = RandomPartition_Like
 
 def RandomPartition_WithSizes(comsizes, sortnodes=False):
