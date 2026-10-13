@@ -338,7 +338,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     else:
         return AvKnn
 
-def Clustering(adjmatrix, checkdirected=True):
+def Clustering(adjmatrix):
     """Returns the clustering coefficient and the local clustering of every node.
 
     Directed networks are NOT accepted by the function. Weighted networks are
