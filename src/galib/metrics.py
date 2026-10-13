@@ -404,41 +404,58 @@ def Clustering(adjmatrix):
 
     return clustcoef, clustnodes
 
-def Degree(adjmatrix, directed=False):
+def Degree(adjmatrix, directed=None):
     """Computes the number of neighbours of every node.
 
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
-    directed: Boolean, optional
-        True if the network is directed, False otherwise.
+    directed: None or Boolean, optional
+        If None, automatically checks whether adjmatrix is a directed or an
+        undirected graph. If True computes both input and output degrees of the
+        nodes. If False, returns the undirected degrees of the graph.
 
     Returns
     -------
-    If 'directed=False':
-    degarray : ndarray
-        An array with the degree of every node in the undirected network.
-    If 'directed=True'
-    degarray : Tuple with two ndarrays (`indegarray` and `outdegarray`)
-        `indegarray` is the input degree of the every node and `outdegarray` is
-        the output degree of every node.
+    degrees : ndarray of shape (N,) or tuple with two ndarrays of shape ((N,), (N,)).
+        The degrees of all nodes in the graph. If ``directed = True`` degrees is
+        a tuple made of two ndarrays (indegree, outdegree) corresponding to the
+        input and output degrees of the nodes. If ``directed = False``, returns
+        a single ndarray with the undirected degrees of the nodes.
+        If ``directed = None``, automatically checks whether ``adjmatrix`` is
+        directed or undirected, and return the result accordingly.
+
+    Note
+    ----
+    When ``adjmatrix`` represents a directed graph but ``directed = False`` is
+    entered, then ``degrees`` is a single ndarray corresponding to the output
+    degrees. When ``adjmatrix`` represents an undirected graph but ``directed = True``
+    is entered, then ``degrees`` returns two ndarrays, both identical, representing
+    the undirected degrees of the nodes.
 
     See Also
     --------
-    Intensity : Computes the weighted degree of networks.
-    ReciprocalDegree : Reciprocity of every node and excess degrees.
+    Intensity : Computes the total strength of a node in a weighted network.
+    ReciprocalDegree : Returns the reciprocal degree and excess degrees of every nodes.
     """
-    adjmatrix = adjmatrix.astype('bool')
+    # SECURITY CHECKS AND PREPARATION
+    if directed not in (None, True, False):
+        raise ValueError( f"'directed' shall be one of (None, True, False), {directed} entered." )
 
-    if directed:
+    if directed == None:
+        directed = is_directed(adjmatrix)
+
+    # COMPUTE THE DEGREE(S) OF THE NODES
+    adjmatrix = adjmatrix.astype('bool')
+    if directed == True:
         indegree = adjmatrix.sum(axis=0)
         outdegree = adjmatrix.sum(axis=1)
-        return indegree, outdegree
-
+        degrees = (indegree, outdegree)
     else:
-        degree = adjmatrix.sum(axis=1)
-        return degree
+        degrees = adjmatrix.sum(axis=1)
+
+    return degrees
 
 def Density(adjmatrix):
     ## TODO: Re-write using has_self_loops()
