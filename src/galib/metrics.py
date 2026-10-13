@@ -35,11 +35,11 @@ AvNeighboursDegree
 Clustering
     Returns the clustering coefficient and the local clustering of every node.
 Degree
-    Computes the number of neighbours of every node.
+    Computes the number of neighbours of every node in a (di)graph.
 Density
     Returns the density of links in a network.
 Intensity
-    The total strength of a node in a weighted network.
+    Computes the intensity (strength) of a node in a weighted network.
 K_Density
     Computes the density of subnetworks made of nodes with degree >= k',
     for all k' = 0 to kmax.
@@ -405,13 +405,13 @@ def Clustering(adjmatrix):
     return clustcoef, clustnodes
 
 def Degree(adjmatrix, directed=None):
-    """Computes the number of neighbours of every node.
+    """Computes the number of neighbours of every node in a (di)graph.
 
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
-    directed: None or Boolean, optional
+    directed: None or Boolean. Optional, default = None
         If None, automatically checks whether adjmatrix is a directed or an
         undirected graph. If True computes both input and output degrees of the
         nodes. If False, returns the undirected degrees of the graph.
@@ -436,7 +436,7 @@ def Degree(adjmatrix, directed=None):
 
     See Also
     --------
-    Intensity : Computes the total strength of a node in a weighted network.
+    Intensity : Computes the intensity (strength) of a node in a weighted network.
     ReciprocalDegree : Returns the reciprocal degree and excess degrees of every nodes.
     """
     # SECURITY CHECKS AND PREPARATION
@@ -480,39 +480,57 @@ def Density(adjmatrix):
         dens = float(L) / (N*(N-1))
     return dens
 
-def Intensity(adjmatrix, directed=False):
-    """Computes the total strength of a node in a weighted network.
+def Intensity(adjmatrix, directed=None):
+    """Computes the intensity (strength) of a node in a weighted network.
 
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
-    directed: Boolean. optional
-        True if the network is directed, False otherwise.
+    directed: None or Boolean. Optional, default = None
+        If None, automatically checks whether adjmatrix is a directed or an
+        undirected graph. If True computes both input and output intensities of the
+        nodes. If False, returns the undirected intensities of the graph.
 
     Returns
     -------
-    If 'directed=False'
-    intensity : ndarray.
-        The weighted degree of every node in the undirected network.
-    If 'directed=True'
-    intensity : Tuple with two ndarrays (`ininintensity` and `outintensity`)
-        `inintensity` is the weighted input degree of every node in the
-        directed network and, `outintensity` is the output weighted degree of every
-        node in the directed network.
+    intensities : ndarray of shape (N,) or tuple with two ndarrays of shape ((N,), (N,)).
+        The intensity of all nodes in the graph. If ``directed = True`` intensities
+        is a tuple made of two ndarrays (input_intensity, output_intensity)
+        corresponding to the input and output intensities of the nodes.
+        If ``directed = False``, returns a single ndarray with the undirected
+        intensities of the nodes. If ``directed = None``, automatically checks
+        whether ``adjmatrix`` is directed or undirected, and return the result
+        accordingly.
+
+    Note
+    ----
+    When ``adjmatrix`` represents a directed graph but ``directed = False`` is
+    entered, then ``intensities`` is a single ndarray corresponding to the output
+    degrees. When ``adjmatrix`` represents an undirected graph but ``directed = True``
+    is entered, then ``degrees`` returns two ndarrays, both identical, representing
+    the undirected degrees of the nodes.
 
     See Also
     --------
-    Degree : Computes the degree of every node in the network.
+    Degree : Computes the number of neighbours of every node in a (di)graph.
     """
-    if directed:
-        inintensity = adjmatrix.sum(axis=0)
-        outintensity = adjmatrix.sum(axis=1)
-        return inintensity, outintensity
+    # SECURITY CHECKS AND PREPARATION
+    if directed not in (None, True, False):
+        raise ValueError( f"'directed' shall be one of (None, True, False), {directed} entered." )
 
+    if directed == None:
+        directed = is_directed(adjmatrix)
+
+    # COMPUTE THE DEGREE(S) OF THE NODES
+    if directed == True:
+        input_intensity = adjmatrix.sum(axis=0)
+        output_intensity = adjmatrix.sum(axis=1)
+        intensities = (input_intensity, output_intensity)
     else:
-        intensity = adjmatrix.sum(axis=0)
-        return intensity
+        intensities = adjmatrix.sum(axis=1)
+
+    return intensities
 
 def K_Density(adjmatrix, rctype='undirected'):
     """Computes the density of subnetworks made of nodes with degree >= k',
