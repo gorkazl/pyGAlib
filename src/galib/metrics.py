@@ -123,8 +123,7 @@ import numpy.random
 # Local imports
 from . import tools
 
-## TODO: Add security checks at the beginning of functions.
-## - e.g., to avoid errors in implicit comparisons like `if directed:`
+## TODO: avoid errors in implicit comparisons like `if directed:`
 ## TODO: Revise description of optional parameters and default values.
 ## - e.g., mention of `parameters` or ``parameters`` in the docstrings + error messages ??
 ## Sort metrics alphabetically, within each category ?
@@ -212,7 +211,6 @@ def is_symmetric(adjmatrix):
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     ## TODO: Revise and retest function.
-    ## TODO: Add security check for fulloutput
     ## TODO: SymmetriseMatrixAverage() no longer exist. Replace by tools.SymmetriseMatrix()
     """Average neighbours' degree of nodes with given degree k, for all k.
 
@@ -441,7 +439,7 @@ def Degree(adjmatrix, directed=None):
     """
     # SECURITY CHECKS AND PREPARATION
     if directed not in (None, True, False):
-        raise ValueError( f"'directed' shall be one of (None, True, False), {directed} entered." )
+        raise ValueError( f"'directed' shall be one of (None, True, False), '{directed}' entered." )
 
     if directed == None:
         directed = is_directed(adjmatrix)
@@ -579,7 +577,7 @@ def K_Density(adjmatrix, rctype='undirected'):
     # 0) SECURITY CHECKS
     optlist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
     if rctype not in optlist:
-        raise ValueError( f"'{rctype}' not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
+        raise ValueError( f"'{rctype}' not a valid input for optional parameter rctype. Please, enter one of {optlist}." )
 
     # Convert the network in binary
     adjmatrix = adjmatrix.astype('bool')
@@ -713,7 +711,7 @@ def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rct
     # 0) SECURITY CHECKS
     optlist = ('undirected', 'outputs', 'inputs', 'average')
     if rctype not in optlist:
-        raise ValueError( f"'{rctype}' not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
+        raise ValueError( f"'{rctype}' not a valid input for optional parameter rctype. Please, enter one of: {optlist}." )
     if maxweight == None:
         maxweight = adjmatrix.max()
 
@@ -810,6 +808,9 @@ def MatchingIndex(adjmatrix, normed=True):
     matching of the output neighbours. Passing the transpose adjmatrix.T to
     the function computes the matching of the input neighbours.
     """
+    if normed not in (True, False):
+        raise ValueError( "Optional parameter `normed` must be True or False" )
+
     N = len(adjmatrix)
 
     MImatrix = np.identity(N, np.float64)
@@ -877,6 +878,9 @@ def ReciprocalDegree(adjmatrix, normed=False):
     computation ignores the weights of the arcs in the case of weighted
     adjacency matrices.
     """
+    if normed not in (True, False):
+        raise ValueError( "Optional parameter `normed` must be True or False" )
+
     # Make a binary copy of the network, get the input / output degrees
     adjmatrix = adjmatrix.astype(np.bool)
     indegree = adjmatrix.sum(axis=0)
@@ -888,7 +892,7 @@ def ReciprocalDegree(adjmatrix, normed=False):
     degminus = indegree - degrecip
     degplus = outdegree - degrecip
 
-    if normed:
+    if normed == True:
         # Normalize the reciprocal degrees of the nodes
         degrecip = 2.0 * degrecip.astype(np.float64) / (indegree+outdegree)
         degminus = degminus.astype(np.float64) / indegree
@@ -1201,10 +1205,12 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
         nodes i and j.
     """
     # Prepare for computations
-    if weighted_dist:
+    if weighted_dist == True:
         distmatrix = np.where(adjmatrix == 0, np.inf, adjmatrix)
-    else:
+    elif weighted_dist == False:
         distmatrix = np.where(adjmatrix == 0, np.inf, 1)
+    else:
+        raise ValueError( "Optional parameter `weighted_dist` must be True or False" )
 
     # Check whether the network is directed or undirected
     recip = Reciprocity(adjmatrix)
@@ -1359,11 +1365,11 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
     """
     # 0) SECURITY CHECKS AND SETUP
     if weighted not in (True, False):
-        raise ValueError( "`weighted` must be True or False" )
+        raise ValueError( "Optional parameter `weighted` must be True or False" )
     if normed not in (True, False):
-        raise ValueError( "`normed` must be True or False" )
+        raise ValueError( "Optional parameter `normed` must be True or False" )
     if selfloops not in (None, True, False):
-        raise ValueError( "`selfloops` must be None, True or False" )
+        raise ValueError( "Optional parameter `selfloops` must be None, True or False" )
 
     # Check if the original network accepts self-loops, or adjust accordingly
     if selfloops == None:
@@ -1447,13 +1453,18 @@ def ConnectedComponents(distmatrix, directed=False, showall=True):
     --------
     FloydWarshall : Pairwise graph distance between all nodes of a network.
     """
+    if directed not in (True, False):
+        raise ValueError( "Optional parameter `directed` must be True or False" )
+    if showall not in (True, False):
+        raise ValueError( "Optional parameter `showall` must be True or False" )
+
     N = len(distmatrix)
 
     # 1) Detect nodes that are connected in both directions
     newmatrix = np.where(distmatrix < N, 1, 0)
 
     # If network is directed, consider only pairs with a reciprocal path
-    if directed:
+    if directed == True:
         newmatrix = newmatrix * newmatrix.T
 
     # 2) Sort the nodes into their components
@@ -1817,8 +1828,10 @@ def RandomPartition_Like(partition, sortnodes=False):
     RandomPartition : Generates a partition of N nodes into M modules, randomly assigned.
     RandomPartition_WithSizes : Generates a partition of given community sizes, with node indices randomly assigned.
     PartitionMatrix : Given a partition of the network, returns its partition matrix.
-
     """
+    if sortnodes not in (True, False):
+        raise ValueError( "Optional parameter `sortnodes` must be True or False" )
+
     # 1) FLATTEN the partition into a 1D array, while doing NECESSARY CHECKS
     nodelist = [node for com in partition for node in com ]
     # Make sure all the items are integer(-like) numbers
@@ -1896,6 +1909,9 @@ def RandomPartition_WithSizes(comsizes, sortnodes=False):
     except (ValueError, TypeError):
         raise RuntimeError(f"comsizes must be a 1D array-like of positive integers, got {comsizes}")
 
+    if sortnodes not in (True, False):
+        raise ValueError( "Optional parameter `sortnodes` must be True or False" )
+
     # 1) GENERATE THE RANDOM PARTITION
     # Create and randomly shuffle a list of N nodes
     N = comsizes.sum()
@@ -1907,7 +1923,7 @@ def RandomPartition_WithSizes(comsizes, sortnodes=False):
     newpartition = np.array_split(nodelist, splitpoints)
 
     # Sort the nodes in the modules, if requested
-    if sortnodes==True:
+    if sortnodes == True:
         for com in newpartition:
             com.sort()
 
@@ -2072,7 +2088,7 @@ def GlobalHubness(adjmatrix, normed=False):
     elif normed == False:
         globalhubness = degree
     else:
-        raise ValueError( "`normed` must be boolean." )
+        raise ValueError( "Optional parameter `normed` must be True or False." )
 
     return globalhubness
 
@@ -2132,7 +2148,7 @@ def LocalHubness(adjmatrix, partition, normed=False):
         elif normed == False:
             hubness = degree
         else:
-            raise ValueError( "`normed` must be boolean." )
+            raise ValueError( "Optional parameter `normed` must be True or False." )
 
         # Add the results for each community in the general array
         localhubness[com] = hubness
@@ -2312,6 +2328,9 @@ def NodeRoles(adjmatrix, partition, normedhubs=False):
     ParticipationIndex : Participation index of every node, for given a partition of the network.
     DispersionIndex : Dispersion index of every node, for given a partition of the network.
     """
+    if normedhubs not in (True, False):
+        raise ValueError( "Optional parameter `normedhubs` must be True or False" )
+
     # 1) COMPUTE THE GLOBAL AND LOCAL HUBNESS
     globalhubness = GlobalHubness(adjmatrix, normed=normedhubs)
     localhubness = LocalHubness(adjmatrix, partition, normed=normedhubs)
