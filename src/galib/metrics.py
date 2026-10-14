@@ -20,9 +20,9 @@ measures will be added to GAlib in future releases.
 ELEMENTARY PROPERTY CHECKS
 --------------------------
 has_self_loops
-    Checks whether an adjmatrix contains self-loops (diagonal entries).
+    Checks whether an adjacency matrix contains self-loops (diagonal entries).
 is_binary
-    Checks whether an adjmatrix represents a binary graph (or a weighted).
+    Checks whether an adjacency matrix represents a binary graph (or a weighted).
 is_directed
     Checks whether a graph (adjacency matrix) is directed or undirected.
 is_symmetric
@@ -131,7 +131,7 @@ from . import tools
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def has_self_loops(adjmatrix):
-    """Checks whether an adjmatrix contains self-loops (diagonal entries).
+    """Checks whether an adjacency matrix contains self-loops (diagonal entries).
 
     Parameters
     ----------
@@ -141,8 +141,8 @@ def has_self_loops(adjmatrix):
     Returns
     -------
     result : boolean
-        Returns True if the input adjacency matrix contains non-zero diagonal
-        entries (or self-loops); False otherwise.
+        Returns ``True`` if the input adjacency matrix contains non-zero diagonal
+        entries (or self-loops); ``False`` otherwise.
     """
     mask = adjmatrix.diagonal().astype(bool)
     result = mask.any().item()
@@ -159,8 +159,8 @@ def is_binary(adjmatrix):
     Returns
     -------
     result : boolean
-        Returns True if the adjacency matrix represents a binary (unweighted)
-        graph; False, if at least one of the links is weighted with a value
+        Returns ``True`` if the `adjmatrix` represents a binary (unweighted)
+        graph; ``False``, if at least one of the links is weighted with a value
         distinct from 1.
     """
     mask = adjmatrix.astype(np.bool)
@@ -178,8 +178,8 @@ def is_directed(adjmatrix):
     Returns
     -------
     result : boolean
-        Returns True if the adjacency matrix represents a directed graph;
-        False otherwise (it represents an undirected graph).
+        Returns ``True`` if `adjmatrix` represents a directed graph; ``False``
+        otherwise (it represents an undirected graph).
     """
     mask = adjmatrix.astype(bool)
     result = (mask ^ mask.T).any()
@@ -196,10 +196,10 @@ def is_symmetric(adjmatrix):
     Returns
     -------
     result : boolean
-        Returns True when all link weights of the adjacency matrix are reciprocal,
-        say ``w[i,j] = w[j,i]``. This also implies the graph is undirected.
-        Returns False if there is at least one link whose weights are not
-        reciprocal (``w[i,j] != w[j,i]``).
+        Returns ``True`` when all link weights of the adjacency matrix are
+        reciprocal, say ``w[i,j] = w[j,i]``. This also implies the graph is
+        undirected. Returns ``False`` if there is at least one link whose weights
+        are not reciprocal (``w[i,j] != w[j,i]``).
     """
     result = np.allclose(adjmatrix, adjmatrix.T)
     return result
@@ -220,29 +220,29 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
         The adjacency matrix of the network. If weighted, link weights are ignored.
     knntype : string
         Defines the class of degree-degree correlation desired.
-        -'undirected' Use this only if 'adjmatrix' is an undirected adjacency
+        -``'undirected'`` Use this only if `adjmatrix` is an undirected adjacency
         matrix. Otherwise an error will be raised.
-        -'outout' computes the average output degree <out-k'> of the output
+        -``'outout'` computes the average output degree <out-k'> of the output
         neighbours of nodes with output degree out-k.
-        -'outin' computes the average input degree <in-k'> of the output
+        -``'outin'`` computes the average input degree <in-k'> of the output
         neighbours of nodes with output degree <out-k>
-        -'inin' computes the average input degree <in-k'> of the input
+        -``'inin'`` computes the average input degree <in-k'> of the input
         neighbours of nodes with input degree in-k.
-        -'inout' computes the average output degree <outk-k'> of the input
+        -``'inout'`` computes the average output degree <outk-k'> of the input
         neighbours of nodes with input degree in-k.
-        -'average' computes the average mean degree 1/2*(in-k' + out-k')
+        -``'average'`` computes the average mean degree 1/2*(in-k' + out-k')
         of nodes with mean degree 1/2*(in-k + out-k).
     fulloutput : boolean
-        If True, it also returns 'alldata'.
+        If ``True``, it also returns `alldata`.
 
     Returns
     --------
-    AvKnn : ndarray of dtype `np.float64`. AvKnn has three rows:
+    AvKnn : ndarray of dtype ``np.float64``. AvKnn has three rows:
             Row-0: the (output) degree, k'
             Row-1: average (input) degree of all neighbours of nodes with
             degree k = k'
             Row-2: the standard deviation of the average in row-1
-    alldata : ndarray with two rows of dtype float64 or integer.
+    alldata : ndarray with two rows of dtype ``np.float64`` or ``np.int64``.
         The list of all node's degree k and all their neighbours' degree k'.
             Row-0: the degree k of a node
             Row-1: the degree k' of one of its neighbours
@@ -261,22 +261,22 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     correlations. This can be confusing. Make sure to understand which of
     the four correlation classes you are asking the function to compute.
 
-    4) 'alldata' is provided only for plotting purposes, such that the average
+    4) `alldata` is provided only for plotting purposes, such that the average
     neighbours' degree can be plotted with all the datapoints in the background.
     See documentation and the script 'Example_NeighboursDegree.py'.
     """
 
     # 0) Security checks and prepare data for calculations
     if fulloutput not in (True, False):
-        raise ValueError( f"Optional parameter 'fulloutput' shall be boolean, {fulloutput} entered" )
+        raise ValueError( f"Optional parameter `fulloutput` shall be boolean, {fulloutput} entered" )
 
     optlist = ('undirected', 'outin',  'outout', 'inout', 'inin', 'average')
     if knntype not in optlist:
-        raise ValueError( f"'{knntype}' not a valid input for optional parameter `knntype`. Please, enter one of: {optlist}." )
+        raise ValueError( f"``{knntype}`` not a valid input for optional parameter `knntype`. Please, enter one of: {optlist}." )
 
     if knntype == 'undirected':
         if is_directed(adjmatrix) == True:
-            raise ValueError("Option knntype = 'undirected' requires an undirected adjacency matrix")
+            raise ValueError("Option ``knntype = 'undirected'`` requires an undirected adjacency matrix")
         indegree, outdegree = Degree(adjmatrix, True)
     elif knntype == 'outin':
         indegree, outdegree = Degree(adjmatrix, True)
@@ -351,13 +351,13 @@ def Clustering(adjmatrix):
     --------
     clustcoef : float
         The clustering coefficient of the network.
-    clustnodes : ndarray length (N,) and dtype `np.float64`.
+    clustnodes : ndarray length (N,) and dtype ``np.float64``.
         An array of length N with the clustering of every node.
 
     Notes
     -----
     The clustering coefficient C is not the same as the average of
-    the clusterings of the individual nodes <Ci>!! Here the array ClustNodes
+    the clusterings of the individual nodes <Ci>!! Here the array `clustnodes`
     is provided because it costs no additional resources and the data is
     useful for an further statistical analysis.
     """
@@ -409,10 +409,10 @@ def Degree(adjmatrix, directed=None):
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
-    directed: None or Boolean. Optional, default = None
-        If None, automatically checks whether adjmatrix is a directed or an
-        undirected graph. If True computes both input and output degrees of the
-        nodes. If False, returns the undirected degrees of the graph.
+    directed: None or Boolean. Optional, default = ``None``
+        If ``None``, automatically checks whether `adjmatrix` is a directed or an
+        undirected graph. If ``True`` computes both input and output degrees of the
+        nodes. If ``False``, returns the undirected degrees of the graph.
 
     Returns
     -------
@@ -421,15 +421,15 @@ def Degree(adjmatrix, directed=None):
         a tuple made of two ndarrays (indegree, outdegree) corresponding to the
         input and output degrees of the nodes. If ``directed = False``, returns
         a single ndarray with the undirected degrees of the nodes.
-        If ``directed = None``, automatically checks whether ``adjmatrix`` is
+        If ``directed = None``, automatically checks whether `adjmatrix` is
         directed or undirected, and return the result accordingly.
 
     Note
     ----
-    When ``adjmatrix`` represents a directed graph but ``directed = False`` is
-    entered, then ``degrees`` is a single ndarray corresponding to the output
-    degrees. When ``adjmatrix`` represents an undirected graph but ``directed = True``
-    is entered, then ``degrees`` returns two ndarrays, both identical, representing
+    When `adjmatrix` represents a directed graph but ``directed = False`` is
+    entered, then `degrees` is a single ndarray corresponding to the output
+    degrees. When `adjmatrix` represents an undirected graph but ``directed = True``
+    is entered, then `degrees` returns two ndarrays, both identical, representing
     the undirected degrees of the nodes.
 
     See Also
@@ -439,7 +439,7 @@ def Degree(adjmatrix, directed=None):
     """
     # SECURITY CHECKS AND PREPARATION
     if directed not in (None, True, False):
-        raise ValueError( f"'directed' shall be one of (None, True, False), '{directed}' entered." )
+        raise ValueError( f"Optional parameter `directed` shall be one of (``None``, ``True``, ``False``), ``{directed}`` entered." )
 
     if directed == None:
         directed = is_directed(adjmatrix)
@@ -484,29 +484,29 @@ def Intensity(adjmatrix, directed=None):
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network.
-    directed: None or Boolean. Optional, default = None
-        If None, automatically checks whether adjmatrix is a directed or an
-        undirected graph. If True computes both input and output intensities of the
-        nodes. If False, returns the undirected intensities of the graph.
+        The (weighted) adjacency matrix of the network.
+    directed: None or Boolean. Optional, default = ``None``
+        If ``None``, automatically checks whether `adjmatrix` is a directed or an
+        undirected graph. If ``True`` computes both input and output intensities of the
+        nodes. If ``False``, returns the undirected intensities of the graph.
 
     Returns
     -------
     intensities : ndarray of shape (N,) or tuple with two ndarrays of shape ((N,), (N,)).
-        The intensity of all nodes in the graph. If ``directed = True`` intensities
-        is a tuple made of two ndarrays (input_intensity, output_intensity)
+        The intensity of all nodes in the graph. If ``directed = True``, `intensities`
+        is a tuple made of two ndarrays (`input_intensity`, `output_intensity`)
         corresponding to the input and output intensities of the nodes.
         If ``directed = False``, returns a single ndarray with the undirected
         intensities of the nodes. If ``directed = None``, automatically checks
-        whether ``adjmatrix`` is directed or undirected, and return the result
+        whether `adjmatrix` is directed or undirected, and return the result
         accordingly.
 
     Note
     ----
-    When ``adjmatrix`` represents a directed graph but ``directed = False`` is
-    entered, then ``intensities`` is a single ndarray corresponding to the output
-    degrees. When ``adjmatrix`` represents an undirected graph but ``directed = True``
-    is entered, then ``degrees`` returns two ndarrays, both identical, representing
+    When `adjmatrix` represents a directed graph but ``directed = False`` is
+    entered, then `intensities` is a single ndarray corresponding to the output
+    degrees. When `adjmatrix` represents an undirected graph but ``directed = True``
+    is entered, then `intensities` returns two ndarrays, both identical, representing
     the undirected degrees of the nodes.
 
     See Also
@@ -537,7 +537,7 @@ def K_Density(adjmatrix, rctype='undirected'):
     The k-density (phi(k)) is the density of the subnetwork formed by all nodes
     with degree k > k'. The calculation of k-density implies an iterative
     process. At each step, all nodes with degree k' <= k are removed from the
-    network (adjmatrix) and the density of the remaining subgraph is calculated.
+    network (`adjmatrix`) and the density of the remaining subgraph is calculated.
     See original paper by S. Zhou and R.J. Modragon, IEEE Communication
     Letters 8(3), 180-182 (2004).
     This function returns the k-density for all values of k', from k' = 0
@@ -552,15 +552,15 @@ def K_Density(adjmatrix, rctype='undirected'):
     rctype : string, optional
         Defines how to make use of the degrees depending on whether the
         network is directed or undirected.
-        - 'undirected' only if the network is undirected. Raises an error if
+        - ``'undirected'`` only if the network is undirected. Raises an error if
         selected with a directed input adjmatrix.
-        - 'outputs', if the network is directed, the k-density is computed
+        - ``'outputs'``, if the network is directed, the k-density is computed
         considering the nodes with output degree out-k' > k.
-        - 'inputs', if the network is directed, the k-density is computed
+        - ``'inputs'``, if the network is directed, the k-density is computed
         considering the nodes with input degree in-k' > k.
-        - 'average', if the network is directed, the k-density is computed
+        - ``'average'``, if the network is directed, the k-density is computed
         considering that the degree of the nodes is k' = 1/2 (in-k + out-k).
-        Only use 'average' when the input and output degrees of the network
+        Only use ``'average'`` when the input and output degrees of the network
         are reasonably symmetric.
 
     Returns
@@ -622,14 +622,14 @@ def K_Density(adjmatrix, rctype='undirected'):
             # 2.2 Compute the k-density of the remainig network
             Lk = adjmatrix.sum()
             Nk = len(degree.nonzero()[0])
-
             if Nk > 1:
                 kdensity[k] = np.float64(Lk)/(Nk*(Nk-1))
-
         else:
             kdensity[k] = kdensity[k-1]
 
     return kdensity
+
+## TODO: Define alias for k_Density() returning also a FutureWarning.
 
 def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
     """Computes the ratio of link weights among the nodes with strength > s',
@@ -660,7 +660,7 @@ def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rct
     nodes can be real valued, in contrast to the discrete nature of the
     unweighted degrees. Therefore, instead of iterating over node degrees one
     by one, from k=0 to k=kmax, here the iteration along the range of
-    values from s=0 to s=smax is discretised into 'nbins' steps.
+    values from s=0 to s=smax is discretised into ``nbins`` steps.
 
     Parameters
     ----------
@@ -672,37 +672,37 @@ def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rct
         The largest value that the weight of links can take. Depending on what
         real system the network represents, link values could take different
         ranges. If a maximum value is known, e.g., 1.0 for correlation matrices,
-        this information can be passed. The default 'maxweigth=None' implies
-        that 'maxweight' is set to the largest value in 'adjmatrix'.
+        this information can be passed. The default ``maxweigth=None`` implies
+        that `maxweight` is set to the largest value in `adjmatrix`.
     maxstrength : scalar, optional
         The largest node strength that the function should scan. This parameter
         is useful when comparing a family of networks. Setting the largest
         node strength, given the samne number of bins, the results are obtained
         for the same range of strengths, and therefore, are directly comparable.
-        The default is 'maxstrength=None' so, if not given, the largest node
-        strength will be calculated from adjmatrix.
+        The default is ``maxstrength=None`` so, if not given, the largest node
+        strength will be calculated from `adjmatrix`.
     rctype : string, optional
         Defines how to iterate over the node strengths, depending on whether the
         network is directed or undirected.
-        - 'undirected' only if the network is undirected. Raises an error if
-        selected but 'adjmatrix' represents a non-symmetric network.
-        - 'outputs', if the network is asymmetric, the k-density is computed
+        - ``'undirected'`` only if the network is undirected. Raises an error if
+        selected but `adjmatrix` represents a non-symmetric network.
+        - ``'outputs'``, if the network is asymmetric, the k-density is computed
         considering the nodes with output strength out-s > s'.
-        - 'inputs', if the network is directed, the k-density is computed
+        - ``'inputs'``, if the network is directed, the k-density is computed
         considering the nodes with input strength in-s > s'.
-        - 'average', if the network is directed, the k-density is computed
+        - ``'average'``, if the network is directed, the k-density is computed
         considering that the strength of the nodes is s = 1/2 (in-s + out-s).
-        Only use 'average' when the input and output degrees of the network
+        Only use ``'average'`` when the input and output degrees of the network
         are reasonably symmetric.
 
     Returns
     -------
     strengthlist: ndarray of length (nbins,)
-        The values of node strength, from s=0 to s=smax, in 'nbins' steps.
+        The values of node strength, from s=0 to s=smax, in `nbins` steps.
     kdensity : ndarray of length (nbins,)
-        An array of length 'nbins' containing, at each index i, the weighted
+        An array of length `nbins` containing, at each index i, the weighted
         k-density for the subnetwork formed by the nodes with strength s >= s',
-        where s' = strengthlist[i].
+        where ``s' = strengthlist[i]``.
 
     See Also
     --------
@@ -772,6 +772,8 @@ def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rct
 
     return strengthlist, kdensity
 
+## TODO: Define alias for k_DensityW() returning also a FutureWarning.
+
 def MatchingIndex(adjmatrix, normed=True):
     ## TODO: Try new algorithm using adjmatrix**2, or a propagation algorithm
     """Computes the number of common neighbours of every pair of nodes.
@@ -785,27 +787,26 @@ def MatchingIndex(adjmatrix, normed=True):
         The adjacency matrix of the network. If weighted, link weights are ignored.
 
     normed : Boolean, optional
-        If 'normed=False', returns the number of common neighbours
-        of two nodes i and j. If 'normed=True', the number of common
-        neighbours is divided by the total number of different nodes they
-        are linked with, so values range from 0 (no common neighbours)
-        to 1 (all neighbours are common to i and j). Explicit links i-->j
-        and j-->i are excluded because they do not contribute to the
-        matching. For example:
+        If ``False``, returns the number of common neighbours of two nodes i
+        and j. If ``True``, the number of common neighbours is divided by the
+        total number of different nodes they are linked with, so values range
+        from 0 (no common neighbours) to 1 (all neighbours are common to i and j).
+        Explicit links i-->j and j-->i are excluded because they do not contribute
+        to the matching. For example:
             1 --> [2,3,4,5]
             2 --> [4,5,6]
             MI(1,2) = len([4,5])/len([3,4,5,6]) = 0.5
 
     Returns
     -------
-    MImatrix : ndarray of shape (N,N) and dtype `float64`
+    MImatrix : ndarray of shape (N,N) and dtype ``np.float64``
         A matrix containing the matching index for all pairs of nodes.
 
     Notes
     -----
     - The function accepts weighted networks but it ignores the weights.
-    - If adjmatrix is directed, calling MatchingIndex(adjmatrix) computes the
-    matching of the output neighbours. Passing the transpose adjmatrix.T to
+    - If adjmatrix is directed, calling ``MatchingIndex(adjmatrix)`` computes the
+    matching of the output neighbours. Passing the transpose `adjmatrix.T` to
     the function computes the matching of the input neighbours.
     """
     if normed not in (True, False):
@@ -857,7 +858,7 @@ def ReciprocalDegree(adjmatrix, normed=False):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     normed: Boolean. optional
-        True if normalized output is desired, False otherwised.
+        ``True`` if normalized output is desired, ``False`` otherwised.
 
     Returns
     --------
@@ -962,7 +963,7 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     given threshold, the function returns both the degree k' at which k-density
     overcomes `kdensthreshold` and the surviving set of hubs at that iteration,
     which are consider to form the rich-club. By default `kdensthreshold` is set
-    to 0.8, which is a convenience choice because typical modules found in
+    to ``0.8``, which is a convenience choice because typical modules found in
     complex networks rarely achieve such large internal density. Thus, it is
     very unlikely that k-density will reach 0.8 in any empirical network just by
     chance. However, we recommend users to visually inspect the curve resulting
@@ -979,31 +980,31 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
     rctype : string, optional
         Defines how to make use of the degrees depending on whether the
         network is directed or undirected.
-        - 'undirected' only if the network is undirected. Raises an error if
-        selected with a directed input adjmatrix.
-        - 'outputs', if the network is directed, the k-density is computed
+        - ``'undirected'`` only if the network is undirected. Raises an error if
+        selected with a directed input `adjmatrix`.
+        - ``'outputs'``, if the network is directed, the k-density is computed
         considering the nodes with output degree out-k' > k.
-        - 'inputs', if the network is directed, the k-density is computed
+        - ``'inputs'``, if the network is directed, the k-density is computed
         considering the nodes with input degree in-k' > k.
-        - 'average', if the network is directed, the k-density is computed
+        - ``'average'``, if the network is directed, the k-density is computed
         considering that the degree of the nodes is k' = 1/2 (in-k + out-k).
-        Only use 'average' when the input and output degrees of the network
+        Only use ``'average'`` when the input and output degrees of the network
         are reasonably symmetric.
 
     Returns
     -------
-    kdensity : ndarray of dtype `np.float64`
+    kdensity : ndarray of dtype ``np.float64``
         An array of length k_max containing, for each index k, the k-density
         of the network.
     kdecision : integer
-        The degree at which k-density overcomes value 'kdensthreshold'.
+        The degree at which k-density overcomes value `kdensthreshold`.
     richclub : A 1D ndarray of dtype `np.float64`
-        The indices of the nodes with degree k >= kdecision. This will be empty
+        The indices of the nodes with degree ``k >= kdecision``. This will be empty
         if k-density curve does not overcome `kdensthreshold` at any point.
 
     See Also
     --------
-    k_Density : Computes the density of subnetworks made of nodes with degree >= k',
+    K_Density : Computes the density of subnetworks made of nodes with degree >= k',
                 for all k' = 0 to kmax.
     RichClub : Looks for the presence of a subset of hubs with dense interconnectivity.
     """
@@ -1012,17 +1013,17 @@ def RichClub(adjmatrix, kdensthreshold=0.8, rctype='undirected'):
         raise ValueError("`kdensthreshold` parameter out of bounds. Please enter values between 0 and 1.")
     optlist = ('undirected', 'outdegree', 'outputs', 'indegree', 'inputs', 'average')
     if rctype not in optlist:
-        raise ValueError( f"'{rctype}' not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
+        raise ValueError( f"``{rctype}`` not a valid input for optional parameter `rctype`. Please, enter one of: {optlist}." )
 
     # 1) PREPARE FOR THE CALCULATIONS
     # Make a binary copy of the network
-    adjmatrix = adjmatrix.astype('bool')
+    adjmatrix = adjmatrix.astype(bool)
 
     # Select the proper data
     indegree, outdegree = Degree(adjmatrix, True)
     if rctype == 'undirected':
         if is_directed(adjmatrix) == True:
-            raise TypeError("Option rctype = 'undirected' requires an undirected adjacency matrix")
+            raise TypeError("Option ``rctype = 'undirected'`` requires an undirected adjacency matrix")
         degree = outdegree
     elif rctype == 'outputs' or rctype == 'outdegree':
         degree = outdegree
@@ -1098,13 +1099,13 @@ def PathsAllinOne(adjmatrix):
 
     Warnings
     --------
-    1. If the adjmatrix is undirected every cycle is found and saved n times,
+    1. If `adjmatrix` is undirected every cycle is found and saved n times,
     where n is the number of nodes in the cycle, e.g., [1,3,4], [4,1,3] and
-    [3,1,4]. If adjmatrix is directed, cycles might appear an unpredictable
-    number of times or only once. Use function CleanCycles() in
-    galib.tools module to remove repeated cycles.
+    [3,1,4]. If `adjmatrix` is directed, cycles might appear an unpredictable
+    number of times or only once. Use function ``CleanCycles()`` in
+    ``galib.tools`` module to remove repeated cycles.
     2. If adjmatrix is undirected every path is saved twice, in the opposite
-    direction, e.g. [1,3,4] and [4,3,1]. Use CleanPaths() in galib.tools module
+    direction, e.g. [1,3,4] and [4,3,1]. Use ``CleanPaths()`` in ``galib.tools`` module
     to remove duplicated paths from undirected graphs.
     """
     # 0) PREPARE FOR THE CALCULATIONS
@@ -1193,10 +1194,8 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     weighted_dist : boolean, optional
-        True if the path distance shall be computed considering the weights
-        of the links, False, otherwise. If the adjmatrix is a weighted
-        network but'weighted = False', the unweighted graph distance is
-        computed.
+        ``True`` if the path distance shall be computed considering the weights
+        of the links, ``False``, otherwise.
 
     Returns
     -------
@@ -1242,14 +1241,14 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
 
     A recursive function that uses the deep-first-search (DFS) strategy to
     navigate the graph starting at node 'start' and finishing the search at
-    branches of length 'length'. adjmatrix can be a weighted adjacency
+    branches of length `length`. `adjmatrix` can be a weighted adjacency
     matrix but weights of links will be ignored.
 
     Usage
     -----
-    Always call the function with 'queue' being the start node AND with
-    parameter 'paths=[]' typed. This is very important due to the recursive
-    nature of the algorithm. If 'paths' is left empty, the paths obtained in
+    Always call the function with `queue` being the start node AND with
+    parameter ``paths=[]`` typed. This is very important due to the recursive
+    nature of the algorithm. If `paths` is left empty, the paths obtained in
     two consecutive calls will accumulate. Proper calling example:
 
     result = AllHamiltonianPaths(network,node1,node2,queue=[node1],paths=[])
@@ -1263,17 +1262,17 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
     end : integer
         The target node at which the paths finish.
     length : integer
-        The desired graph distance between nodes 'start' and 'end'. To find
-        all shortest paths between them, 'length' has to be the shortest graph
+        The desired graph distance between nodes `start` and `end`. To find
+        all shortest paths between them, `length` has to be the shortest graph
         distance which must have been computed beforehand by other methods,
         e.g. Dijkstra's or the Floyd-Warshall algorithm.
     queue : list of integers
-        The current path of nodes that the function explores. SEE 'Usage'!!!
+        The current path of nodes that the function explores. SEE Usage!!!
 
     Returns
     -------
     paths : list of lists
-        The list of all the shortest paths between nodes 'start' and 'end'.
+        The list of all the shortest paths between nodes `start` and `end`.
         LEAVE EMPTY at function call!! See Usage.
 
     See Also
@@ -1333,28 +1332,28 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
     partition : list, tuple or array_like
         A sequence of subsets of nodes given as sequences (lists, tuples or
         arrays). The indices of the nodes sorted per category.
-    weighted : boolean, optional, default: False
+    weighted : boolean, optional, default: ``False``
         Sets whether adjmatrix should be treated as a weighted or a binary
-        connectivity. If True, the function will use the link weights (if any)
-        and compute the total (or mean) weights across categories. If False,
+        connectivity. If ``True``, the function will use the link weights (if any)
+        and compute the total (or mean) weights across categories. If ``False``,
         only the binary connectivity is considered.
-    normed : boolean, optional default: False
-        If True, returns the average connectivity within and between categories.
+    normed : boolean, optional default: ``False``
+        If ``True``, returns the average connectivity within and between categories.
         For binary case that means the link probability and, for weighted graphs,
         the average connection weights between nodes in the two categories.
-        If False, returns the total number of links, or the total weight,
+        If ``False``, returns the total number of links, or the total weight,
         between categories.
-    selfloops : None or boolean, default : None
+    selfloops : None or boolean, default : ``None``
         Controls whether the self-loops (diagonal entries in `adjmatrix` are
-        taken on account or not. Default is set to None, meaning the function
+        taken on account or not. Default is set to ``None``, meaning the function
         checks whether `adjmatrix` contains self-loops or not, and acts accordingly.
-        If True, forces self-loops to be considered (which alters normalization
-        even if no self-loop is present in `adjmatrix`). If False, the function
+        If ``True``, forces self-loops to be considered (which alters normalization
+        even if no self-loop is present in `adjmatrix`). If ``False``, the function
         ommits any self-loops in `adjmatrix` and normalises accordingly.
 
     Returns
     -------
-    assortmatrix : ndarray of shape (M,M) and dtype `np.float64`
+    assortmatrix : ndarray of shape (M,M) and dtype ``np.float64``
         Assortativity matrix of shape (M,M), where M is the number of
         categories of nodes in `partition`.
 
@@ -1424,8 +1423,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
 def ConnectedComponents(distmatrix, directed=False, showall=True):
     ## TODO: Revise and modernise (if anything useful)
     ## TODO: Set default directed=None, and automatically check?
-    """Finds all the connected components in a network out of a distance
-    matrix.
+    """Finds all the connected components in a network out of a distance matrix.
 
     A strongly connected component is a set of nodes for which there is
     at least one path connecting every two nodes within the set.
@@ -1436,12 +1434,12 @@ def ConnectedComponents(distmatrix, directed=False, showall=True):
     ----------
     distmatrix : ndarray of shape (N,N)
         The pairwise graph distance matrix of the network, usually the
-        output of function FloydWarshall().
-    directed : boolean, optional
-        'True' if the network is directed, 'False' if it is undirected.
-    showall : boolean, optional
-        If 'True' the function returns all strong components, including
-        independent nodes. If 'False' it returns only components of two
+        output of function ``FloydWarshall()``.
+    directed : boolean, optional, default: ``False``
+        ``True`` if the network is directed, ``False`` if it is undirected.
+    showall : boolean, optional, default: ``True``
+        If ``True`` the function returns all strong components, including
+        independent nodes. If ``False`` it returns only components of two
         or more nodes.
 
     Returns
@@ -1578,8 +1576,7 @@ def K_Shells(adjmatrix):
     Returns
     -------
     kshells : dictionary
-        Dictionary containing the list of nodes forming k-shell for
-        each key k.
+        Dictionary containing the list of nodes forming k-shell for each key k.
 
     Usage
     -----
@@ -1664,12 +1661,12 @@ def Modularity(adjmatrix, partition):
 
     Notes
     -----
-    If 'adjmatrix' is the binary adjacency matrix of the network and 'degree'
+    If `adjmatrix` is the binary adjacency matrix of the network and "degree"
     the usual degree, the function returns the unweighted modularity.
-    If 'adjmatrix' is a weighted adjacency matrix and 'degree' its weighted
+    If `adjmatrix` is a weighted adjacency matrix and "degree" its weighted
     degree or intensity, it returns the weighted modularity.
     The algorithm automatically computes modularity for both directed and
-    undirected networks according to input 'matrix'.
+    undirected networks according to input `adjmatrix`.
     """
     # Prepare for calculations
     L = adjmatrix.sum()
@@ -1700,7 +1697,7 @@ def PartitionMatrix(partition):
 
     Returns
     -------
-    partitionmatrix : ndarray of shape (N,M) and dtype `np.uint8`
+    partitionmatrix : ndarray of shape (N,M) and dtype ``np.uint8``
         The partition matrix P is a binary matrix where P(i,c) = 1 if node i
         belongs to community c, and P(i,c) = 0 otherwise.
 
@@ -1733,12 +1730,12 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
         Number of nodes
     M : integer
         The number of communities (modules) desired.
-    comsize_dist : string, optional, default: 'uniform'
-        Method to stablish the sizes of the communities. If 'uniform', tries to split
-        the N nodes into M modules of equal size (as close as possible). If 'random',
-        modules of random sizes are returned such that sum(com_sizes) = N.
+    comsize_dist : string, optional, default: ``'uniform'``
+        Method to stablish the sizes of the communities. If ``'uniform'``, tries
+        to split the N nodes into M modules of equal size (as close as possible).
+        If ``'random'``, modules of random sizes are returned such that sum(com_sizes) = N.
     sortnodes : boolean, optional, default: False
-        If `True`, the indices of the nodes are sorted in ascending order, within
+        If ``True``, the indices of the nodes are sorted in ascending order, within
         every community.
 
     Returns
@@ -1756,13 +1753,13 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
     # 0) SECURITY CHECKS
     # Check that N is a positive integer
     if not isinstance(N, (int, np.integer)):
-        raise TypeError( f"N must be a positive integer,  got '{N}'" )
+        raise TypeError( f"`N` must be a positive integer,  got ``{N}``" )
     if N < 1:
-        raise ValueError( f"N must be a positive integer,  got '{N}'" )
+        raise ValueError( f"`N` must be a positive integer,  got ``{N}``" )
 
     # Check that M is actually an integer
     if not isinstance(M, (int, np.integer)):
-        raise TypeError( f"M must be a positive integer smaller than N, got '{M}'" )
+        raise TypeError( f"`M` must be a positive integer smaller than `N`, got ``{M}``" )
 
     # Deal with trivial cases and errors
     if M == 1:
@@ -1770,7 +1767,7 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
     elif M == N:
         return [ [i] for i in range(N) ]
     elif M < 1 or M > N:
-        raise ValueError( f"M must be a positive integer smaller than N, got '{M}'" )
+        raise ValueError( f"`M` must be a positive integer smaller than `N`, got ``{M}``" )
 
     # 1) GENERATE THE RANDOM PARTITION
     # Create and shuffle a list of N nodes
@@ -1789,7 +1786,7 @@ def RandomPartition(N, M, comsize_dist='uniform', sortnodes=False):
         newpartition = np.array_split(nodelist, splitpoints)
 
     else:
-        raise ValueError( f"comsize_dist must be one of 'uniform' or 'random' (got '{comsize_dist}') " )
+        raise ValueError( f"`comsize_dist` must be one of 'uniform' or 'random' (got ``'{comsize_dist}'``) " )
 
     # Sort the nodes in the modules, if requested
     if sortnodes==True:
@@ -1813,14 +1810,14 @@ def RandomPartition_Like(partition, sortnodes=False):
             - [[2, 4], [1, 3, 5]]
             - ((2, 4), (1, 3, 5))
             - [np.array((2,4)), np.array((1,3,5))]
-    sortnodes : boolean, optional, default: False
-        If True, sorts the nodes in each community (module) in ascending order.
+    sortnodes : boolean, optional, default: ``False``
+        If ``True``, sorts the nodes in each community (module) in ascending order.
 
     Returns
     -------
     newpartition : list
        A list of lists of same sizes as in input `partition`, but with the nodes randomly
-       reassigned across the communities. For the examples above, newpartition would
+       reassigned across the communities. For the examples above, `newpartition` would
        be, e.g., [[1, 5], [2, 3, 4]]
 
     See Also
@@ -1877,8 +1874,8 @@ def RandomPartition_WithSizes(comsizes, sortnodes=False):
     comsizes : array-like of 1D
         A list of target sizes for each community in the partition.
     sortnodes : boolean, optional, default: False
-        If `True`, the indices of the nodes are sorted in ascending order, within
-        every community.
+        If ``True``, the indices of the nodes are sorted in ascending order,
+        within every community.
 
     Returns
     -------
@@ -1959,8 +1956,7 @@ def ParticipationMatrix(adjmatrix, partition):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
+        A sequence of subsets of nodes given as sequences (lists, tuples or arrays).
 
     Returns
     -------
@@ -2006,7 +2002,7 @@ def ParticipationVectors(adjmatrix, partition):
 
     Returns
     -------
-    p_vectors : ndarray of shape (N,M) and dtype `np.float64`.
+    p_vectors : ndarray of shape (N,M) and dtype ``np.float64``.
         Rows of the matrix inform of the probability of the corresponding node
         to belong to each of the M communities.
 
@@ -2057,14 +2053,14 @@ def GlobalHubness(adjmatrix, normed=False):
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
-    normed : boolean, optional default: False
-        If True, the degrees are weighted, as compared to the expected degree
-        distribution in random graphs of same size and density.
-        If False, the usual degree of the nodes is returned.
+    normed : boolean, optional default: ``False``
+        If ``True``, the degrees are weighted, as compared to the expected degree
+        distribution in random graphs of same size and density. If ``False``, the
+        usual degree of the nodes is returned.
 
     Returns
     -------
-    globalhubness : ndarray of length (N,) and dtype `np.float64`
+    globalhubness : ndarray of length (N,) and dtype ``np.float64``
         The global hubness of every node.
 
     See Also
@@ -2111,16 +2107,15 @@ def LocalHubness(adjmatrix, partition, normed=False):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
-    normed : boolean, optional default: False
-        If True, the degrees are weighted, as compared to the expected degree
-        distribution in random graphs of same size and density.
-        If False, the usual degree of the nodes is returned.
+        A sequence of subsets of nodes given as sequences (lists, tuples or arrays).
+    normed : boolean, optional default: ``False``
+        If ``True``, the degrees are weighted, as compared to the expected degree
+        distribution in random graphs of same size and density. If ``False``, the
+        usual degree of the nodes is returned.
 
     Returns
     -------
-    localhubness : ndarray of length (N,) and dtype `np.float64`
+    localhubness : ndarray of length (N,) and dtype ``np.float64``
         Local hubness of every node.
 
     See Also
@@ -2177,12 +2172,11 @@ def DispersionIndex(adjmatrix, partition):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
+        A sequence of subsets of nodes given as sequences (lists, tuples or arrays).
 
     Returns
     -------
-    d_index : ndarray of length (N,) and dtype `np.float64`.
+    d_index : ndarray of length (N,) and dtype ``np.float64``.
         The participation index of each node.
 
     See Also
@@ -2231,12 +2225,11 @@ def ParticipationIndex(adjmatrix, partition):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
+        A sequence of subsets of nodes given as sequences (lists, tuples or arrays).
 
     Returns
     -------
-    p_index : ndarray of length (N,) and dtype `np.float64`.
+    p_index : ndarray of length (N,) and dtype ``np.float64``.
         The participation index of all the nodes.
 
     See Also
@@ -2303,22 +2296,21 @@ def NodeRoles(adjmatrix, partition, normedhubs=False):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
-    normedhubs : boolean, optional default: False
-        If `True`, the degrees are weighted, as compared to the expected degree
-        distribution in random graphs of same size and density.
-        If `False`, the usual degree of the nodes is returned.
+        A sequence of subsets of nodes given as sequences (lists, tuples or arrays).
+    normedhubs : boolean, optional default: ``False``
+        If ``True``, the degrees are weighted, as compared to the expected degree
+        distribution in random graphs of same size and density. If ``False``, the
+        usual degree of the nodes is returned.
 
     Returns
     -------
-    globalhubness : ndarray of length (N,) and dtype `np.float64`.
+    globalhubness : ndarray of length (N,) and dtype ``np.float64``.
         Global hubness of every node.
-    localhubness : ndarray of length (N,) and dtype `np.float64`.
+    localhubness : ndarray of length (N,) and dtype ``np.float64``.
         Local hubness of every node.
-    nodeparticip : ndarray of length (N,) and dtype `np.float64`.
+    nodeparticip : ndarray of length (N,) and dtype ``np.float64``.
         The participation index of each node.
-    dispersionindex : ndarray of length (N,) and dtype `np.float64`.
+    dispersionindex : ndarray of length (N,) and dtype ``np.float64``.
         The participation index of each node.
 
     See Also
@@ -2368,12 +2360,11 @@ def Hubness_GA(adjmatrix, partition):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
+        A sequence of subsets of nodes given as sequences (lists, tuples or arrays).
 
     Returns
     -------
-    zscore : ndarray of length (N,) and dtype `np.float64`.
+    zscore : ndarray of length (N,) and dtype ``np.float64``.
         The within-module degree of every node in the network.
 
     See Also
@@ -2412,12 +2403,11 @@ def ParticipationIndex_GA(adjmatrix, partition):
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network. If weighted, link weights are ignored.
     partition : list, tuple or array_like
-        A sequence of subsets of nodes given as sequences (lists, tuples or
-        arrays).
+        A sequence of subsets of nodes given as sequences (lists, tuples or arrays).
 
     Returns
     -------
-    p_index : ndarray of length (N,) and dtype `np.float64`.
+    p_index : ndarray of length (N,) and dtype ``np.float64``.
         The participation index of all the nodes.
 
     Notes
