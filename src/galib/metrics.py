@@ -125,8 +125,6 @@ from . import tools
 
 ## TODO: avoid errors in implicit comparisons like `if directed:`
 ## TODO: Revise description of optional parameters and default values.
-## - e.g., mention of `parameters` or ``parameters`` in the docstrings + error messages ??
-## Sort metrics alphabetically, within each category ?
 
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
@@ -629,7 +627,13 @@ def K_Density(adjmatrix, rctype='undirected'):
 
     return kdensity
 
-## TODO: Define alias for k_Density() returning also a FutureWarning.
+def k_Density(adjmatrix, rctype='undirected'):
+    """Temporary alias for function ``K_Density()``. Please use ``K_Density``
+    instead, and see its documentation.
+    """
+    warnings.warn( "Function renamed and will be removed in future versions, please use `K_Density()` instead.",
+                    category=FutureWarning)
+    return K_Density(adjmatrix, rctype=rctype)
 
 def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
     """Computes the ratio of link weights among the nodes with strength > s',
@@ -772,7 +776,13 @@ def K_DensityWeighted(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rct
 
     return strengthlist, kdensity
 
-## TODO: Define alias for k_DensityW() returning also a FutureWarning.
+def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='undirected'):
+    """Temporary alias for function ``K_DensityWeighted()``. Please use
+    ``K_DensityWeighted`` instead, and see its documentation.
+    """
+    warnings.warn( "Function renamed and will be removed in future versions, please use ``K_DensityWeighted()`` instead.",
+                    category=FutureWarning)
+    return K_DensityWeighted(adjmatrix, nbins=nbins, maxweight=maxweight, maxstrength=maxstrength, rctype=rctype)
 
 def MatchingIndex(adjmatrix, normed=True):
     ## TODO: Try new algorithm using adjmatrix**2, or a propagation algorithm
