@@ -912,8 +912,6 @@ def ReciprocalDegree(adjmatrix, normed=False):
     return degrecip, degminus, degplus
 
 def Reciprocity(adjmatrix):
-    ## TODO: Rename internally to mask_und and mask_dir, following nomenclature
-    ## in models.py module.
     """Computes the fraction of reciprocal links to total number of links.
 
     Both weighted and unweighted input matrices are permitted. Weights
@@ -938,10 +936,10 @@ def Reciprocity(adjmatrix):
     if L == 0:
         reciprocity = 0
     else:
-        # Find the assymmetric links
-        # Rest = np.abs(adjmatrix - adjmatrix.T)
-        Rest = np.abs(adjmatrix ^ adjmatrix.T)
-        Lsingle = 0.5*Rest.sum()
+        # Find the asymmetric links
+        diffmat = adjmatrix ^ adjmatrix.T
+        Lsingle = 0.5*diffmat.sum()
+        # Compute the reciprocity
         reciprocity = float(L-Lsingle) / L
 
     return reciprocity
