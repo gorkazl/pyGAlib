@@ -595,13 +595,10 @@ def K_Density(adjmatrix, rctype='undirected'):
 
     # 1) Prepare for calculations
     N = len(adjmatrix)
-
     kmax = int( np.round((degree+0.000001).max()) )
     kdensity = np.zeros(kmax+1, np.float64)
-
-    # Density of the original network
-    initialL = adjmatrix.sum()
-    kdensity[0] = np.float64(initialL) / (N*(N-1))
+    # Overall density of the network
+    kdensity[0] = np.float64(adjmatrix.sum()) / (N*(N-1))
 
     # 2) Compute the k-density of all degrees
     klist = np.unique( np.round((degree+0.000001)) )
