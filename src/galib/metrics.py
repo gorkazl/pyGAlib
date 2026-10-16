@@ -236,14 +236,13 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     Returns
     --------
     AvKnn : ndarray of dtype ``np.float64``. AvKnn has three rows:
-            Row-0: the (output) degree, k'
-            Row-1: average (input) degree of all neighbours of nodes with
-            degree k = k'
-            Row-2: the standard deviation of the average in row-1
+        Row-0: the (output) degree, k'
+        Row-1: average (input) degree of all neighbours of nodes with degree k = k'
+        Row-2: the standard deviation of the average in row-1
     alldata : ndarray with two rows of dtype ``np.float64`` or ``np.int64``.
         The list of all node's degree k and all their neighbours' degree k'.
-            Row-0: the degree k of a node
-            Row-1: the degree k' of one of its neighbours
+        Row-0: the degree k of a node
+        Row-1: the degree k' of one of its neighbours
 
     Notes
     -----
