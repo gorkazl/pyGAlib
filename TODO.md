@@ -9,7 +9,7 @@
 4. ~~Replace runtime "prints" by proper warning and error detection.~~
 5. Update to the newer packaging and PyPI release standards.
     1. ~~We will use Hatch, at least for now.~~
-    2. Move Matploblib into optional dependencies. Only used to run the examples.
+    2. ~~Move Matploblib into optional dependencies. Only used to run the examples.~~
     3. Prepare GAlib for conda-sourceforge.
     4. Add in README.md instructions for conda users (either `conda install galib` or, first install dependencies via conda and then `python -m pip install -e . --no-deps`. Or, release also a *yml* file with preinstallation of the dependencies.
 6. ~~What should I do with the Examples/ and Branding/ folders when packaging?~~ Should I integrate them to the wheel, or should I let users to download the examples separately (manually) from the GitHub page? **NO, do not include them into the wheel. Just leave them in the root of the repo, for independent download.**
@@ -20,22 +20,32 @@
 11. Update README.md file:
     1. ~~Add version and status indicators at the top~~. 
     2. ~~Revise installation instructions.~~
+12. **Revise modules and galib structure:**
+    1. Revise, update and modernise all functions in *metrics.py* module.
+    2. Revise, update and modernise all functions in *tools.py* module.
+    3. Move all I/O functionality from *tools.py* to a new module *io.py*.
+        1. Add further data I/O conversions to other graph formats: igraph, graphML (.xml), DOT (.dot), etc. 
+    4. Create the *galib.extremal* subpackage
+        1. Bring everything from the PathLims package.
+        2. Include extremal properties and models for the clustering coefficient.
 
 
 
 ### This and that...
 
 1. Update all random number generation, shuffling and choices to the new `numpy.random.Generator.whatever_it_means`. Understand that properly and safely first, to avoid breaking behaviour.
-2. Add the two functions to generate surrogates for spatial (weighted) networks. See file "*Examples/SpatialLattices.py*" with legacy code from SiReNetA.
-3. Identify further functions which could be accelarated using Numba package, and write the Numba-based duplicates.
-4. Write a function for the Dijkstra algorithm.
-5. Write a function to calculate Katz centrality.
-6. Add further data I/O conversions to other graph formats: igraph, graphML (.xml), DOT (.dot), etc. 
-7. Identify and modify all functions whose unweighted version could be improved using Boolean operators: maybe ``ReciprocalDegree()``, ``RichClub()``, ``MatchingIndex()``, ``ConnectedComponents()``, ``K_Core()``, ``K_Shells()``, ``Modularity()``, etc.
-8. Support for weighted network metrics (ACHTUNG!! I won't accept just any algorithm for weighted networks, since many do not make sense.)
-9. Write tests for all functions.
-10. Finish and publish documentation.
-11. *Suggest your own…*
+2. Add the two functions to generate surrogates for spatial (weighted) networks.
+3. Add functions to estimate the varios degree-degree correlations (your papers with Vinko!).
+4. Add the functions to generate random (di)graphs with specified degree-degree sequences (your own work with Vinko!) 
+5. See file "*Examples/SpatialLattices.py*" with legacy code from SiReNetA.
+6. Identify further functions which could be accelarated using Numba, and write the Numba-based duplicates.
+7. Write a function for the Dijkstra algorithm.
+8. Write a function to calculate Katz centrality.
+9. Identify and modify all functions whose unweighted version could be improved using Boolean operators: maybe `ReciprocalDegree()`, `RichClub()`, `MatchingIndex()`, `ConnectedComponents()`, `K_Core()`, `K_Shells()`, `Modularity()`, etc.
+10. Support for weighted network metrics (ACHTUNG!! I won't accept just any algorithm for weighted networks, since many do not make sense.)
+11. Write tests for all functions.
+12. Finish and publish documentation.
+13. *Suggest your own…*
 
 
 ### It would be nice to ...
@@ -43,5 +53,4 @@
 1. Use some *linting* software to double check code style.
 2. Add functions for community detection (*help is welcome*).
 3. Add functionalities for graph visualization (*help is welcome*).
-5. Check compatibility with scipy.sparse module.
 6. *Please, suggest your own…*
