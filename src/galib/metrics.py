@@ -1395,6 +1395,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
     assortmatrix = np.zeros((M,M), np.float64)
     # Deal with the diagonal blocks
     for c1,com1 in enumerate(partition):
+        if len(com1) == 0: continue
         submatrix = tools.ExtractSubmatrix(adjmatrix, com1)
         if weighted == False:
             submatrix = submatrix.astype(bool)
@@ -1406,6 +1407,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
         # Deal with the extra-diagonal blocks
         for c2,com2 in enumerate(partition):
             if c2 == c1: continue
+            if len(com2) == 0: continue
             submatrix = tools.ExtractSubmatrix(adjmatrix, com1, com2)
             if weighted == False:
                 submatrix = submatrix.astype(bool)
