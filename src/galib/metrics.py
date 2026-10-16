@@ -30,8 +30,6 @@ is_symmetric
 
 BASIC CONNECTIVITY DESCRIPTORS
 ------------------------------
-AvNeighboursDegree
-    Average neighbours' degree of nodes with given degree k, for all k.
 Clustering
     Returns the clustering coefficient and the local clustering of every node.
 Degree
@@ -48,6 +46,8 @@ K_DensityWeighted
     for s' = 0 to s' = smax.
 MatchingIndex
     Computes the number of common neighbours of every pair of nodes.
+NeighboursDegree
+    Average neighbours' degree of nodes with given degree k, for all k.
 ReciprocalDegree
     Returns the reciprocal degree and excess degrees of every nodes.
 Reciprocity
@@ -207,134 +207,6 @@ def is_symmetric(adjmatrix):
 
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
-def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
-    ## TODO: Revise and retest function.
-    ## TODO: Revise and correct/drop the 'average' case usage. Degrees shall be integers, not e.g., k = 10.5.
-    ## TODO: Set default knntype=None, and check automatically.
-    ## TODO: Replace ``fulloutput`` by ``alldata``
-    """Average neighbours' degree of nodes with given degree k, for all k.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. If weighted, link weights are ignored.
-    knntype : string
-        Defines the class of degree-degree correlation desired.
-        -``'undirected'`` Use this only if `adjmatrix` is an undirected adjacency
-        matrix. Otherwise an error will be raised.
-        -``'outout'` computes the average output degree <out-k'> of the output
-        neighbours of nodes with output degree out-k.
-        -``'outin'`` computes the average input degree <in-k'> of the output
-        neighbours of nodes with output degree <out-k>
-        -``'inin'`` computes the average input degree <in-k'> of the input
-        neighbours of nodes with input degree in-k.
-        -``'inout'`` computes the average output degree <outk-k'> of the input
-        neighbours of nodes with input degree in-k.
-        -``'average'`` computes the average mean degree 1/2*(in-k' + out-k')
-        of nodes with mean degree 1/2*(in-k + out-k).
-    fulloutput : boolean
-        If ``True``, it also returns `alldata`.
-
-    Returns
-    --------
-    AvKnn : ndarray of dtype ``np.float64``. AvKnn has three rows:
-        Row-0: the (output) degree, k'
-        Row-1: average (input) degree of all neighbours of nodes with degree k = k'
-        Row-2: the standard deviation of the average in row-1
-    alldata : ndarray with two rows of dtype ``np.float64`` or ``np.int64``.
-        The list of all node's degree k and all their neighbours' degree k'.
-        Row-0: the degree k of a node
-        Row-1: the degree k' of one of its neighbours
-
-    Notes
-    -----
-    1) In order to compute the standard deviation the algorithm first pools
-    together all neighbours' degree of all nodes with degree k and then
-    computes the average and std values.
-
-    2) The function accepts weighted adjacency matrices but it ignores the
-    weights of the links. The function works with both directed and with
-    undirected networks.
-
-    3) In the case of directed networks there are four classes of degre-degree
-    correlations. This can be confusing. Make sure to understand which of
-    the four correlation classes you are asking the function to compute.
-
-    4) `alldata` is provided only for plotting purposes, such that the average
-    neighbours' degree can be plotted with all the datapoints in the background.
-    See documentation and the script 'Example_NeighboursDegree.py'.
-    """
-
-    # 0) Security checks and prepare data for calculations
-    if fulloutput not in (True, False):
-        raise ValueError( f"Optional parameter `fulloutput` shall be boolean, {fulloutput} entered" )
-
-    optlist = ('undirected', 'outin',  'outout', 'inout', 'inin', 'average')
-    if knntype not in optlist:
-        raise ValueError( f"``{knntype}`` not a valid input for optional parameter `knntype`. Please, enter one of: {optlist}." )
-
-    if knntype == 'undirected':
-        if is_directed(adjmatrix) == True:
-            raise ValueError("Option ``knntype = 'undirected'`` requires an undirected adjacency matrix")
-        indegree, outdegree = Degree(adjmatrix, True)
-    elif knntype == 'outin':
-        indegree, outdegree = Degree(adjmatrix, True)
-    elif knntype == 'outout':
-        indegree, outdegree = Degree(adjmatrix, True)
-        indegree = outdegree
-    elif knntype == 'inout':
-        adjmatrix = adjmatrix.T
-        indegree, outdegree = Degree(adjmatrix, True)
-    elif knntype == 'inin':
-        adjmatrix = adjmatrix.T
-        indegree, outdegree = Degree(adjmatrix, True)
-        indegree = outdegree
-    elif knntype == 'average':
-        indeg, outdeg = Degree(adjmatrix, True)
-        avdeg = 0.5 * (indeg + outdeg)
-        indegree = avdeg; outdegree = avdeg
-        adjmatrix = tools.SymmetriseMatrix(adjmatrix)
-
-    # 1) Find the degrees k of all the neighbours of nodes with given degree k'
-    kdict = {}
-    for i, kout in enumerate(outdegree):
-        if kout not in kdict: kdict[kout] = []
-        neighbours = adjmatrix[i].nonzero()[0]
-        for node in neighbours:
-            kinneigh = indegree[node]
-            kdict[kout].append(kinneigh)
-
-    # 2) Compute the av. degree for all neighbours of nodes with degree k'
-    klist = np.sort(list(kdict.keys()))
-    # klist = (kdict.keys()).sort()
-    AvKnn = np.zeros((3,len(klist)), np.float64)
-    for count, k in enumerate(klist):
-        dummy = np.array(kdict[k])
-        avk = dummy.mean()
-        devk = dummy.std()
-
-        AvKnn[0,count] = k
-        AvKnn[1,count] = avk
-        AvKnn[2,count] = devk
-
-    if fulloutput:
-        L = indegree.sum()
-        # Convert the kdict into a 2D array for plotting purposes
-        ## TODO: Revise this because 'Mixed' case does not exist! Is that 'average' ?
-        if knntype == 'Mixed': neighkarray = np.zeros((2,L),np.float64)
-        else: neighkarray = np.zeros((2,L),np.int64)
-
-        counter = 0
-        for k in kdict:
-            for node in kdict[k]:
-                neighkarray[0,counter] = k
-                neighkarray[1,counter] = indegree[node]
-                counter += 1
-        return AvKnn, neighkarray
-
-    else:
-        return AvKnn
-
 def Clustering(adjmatrix):
     """Returns the clustering coefficient and the local clustering of every node.
 
@@ -851,6 +723,141 @@ def MatchingIndex(adjmatrix, normed=True):
 
     return MImatrix
 
+def NeighboursDegree(adjmatrix, knncase='undirected', return_alldata=False):
+    """Average neighbours' degree of nodes with given degree k, for all k.
+
+    The average neighbours degree is a metric to evaluate the presence or absence
+    of degree assortativity in a network, say, whether the connection probability
+    between nodes depends on their degree or not. A network is said to be degree-
+    assortative if nodes are preferentially connected to nodes of similar degree
+    (or opposite degree, e.g., hubs preferentially connecting to low degree nodes),
+    and dissasortative if connection probability between two nodes is independent
+    of their degrees. This is also a form to evaluate degree-degree correlations.
+
+    A manner to evaluate this is to first identify all nodes with a given degree
+    k, and then find the average degree <k'> of all their neighbours. In case of
+    directed graphs, several classes of degree-assortativity may happen, given
+    that every node has both an input and an output degree, which can differ.
+    For example, the input degrees may be correlated, but not the outputs.
+
+    This function returns the data needed to compute and plot various statistics,
+    e.g., the correlation between the degrees of nodes and the (average) degrees
+    of their neighbours.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of shape (N,N)
+        The adjacency matrix of the network. If weighted, link weights are ignored.
+    knncase : string, optional. Default: 'undirected'
+        Defines the class of degree-degree correlation to investigate. Use
+        ``'undirected'`` only if `adjmatrix` is an undirected adjacency matrix.
+        Otherwise a `ValueError` is raised. The remaining options are
+        (``'outout'``, ``'outin'``, ``'inout'`` and ``'inin'``). In these cases,
+        the first half refers to the source node and the second half to its
+        neighbours. For example, option ``'outin'`` will consider the output
+        neighbours of a node, and evaluate their average input degrees.
+        ``'inin'`` will consider the input neighbours of a node and calculate
+        their average input degree.
+    return_alldata : boolean
+        If ``True``, the function also returns `alldata` variable (see below).
+
+    Returns
+    --------
+    result : ndarray of shape (3,nk), where ``nk`` is the number of unique values
+        of degree in the network.
+        - Row [0] contains the set of unique degrees k' encountered.
+        - Row result[1] are the average neighbours degrees, for nodes with degree k.
+        - Row result[2] are the standard deviations of the averages in row-1.
+    alldata : ndarray of shape(2,L) where L is the number of links.
+        The list of every node's degree k, and the degrees k' of all their
+        neighbours. In a column j, alldata[0,j] is the degree of one node, and
+        alldata[1,j] is the degree k' of one of the node's neighbours.
+
+    Notes
+    -----
+    1) In order to compute the average and the standard deviations the function
+    first pools together all neighbours of all nodes with given degree k, and then
+    computes theaverage of their degrees and the std values.
+
+    2) In the case of directed networks there are four classes of degre-degree
+    correlations. This can be confusing. Make sure to understand which of
+    the four correlation classes you are asking the function to compute. See
+    for example reference :
+        G. Zamora-López, C.S. Zhou, V. Zlatic and J. Kurths (2008) The generation
+        of random directed networks with prescribed 1-node and 2-node degree
+        correlations. J. Phys. A 41, 224006.
+        DOI: http://dx.doi.org/10.1088/1751-8113/41/22/224006
+
+    3) `alldata` is made accessible for statistical and plotting purposes, e.g.,
+    such that all correlations can be more accurately evaluated, or the average
+    neighbours' degree can be plotted with all the datapoints in the background.
+
+    See also
+    --------
+    AssortativityMatrix : Returns the assortativity matrix of a network for a given a partition.
+    """
+    # 0) SECURITY CHECKS AND PREPARE DATA FOR CALCULATIONS
+    if return_alldata not in (True, False):
+        raise ValueError( f"Optional parameter `return_alldata` shall be True or False, {return_alldata} entered" )
+
+    optlist = ('undirected', 'outin',  'outout', 'inout', 'inin')
+    if knncase not in optlist:
+        raise ValueError( f"``{knncase}`` not a valid input for optional parameter `knncase`. Please, enter one of: {optlist}." )
+
+    if knncase == 'undirected':
+        if is_directed(adjmatrix) == True:
+            raise ValueError("Option ``knncase = 'undirected'`` requires `adjmatrix` to represent an undirected graph, directed found.")
+
+    # Convert adjmatrix to boolean, and get the degrees
+    adjmatrix = adjmatrix.astype(bool)
+    indegree = adjmatrix.sum(axis=0)
+    outdegree = adjmatrix.sum(axis=1)
+
+    # Specifiy which case will be evaluated
+    if knncase == 'undirected':
+        sourcedegree = outdegree
+        targetdegree = outdegree
+    elif knncase == 'outin':
+        sourcedegree = outdegree
+        targetdegree = indegree
+    elif knncase == 'outout':
+        sourcedegree = outdegree
+        targetdegree = outdegree
+    elif knncase == 'inout':
+        sourcedegree = indegree
+        targetdegree = outdegree
+    elif knncase == 'inin':
+        sourcedegree = indegree
+        targetdegree = indegree
+
+    # 1) SUMMARISE THE DEGREES OF EACH NODE AND, ALL THEIR NEIGHBOURS
+    # Get the indices of all links
+    if knncase in ['undirected', 'outout', 'outin']:
+        alldata = np.array(np.where(adjmatrix), dtype=np.int64)
+    elif knncase in ['inout', 'inin']:
+        alldata = np.array(np.where(adjmatrix.T), dtype=np.int64)
+
+    # Transform into degrees
+    alldata[0] = sourcedegree[alldata[0]]  # Degrees of the nodes
+    alldata[1] = targetdegree[alldata[1]]  # Degrees of the neighbours
+
+    # 2) COMPUTE THE STATISTICS (AVERAGE AND STD per degree)
+    klist = np.unique(sourcedegree)
+    nk = len(klist)
+    result = np.zeros((3,nk), np.float64)
+    result[0] = klist
+    for ik,k in enumerate(klist):
+        _idx = np.where(alldata[0] == k)[0]
+        _neighdegs = alldata[1,_idx]
+        result[1,ik] = _neighdegs.mean()
+        result[2,ik] = _neighdegs.std()
+
+    # Return the results
+    if return_alldata == True:
+        return result, alldata
+    else:
+        return result
+
 def ReciprocalDegree(adjmatrix, normed=False):
     """Returns the reciprocal degree and excess degrees of every nodes.
 
@@ -1366,6 +1373,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
 
     See Also
     --------
+    NeighboursDegree : Average neighbours' degree of nodes with given degree k, for all k.
     Modularity : Computes the Newman modularity given a partition of nodes.
     ParticipationMatrix : Summarises the number of links each node makes across modules.
     """
