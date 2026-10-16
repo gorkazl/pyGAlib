@@ -209,7 +209,9 @@ def is_symmetric(adjmatrix):
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     ## TODO: Revise and retest function.
-    ## TODO: SymmetriseMatrixAverage() no longer exist. Replace by tools.SymmetriseMatrix()
+    ## TODO: Revise and correct the 'average' case usage. Degrees shall be integers, not e.g., k = 10.5.
+    ## TODO: Set default knntype=None, and check automatically.
+    ## TODO: Replace ``fulloutput`` by ``alldata``
     """Average neighbours' degree of nodes with given degree k, for all k.
 
     Parameters
@@ -291,8 +293,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
         indeg, outdeg = Degree(adjmatrix, True)
         avdeg = 0.5 * (indeg + outdeg)
         indegree = avdeg; outdegree = avdeg
-        ## TODO: Replace by tools.SymmetriseMatrix() and test
-        adjmatrix = SymmetriseMatrixAverage(adjmatrix)
+        adjmatrix = tools.SymmetriseMatrix(adjmatrix)
 
     # 1) Find the degrees k of all the neighbours of nodes with given degree k'
     kdict = {}
@@ -319,6 +320,7 @@ def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     if fulloutput:
         L = indegree.sum()
         # Convert the kdict into a 2D array for plotting purposes
+        ## TODO: Revise this because 'Mixed' case does not exist! Is that 'average' ?
         if knntype == 'Mixed': neighkarray = np.zeros((2,L),np.float64)
         else: neighkarray = np.zeros((2,L),np.int64)
 
