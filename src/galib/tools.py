@@ -69,8 +69,8 @@ MeanCorrelation
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
-## TODO 1: Move all the I/O functions to a new I/O module
-## TODO 2: Shall we rename this module from tools.py to utils.py ?
+## TODO: Move all the I/O functions to a new I/O module
+## TODO: Shall we rename this module from tools.py to utils.py ?
 
 # Standard library imports
 import itertools
@@ -80,8 +80,8 @@ import functools
 # Third party imports
 import numpy as np
 # Local imports
-# from . import metrics
-import galib.metrics
+from . import metrics
+# import galib.metrics
 
 
 # I/O AND DATA CONVERSIONS ################################################
@@ -519,8 +519,8 @@ def SymmetriseMatrix(adjmatrix):
     An adjacency matrix of the same shape, of dype=float, with values
     """
 
-    if galib.metrics.Reciprocity(adjmatrix) == 1:
-    # if Reciprocity(adjmatrix) == 1:
+    # if metrics.Reciprocity(adjmatrix) == 1:
+    if metrics.is_symmetric == True:
         return adjmatrix
     else:
         return 0.5 * (adjmatrix + adjmatrix.T)
