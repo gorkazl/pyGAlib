@@ -85,7 +85,7 @@ RandomPartition_WithSizes
 RandomPartition_Like
     Randomises an input partition, conserving the community (module) sizes.
 ShufflePartition
-    Alias for RandomPartition_Like
+    Alias for ``RandomPartition_Like()``
 
 ROLES OF NODES IN NETWORKS WITH MODULAR ORGANIZATION
 ----------------------------------------------------
@@ -1827,6 +1827,7 @@ def RandomPartition_Like(partition, sortnodes=False):
 
     See Also
     --------
+    ShufflePartition : Alias of function ``RandomPartition_Like()``.
     RandomPartition : Generates a partition of N nodes into M modules, randomly assigned.
     RandomPartition_WithSizes : Generates a partition of given community sizes, with node indices randomly assigned.
     PartitionMatrix : Given a partition of the network, returns its partition matrix.
@@ -1866,8 +1867,11 @@ def RandomPartition_Like(partition, sortnodes=False):
 
     return newpartition
 
-## TODO: Implement this alias as a proper function definition
-ShufflePartition = RandomPartition_Like
+def ShufflePartition(partition, sortnodes=False):
+    """Alias for function ``RandomPartition_Like()``. See its documentation for
+    usage information.
+    """
+    return RandomPartition_Like(partition, sortnodes=sortnodes)
 
 def RandomPartition_WithSizes(comsizes, sortnodes=False):
     """Generates a partition of given community sizes, with node indices randomly assigned.
