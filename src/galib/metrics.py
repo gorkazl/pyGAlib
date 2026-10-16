@@ -209,7 +209,7 @@ def is_symmetric(adjmatrix):
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def AvNeighboursDegree(adjmatrix, knntype='undirected', fulloutput=False):
     ## TODO: Revise and retest function.
-    ## TODO: Revise and correct the 'average' case usage. Degrees shall be integers, not e.g., k = 10.5.
+    ## TODO: Revise and correct/drop the 'average' case usage. Degrees shall be integers, not e.g., k = 10.5.
     ## TODO: Set default knntype=None, and check automatically.
     ## TODO: Replace ``fulloutput`` by ``alldata``
     """Average neighbours' degree of nodes with given degree k, for all k.
@@ -1309,6 +1309,7 @@ def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
 ################################################################################
 """COMPONENTS, K-CORES and COMMUNITIES..."""
 def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, selfloops=None):
+    ## TODO: Fix to ignore entries for empty communities
     """Returns the assortativity matrix of network given a partition of nodes.
 
     In general, when the nodes of a network can be labeled into various categories,
