@@ -655,11 +655,59 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='un
     return K_DensityWeighted(adjmatrix, nbins=nbins, maxweight=maxweight, maxstrength=maxstrength, rctype=rctype)
 
 def MatchingIndex(adjmatrix, directed=None, normed=False):
-    """FINAL VERSION FOR GAlib v2.2. Derived from the faster ``MatchingIndex2()``
-    function above.
+    """Computes the number of common neighbours for every pair of nodes.
+
+    The matching index of two nodes i and j is the number of common
+    neighbours they are connected to.
+
+    Parameters
+    ----------
+    adjmatrix : ndarray of shape (N,N)
+        The adjacency matrix of the network. If weighted, link weights are ignored.
+    directed: None or Boolean. Optional, default: None
+        If ``None``, automatically checks whether `adjmatrix` is a directed or
+        an undirected graph, and continues accordingly. If ``True`` computes the
+        results for both the the input and output neighbours shared by two nodes.
+        If ``False``, computes the results for undirected graphs.
+    normed : Boolean, optional. Default: False
+        Determines whether the number or the fraction of common neighbours is
+        returned. If ``False``, it computes the number of common neighbours of
+        two nodes i and j. If ``True``, this is divided by the total number of
+        distinct neighbours that i and j share. Thus, values range from 0 (i and
+        j have no common neighbours) to 1 (i and j are connected to the same
+        nodes).
+        Note that explicit links i-->j and j-->i are excluded. For example:
+            1 -- [2,3,4,5]
+            2 -- [1,4,5,6]
+            MI(1,2) = len({4,5}) / len({3,4,5,6}) = 0.5
+
+    Returns
+    -------
+    mindices : ndarray of shape (N,N), or tuple with two ndarrays of shape ((N,N), (N,N)).
+        The matching indices for all pairs of nodes. If ``directed = False``
+        returns a single matrix and, if ``directed = True`` a tuple is returned
+        containing two matrices. ``mindices[0]`` is the matrix of input pair-wise
+        matching indices (the common neighbours nodes i and j receive connections
+        from) and ``mindices[1]`` is the matrix for the output neighbours (number
+        of common neighbours i and j project to).
+        If ``directed = None``, automatically checks whether `adjmatrix` is
+        directed or undirected, and return the corresponding result.
+
+    Usage
+    -----
+    Except for the default ``directed=None`` case, the function does not check
+    whether the input `adjmatrix` is directed or not. Therefore, for the cases
+    ``directed=True`` and ``directed=False`` the function behaves as described
+    above, returning either one or two matrices.
+    If `adjmatrix` is a directed graph but user enters ``directed = False``,
+    then the function returns a single matrix with the matching indices of the
+    output neighbours (inputing the transpose would return the result for the
+    input neighbours). When `adjmatrix` is an undirected graph but user enters
+    ``directed = True``, then two identical matrices are returned because in a
+    graph the input and output neighbours are the same.
     """
-    def _MatchingIndex_Base(boolmatrix, _normed=False):
-        """Performs the calculation directly on the boolean matrix.
+    def _MatchingIndex_Base(boolmatrix, _normed):
+        """Performs the calculation directly on the binary connectivity matrix.
         """
         # Initialise the pair-wise matching index matrix
         N = len(boolmatrix)
@@ -707,12 +755,12 @@ def MatchingIndex(adjmatrix, directed=None, normed=False):
         directed = is_directed(adjmatrix)
 
     if directed == True:
-        mindices_outputs = _MatchingIndex_Base(adjmatrix, _normed=normed)
+        mindices_outputs = _MatchingIndex_Base(adjmatrix, normed)
         adjmatrixT = np.transpose(adjmatrix).copy()
-        mindices_inputs = _MatchingIndex_Base(adjmatrixT, _normed=normed)
+        mindices_inputs = _MatchingIndex_Base(adjmatrixT, normed)
         mindices = (mindices_inputs, mindices_outputs)
     else:
-        mindices = _MatchingIndex_Base(adjmatrix, _normed=normed)
+        mindices = _MatchingIndex_Base(adjmatrix, normed)
 
     return mindices
 
