@@ -221,9 +221,11 @@ limitations under the License.
 -----------------------------------------------------------------
 ### WHAT IS NEW
 
-##### month day, 2026 (Version 2.2)
+##### month day, 2026 (Version 3.0)
 
-This version is a polishing and extension of the *galib.metrics*, with particular emphasis on the metrics to characterise the roles of nodes in modular networks. Many improvements are "silent" (no input / output consequences for the user). Some incompatibilities were introduced, as summarised below.
+This version is a major polishing and extension of the *galib.metrics* module. Many silent improvements have been made that have no input / output consequences for the user. However, several other changes resulted in incompatibilities with the previous versions and thus, we are jumping from GAlib 2.1 to GAlib 3.0. These were necessary revisions to pave for future updates, which should bring novel functionalities rather than core alterations.
+
+* Created *galib.io.py* module and moved there all read-in / read-out functions previously in *galib.tools.py* module. (TO BE DONE YET!!)
 
 * Property checks added:
     * `is_binary()`: Checks whether an adjmatrix represents a binary graph (or a weighted).
@@ -236,14 +238,15 @@ This version is a polishing and extension of the *galib.metrics*, with particula
     * `ShufflePartition()`: Alias for `RandomPartition_Like()`
     * `PartitionMatrix()` ... finish this ...
 * Internal changes to *galib.metrics* module:
-    * Polishing and homogeneization of  docstrings.
+    * Polished and homogeneised docstrings.
     * Homogenised variable names and descriptions.
     * Function `NodeParticipation()` renamed as `ParticipationIndex()`
     * Function `NodeDispersion()` renamed as `DispersionIndex()`.
     * Function `AssortativityMatrix()` revised. Incompatible with previous version due to changes in optional parameters. Corrects behaviour for networks with self-loops and modules (categories) made of a single node.
-    * Function `AvNeighboursDegree()` has been internally updated, it is 5x faster now. New function is incompatible with previous version. Funciton names was changed to `NeighboursDegree()`. Optional parameters were renamed aswell. Option `knntype = 'average'` has been removed.
+    * Function `AvNeighboursDegree()` has been renamed to `NeighboursDegree()`. Internal updates results in 5x faster function. New function is incompatible with previous version. Option `knntype = 'average'` has been removed.
     * Function `ParticipationIndex_GA()` revised. Incompatible with previous version, input parameters were changed. It now requires `adjmatrix` and `partition` as input arguments.
     * Function `Hubness_GA()` revised. Incompatible with previous version since input `participmatrix` was replaced by `adjmatrix`.
+    * Optional parameter `directed` was added to function `MatchingIndex()`, to properly account for graphs and digraphs.
 
 
 ##### June 26, 2026 (Release of Version 2.1)
