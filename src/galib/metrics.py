@@ -160,6 +160,15 @@ def is_binary(adjmatrix):
         Returns ``True`` if the `adjmatrix` represents a binary (unweighted)
         graph; ``False``, if at least one of the links is weighted with a value
         distinct from 1.
+
+    See also
+    --------
+    has_self_loops
+        Checks whether an adjacency matrix contains self-loops (diagonal entries).
+    is_directed
+        Checks whether a graph (adjacency matrix) is directed or undirected.
+    is_symmetric
+        Checks whether the link weights of a graph are reciprocal or not.
     """
     mask = adjmatrix.astype(np.bool)
     result = np.allclose(adjmatrix, mask)
@@ -178,6 +187,15 @@ def is_directed(adjmatrix):
     result : boolean
         Returns ``True`` if `adjmatrix` represents a directed graph; ``False``
         otherwise (it represents an undirected graph).
+
+    See also
+    --------
+    has_self_loops
+        Checks whether an adjacency matrix contains self-loops (diagonal entries).
+    is_binary
+        Checks whether an adjacency matrix represents a binary graph (or a weighted).
+    is_symmetric
+        Checks whether the link weights of a graph are reciprocal or not.
     """
     mask = adjmatrix.astype(bool)
     result = (mask ^ mask.T).any()
@@ -198,6 +216,15 @@ def is_symmetric(adjmatrix):
         reciprocal, say ``w[i,j] = w[j,i]``. This also implies the graph is
         undirected. Returns ``False`` if there is at least one link whose weights
         are not reciprocal (``w[i,j] != w[j,i]``).
+
+    See also
+    --------
+    has_self_loops
+        Checks whether an adjacency matrix contains self-loops (diagonal entries).
+    is_binary
+        Checks whether an adjacency matrix represents a binary graph (or a weighted).
+    is_directed
+        Checks whether a graph (adjacency matrix) is directed or undirected.
     """
     result = np.allclose(adjmatrix, adjmatrix.T)
     return result
@@ -1242,6 +1269,7 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
     ## TODO: Can I replace algorithm by a propagarot matrix, using powers of Aij?
     ## Would that be any faster, or use less memory ??
     ## TODO: use `is_directed()` instead of `Reciprocity()`
+    ## TODO: Check if faster defining distmatrix as ``np.int64``
     """Computes the pathlength between all pairs of nodes in a network..
 
     Parameters
