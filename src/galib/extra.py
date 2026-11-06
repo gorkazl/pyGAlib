@@ -13,7 +13,7 @@ ADDITIONAL FUNCTIONALITIES
 
 This module hosts functionalities and measures related to the study of complex
 networks which do not fit in the more strict classification of graph metrics,
-models and tools. These correspond to functionalities I have developed and
+models and utils. These correspond to functionalities I have developed and
 published during my research, which might be of interest for some users or
 readers. It also contains adaptation into Python of measures published by
 third-party authors which I needed for my own research.
@@ -36,7 +36,6 @@ NeuralComplexity
 NeuralComplexity_Sampled
     Calculates the neural complexity of a correlation(-like) matrix (Faster).
 
-
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
@@ -46,7 +45,7 @@ import numpy as np
 import numpy.random
 import scipy.linalg
 # Local imports
-from . import tools
+from . import utils
 
 
 ############################################################################
@@ -394,7 +393,7 @@ def NeuralComplexity(corrmatrix, bipartitions=None):
 
     # Find all possible bipartitions in a set of N nodes
     if not bipartitions:
-        bipartitions = tools.AllBipartitions(np.arange(N))
+        bipartitions = utils.AllBipartitions(np.arange(N))
 
     nmax = N // 2
     detcorrmat = scipy.linalg.det(corrmatrix)
@@ -404,7 +403,7 @@ def NeuralComplexity(corrmatrix, bipartitions=None):
     avmibips = np.zeros(nmax+1, np.float64)
     for n in range(1,nmax+1):
         # Number of bipartitions for set of size n and (N-n)
-        nbips = tools.Factorial(N) / (tools.Factorial(n) * tools.Factorial(N-n))
+        nbips = utils.Factorial(N) / (utils.Factorial(n) * utils.Factorial(N-n))
 
         # Correct nbips if N is even and if nbips = nmax
         if n == nmax and 2*n == N:
@@ -418,8 +417,8 @@ def NeuralComplexity(corrmatrix, bipartitions=None):
             set1, set2 = bipartitions[counter+i]
 
             # Extract the submatrices for each bipartition
-            submat1 = tools.ExtractSubmatrix(corrmatrix, set1)
-            submat2 = tools.ExtractSubmatrix(corrmatrix, set2)
+            submat1 = utils.ExtractSubmatrix(corrmatrix, set1)
+            submat2 = utils.ExtractSubmatrix(corrmatrix, set2)
 
             # Compute the determinant of the submatrices
             detsubmat1 = scipy.linalg.det(submat1)
@@ -469,13 +468,13 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
 
     nmax = N // 2
     detcorrmat = scipy.linalg.det(corrmatrix)
-    factorialN = tools.Factorial(N)
+    factorialN = utils.Factorial(N)
     nodelist = np.arange(N)
 
     # 1) Calculate the mutual information, for all bipartitions of all sizes
     avmibips = np.zeros(nmax+1, np.float64)
     for n in range(1,nmax+1):
-        nbips = factorialN / (tools.Factorial(n) * tools.Factorial(N-n))
+        nbips = factorialN / (utils.Factorial(n) * utils.Factorial(N-n))
 
         # Correct nbips is N is even and if nbips = nmax
         if n == nmax and 2*n == N:
@@ -486,14 +485,14 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
             nbips = int(nbips)
             mibips = np.zeros(nbips, np.float64)
             # Create all the bipartitions of size n
-            bipartitions = tools.AllBipartitions(nodelist, n)
+            bipartitions = utils.AllBipartitions(nodelist, n)
             for i in range(nbips):
                 # Choose a bipartition
                 set1, set2 = bipartitions[i]
 
                 # Extract the submatrices for each bipartition
-                submat1 = tools.ExtractSubmatrix(corrmatrix, set1)
-                submat2 = tools.ExtractSubmatrix(corrmatrix, set2)
+                submat1 = utils.ExtractSubmatrix(corrmatrix, set1)
+                submat2 = utils.ExtractSubmatrix(corrmatrix, set2)
 
                 # Compute the determinant of the submatrices
                 detsubmat1 = scipy.linalg.det(submat1)
@@ -513,8 +512,8 @@ def NeuralComplexity_Sampled(corrmatrix, maxiter=1000):
                 set2 = nodelist[n:]
 
                 # Extract the submatrices for each bipartition
-                submat1 = tools.ExtractSubmatrix(corrmatrix, set1)
-                submat2 = tools.ExtractSubmatrix(corrmatrix, set2)
+                submat1 = utils.ExtractSubmatrix(corrmatrix, set1)
+                submat2 = utils.ExtractSubmatrix(corrmatrix, set2)
 
                 # Compute the determinant of the submatrices
                 detsubmat1 = scipy.linalg.det(submat1)
