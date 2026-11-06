@@ -654,74 +654,67 @@ def k_DensityW(adjmatrix, nbins=50, maxweight=None, maxstrength=None, rctype='un
                     category=FutureWarning)
     return K_DensityWeighted(adjmatrix, nbins=nbins, maxweight=maxweight, maxstrength=maxstrength, rctype=rctype)
 
-def MatchingIndex(adjmatrix, normed=True):
-    ## TODO: Try new algorithm using adjmatrix**2, or a propagation algorithm
-    """Computes the number of common neighbours of every pair of nodes.
-
-    The matching index of two nodes i and j is the number of common
-    neighbours they are linked with.
-
-    Parameters
-    ----------
-    adjmatrix : ndarray of shape (N,N)
-        The adjacency matrix of the network. If weighted, link weights are ignored.
-
-    normed : Boolean, optional
-        If ``False``, returns the number of common neighbours of two nodes i
-        and j. If ``True``, the number of common neighbours is divided by the
-        total number of different nodes they are linked with, so values range
-        from 0 (no common neighbours) to 1 (all neighbours are common to i and j).
-        Explicit links i-->j and j-->i are excluded because they do not contribute
-        to the matching. For example:
-            1 --> [2,3,4,5]
-            2 --> [4,5,6]
-            MI(1,2) = len([4,5])/len([3,4,5,6]) = 0.5
-
-    Returns
-    -------
-    MImatrix : ndarray of shape (N,N) and dtype ``np.float64``
-        A matrix containing the matching index for all pairs of nodes.
-
-    Notes
-    -----
-    - The function accepts weighted networks but it ignores the weights.
-    - If adjmatrix is directed, calling ``MatchingIndex(adjmatrix)`` computes the
-    matching of the output neighbours. Passing the transpose `adjmatrix.T` to
-    the function computes the matching of the input neighbours.
+def MatchingIndex(adjmatrix, directed=None, normed=False):
+    """FINAL VERSION FOR GAlib v2.2. Derived from the faster ``MatchingIndex2()``
+    function above.
     """
+    def _MatchingIndex_Base(boolmatrix, _normed=False):
+        """Performs the calculation directly on the boolean matrix.
+        """
+        # Initialise the pair-wise matching index matrix
+        N = len(boolmatrix)
+        mimatrix = np.zeros((N,N), np.float64)
+
+        for i in range(N):
+            ineighbours = set( boolmatrix[i].nonzero()[0].tolist() )
+            if _normed: mimatrix[i,i] = 1.0
+            else: mimatrix[i,i] = len(ineighbours)
+
+            for j in range(i+1,N):
+                jneighbours = set( boolmatrix[j].nonzero()[0].tolist() )
+
+                # Intersection and union of the neighbourhoods
+                mi = len(ineighbours & jneighbours)
+                if mi == 0: continue
+                if _normed:
+                    union = ineighbours | jneighbours
+                    norm = len(union)
+                    # Avoid counting the explicit links i-->j and j-->i
+                    if i in union: norm -= 1
+                    if j in union: norm -= 1
+                    # Normalize and save the value avoiding ZeroDivision errors
+                    mi /= norm
+
+                mimatrix[i,j] = mi
+                mimatrix[j,i] = mi
+
+        return mimatrix
+
+    #______________________________________________________________________
+    # SECURITY CHECKS AND PREPARATION
+    if directed not in (None, True, False):
+        raise ValueError( f"Optional parameter `directed` shall be one of (``None``, ``True``, ``False``), ``{directed}`` entered." )
+
     if normed not in (True, False):
-        raise ValueError( "Optional parameter `normed` must be True or False" )
+        raise ValueError( f"Optional parameter `normed` must be ``True`` or ``False``, got `{normed}`" )
 
-    N = len(adjmatrix)
+    # Convert to boolean and make sure self-loops are ignored
+    adjmatrix = adjmatrix.astype(bool)
+    np.fill_diagonal(adjmatrix, False)
 
-    MImatrix = np.identity(N, np.float64)
+    # COMPUTE THE PAIR-WISE MATRIX OF MATCHING INDICES
+    if directed == None:
+        directed = is_directed(adjmatrix)
 
-    for i in range(N):
-        ineighbours = set(adjmatrix[i].nonzero()[0])
-        for j in range(i,N):
-            jneighbours = set(adjmatrix[j].nonzero()[0])
+    if directed == True:
+        mindices_outputs = _MatchingIndex_Base(adjmatrix, _normed=normed)
+        adjmatrixT = np.transpose(adjmatrix).copy()
+        mindices_inputs = _MatchingIndex_Base(adjmatrixT, _normed=normed)
+        mindices = (mindices_inputs, mindices_outputs)
+    else:
+        mindices = _MatchingIndex_Base(adjmatrix, _normed=normed)
 
-            # Intersection and union of the sets
-            mi = len(ineighbours & jneighbours)
-
-            if normed:
-                union = ineighbours | jneighbours
-                norm = len(union)
-                # Avoid counting the explicit links i-->j and j-->i
-                if i in union: norm -= 1
-                if j in union: norm -= 1
-                # Normalize and save the value avoiding ZeroDivision errors
-                if norm > 0:
-                    mi = np.float64(mi) / norm
-                    MImatrix[i,j] = mi
-                    MImatrix[j,i] = mi
-
-            else:
-                # Save the value
-                MImatrix[i,j] = mi
-                MImatrix[j,i] = mi
-
-    return MImatrix
+    return mindices
 
 def NeighboursDegree(adjmatrix, knncase='undirected', return_alldata=False):
     """Average neighbours' degree of nodes with given degree k, for all k.
