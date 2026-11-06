@@ -216,10 +216,12 @@ from . import metrics
 from .metrics import*
 from . import models
 from .models import*
+from . import io
+from .io import*
 
 
 # Some metadata
-__version__ = "2.2.dev1"
+__version__ = "2.2.dev2"
 
 
 
