@@ -109,7 +109,7 @@ import numpy as np
 import numpy.random
 # Local imports
 from .metrics import is_directed, is_symmetric, Density
-from .tools import ExtractSubmatrix
+from .utils import ExtractSubmatrix
 
 ## TO BE DECIDED:
 ## - Shall we have only one ErdosRenyiGraph_Like() and RandomGraph_Like()
