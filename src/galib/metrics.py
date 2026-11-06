@@ -121,7 +121,7 @@ import warnings
 import numpy as np
 import numpy.random
 # Local imports
-from . import tools
+from . import utils
 
 ## TODO: avoid errors in implicit comparisons like `if directed:`
 ## TODO: Revise description of optional parameters and default values.
@@ -1465,7 +1465,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
     # Deal with the diagonal blocks
     for c1,com1 in enumerate(partition):
         if len(com1) == 0: continue
-        submatrix = tools.ExtractSubmatrix(adjmatrix, com1)
+        submatrix = utils.ExtractSubmatrix(adjmatrix, com1)
         if weighted == False:
             submatrix = submatrix.astype(bool)
         if selfloops == True:
@@ -1477,7 +1477,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
         for c2,com2 in enumerate(partition):
             if c2 == c1: continue
             if len(com2) == 0: continue
-            submatrix = tools.ExtractSubmatrix(adjmatrix, com1, com2)
+            submatrix = utils.ExtractSubmatrix(adjmatrix, com1, com2)
             if weighted == False:
                 submatrix = submatrix.astype(bool)
             assortmatrix[c1,c2] = submatrix.sum()
@@ -1633,7 +1633,7 @@ def K_Core(adjmatrix, kmin):
         # 'nodelist' is already empty before end of loop.
         degree = Degree(adjmatrix)
         try:
-            newkmin = tools.NonZeroMin(degree)
+            newkmin = utils.NonZeroMin(degree)
         except ValueError:
             done = True
 
@@ -1683,7 +1683,7 @@ def K_Shells(adjmatrix):
 
     # Find the smallest non-zero degree to start from
     degree = Degree(adjmatrix)
-    kmin = tools.NonZeroMin(degree)
+    kmin = utils.NonZeroMin(degree)
 
     # 1) Start computing the k-shells
     kshells = {}
@@ -1708,7 +1708,7 @@ def K_Shells(adjmatrix):
             # 'nodelist' is already empty before end of loop
             degree = Degree(adjmatrix)
             try:
-                newkmin = tools.NonZeroMin(degree)
+                newkmin = utils.NonZeroMin(degree)
             except ValueError:
                 kshells[kmin] = shell
                 done = True
@@ -1763,7 +1763,7 @@ def Modularity(adjmatrix, partition):
     Q = 0.0
     L_inv = 1./L
     for s, community in enumerate(partition):
-        submat = tools.ExtractSubmatrix(adjmatrix, community)
+        submat = utils.ExtractSubmatrix(adjmatrix, community)
         # Add the fraction of internal links
         Q += np.float64(submat.sum())
         # Minus the expected fraction of links
@@ -2221,7 +2221,7 @@ def LocalHubness(adjmatrix, partition, normed=False):
         if len(com) == 1: continue
 
         # Compute the hubness of nodes in the isolated community
-        subnet = tools.ExtractSubmatrix(adjmatrix,com)
+        subnet = utils.ExtractSubmatrix(adjmatrix,com)
         degree = Degree(subnet).astype(np.float64)
 
         if normed == True:
