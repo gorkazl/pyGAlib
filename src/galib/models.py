@@ -28,6 +28,8 @@ PathGraph
     Generates a path graph (line or chain graph) of size N.
 StarGraph
     Generates a star graph of size N.
+GraphLaplacian
+    Calculates the graph Laplacian.
 
 GENERATION OF RANDOM (DI)GRAPHS
 -------------------------------
@@ -294,6 +296,52 @@ def StarGraph(N):
     adjmatrix[1:,0] = 1
 
     return adjmatrix
+
+def GraphLaplacian(adjmatrix, normed=False):
+    ## TODO: Revise the use of binary / weights
+    ## TODO: Validate.
+    """Calculates the graph Laplacian.
+
+    Given a connectivity matrix A, where Aij represents the (weighted)
+    connection from j to i, the continuous diffusion is the simplest time-
+    continuous (and continuous variable) linear propagation model with diffusive
+    (or conservative) coupling. It is represented by the differential equation:
+
+            xdot(t) = -D x(t) + A x(t) ,
+
+    where D is a diagonal matrix containing the (output) degrees of the nodes
+    in the diagonal. Thus, the graph Laplacian matrix is L = -D + A such that
+
+            xdot(t) = (-D + A) x(t) = L X(t) .
+
+    Parameters
+    ----------
+    adjmatrix : ndarray (2d) of shape (N,N).
+        The (weighted) adjacency matrix of the network.
+    normed : boolean, optional. Default: False
+        If True, it returns the normalised graph Laplacian.
+
+    Returns
+    -------
+    laplacian : ndarray (2d) of shape(N,N)
+        The graph Laplacian matrix.
+    """
+    # 0) HANDLE AND CHECK THE INPUTS
+    if adjmatrix.dtype != np.float64:
+        adjmatrix = adjmatrix.astype(np.float64)
+    N = len(adjmatrix)
+
+    # 1) CALCULATE THE GRAPH LAPLACIAN MATRIX
+    outdeg = adjmatrix.sum(axis=0)
+    laplacian = -outdeg * np.identity(N, dtype=np.float64) + laplacian
+
+    if normed:
+        laplacian /= outdeg
+        # Avoid NaN values in tpmat if there are disconnected nodes
+        if np.isnan(laplacian.min()):
+            laplacian[np.isnan(laplacian)] = 0
+
+    return laplacian
 
 
 ################################################################################
