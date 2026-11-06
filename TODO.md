@@ -25,6 +25,7 @@
     2. Revise, update and modernise all functions in *tools.py* module.
     3. Move all I/O functionality from *tools.py* to a new module *io.py*.
         1. Add further data I/O conversions to other graph formats: igraph, graphML (.xml), DOT (.dot), etc. 
+        2. Rename *tools.py* as *utils.py*.
     4. Create the *galib.extremal* subpackage
         1. Bring everything from the PathLims package.
         2. Include extremal properties and models for the clustering coefficient.
