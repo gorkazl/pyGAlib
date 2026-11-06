@@ -1200,6 +1200,7 @@ def PathsAllinOne(adjmatrix):
 def FloydWarshall(adjmatrix, weighted_dist = False):
     ## TODO: Can I replace algorithm by a propagarot matrix, using powers of Aij?
     ## Would that be any faster, or use less memory ??
+    ## TODO: use `is_directed()` instead of `Reciprocity()`
     """Computes the pathlength between all pairs of nodes in a network..
 
     Parameters
