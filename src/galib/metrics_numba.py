@@ -40,13 +40,15 @@ FloydWarshall_Numba
 import numpy as np
 from numba import jit
 # Local imports
-from . import metrics
+from .metrics import is_directed
 
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
 @jit
 def MatchingIndex_Numba(adjmatrix, normed=True):
+    ## TODO: Update this function, following new version in metrics.py.
+    ## The new function includes optional parameter `directed`
     """Computes the number of common neighbours of every pair of nodes.
 
     The matching index of two nodes i and j is the number of common
@@ -123,9 +125,9 @@ def MatchingIndex_Numba(adjmatrix, normed=True):
 def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
     """Computes the pathlength between all pairs of nodes in a network.
 
-    WARNING! This version returns the same output as 'FloydWarshall()'
-        function in main metrics.py module but runs much faster (for networks
-        of N > 100). It requires package Numba to be installed.
+    This version returns the same output as `FloydWarshall()` function in main
+    metrics.py module, but runs much faster (specially for networks of N > 100)
+    due to the Numba precompilation of the main loop.
 
     Parameters
     ----------
@@ -177,18 +179,15 @@ def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
     # 1) PREPARE FOR THE CALCULATIONS
     # 1.1) Initialize the distance matrix
     if weighted_dist:
-        distmatrix = np.where(adjmatrix == 0, np.inf, adjmatrix)
+        distmatrix = np.where(adjmatrix == 0, np.inf, adjmatrix).astype(np.float64)
     else:
-        distmatrix = np.where(adjmatrix == 0, np.inf, 1)
-
-    # 1.2) Find out whether the network is directed or undirected
-    recip = metrics.Reciprocity(adjmatrix)
+        distmatrix = np.where(adjmatrix == 0, np.inf, 1).astype(np.float64)
 
     # 2) RUN THE FLOYD-WARSHALL ALGORITHM USING FASTER FUNCTIONS (NUMBA)
-    if recip==1.0:
-        FW_Undirected(distmatrix)
-    else:
+    if is_directed(adjmatrix) == True:
         FW_Directed(distmatrix)
+    else:
+        FW_Undirected(distmatrix)
 
     return distmatrix
 
