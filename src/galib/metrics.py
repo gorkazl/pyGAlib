@@ -1257,8 +1257,9 @@ def PathsAllinOne(adjmatrix):
     # 3) CORRECT FOR UNDIRECTED GRAPHS
     # For the moment I only correct the betweenness, but I should remove
     # also all undirected paths that run inversely and are duplicated.
-    recip = Reciprocity(adjmatrix)
-    if recip == 1:
+    # recip = Reciprocity(adjmatrix)
+    # if recip == 1:
+    if not is_directed(adjmatrix):
         betweenness = (0.5*betweenness).astype(np.int64)
 
     # 4) CLEAN TRASH AND FINISH
@@ -1266,10 +1267,6 @@ def PathsAllinOne(adjmatrix):
     return distmatrix, betweenness, allpaths, allcycles
 
 def FloydWarshall(adjmatrix, weighted_dist = False):
-    ## TODO: Can I replace algorithm by a propagarot matrix, using powers of Aij?
-    ## Would that be any faster, or use less memory ??
-    ## TODO: use `is_directed()` instead of `Reciprocity()`
-    ## TODO: Check if faster defining distmatrix as ``np.int64``
     """Computes the pathlength between all pairs of nodes in a network..
 
     Parameters
@@ -1288,18 +1285,24 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
     """
     # Prepare for computations
     if weighted_dist == True:
-        distmatrix = np.where(adjmatrix == 0, np.inf, adjmatrix)
+        distmatrix = np.where(adjmatrix==0, np.inf, adjmatrix).astype(np.float64)
     elif weighted_dist == False:
-        distmatrix = np.where(adjmatrix == 0, np.inf, 1)
+        distmatrix = np.where(adjmatrix==0, np.inf, 1).astype(np.float64)
     else:
         raise ValueError( "Optional parameter `weighted_dist` must be True or False" )
 
-    # Check whether the network is directed or undirected
-    recip = Reciprocity(adjmatrix)
-
     N = len(adjmatrix)
+    # Run the Floyd-Warshall algorithm - directed networks
+    if is_directed(adjmatrix) == True:
+        for k in range(N):
+            for i in range(N):
+                for j in range(N):
+                    d = distmatrix[i,k] + distmatrix[k,j]
+                    if distmatrix[i,j] > d:
+                        distmatrix[i,j] = d
+
     # Run the Floyd-Warshall algorithm - Undirected networks
-    if recip == 1.0:
+    else:
         for k in range(N):
             for i in range(N):
                 for j in range(i,N):
@@ -1308,18 +1311,10 @@ def FloydWarshall(adjmatrix, weighted_dist = False):
                         distmatrix[i,j] = d
                         distmatrix[j,i] = d
 
-    # Run the Floyd-Warshall algorithm - directed networks
-    else:
-        for k in range(N):
-            for i in range(N):
-                for j in range(N):
-                    d = distmatrix[i,k] + distmatrix[k,j]
-                    if distmatrix[i,j] > d:
-                        distmatrix[i,j] = d
-
     return distmatrix
 
 def ShortestPaths(adjmatrix, start, end, length, queue = [], paths = []):
+    ## TODO: Can this be replaced by a powers propagator?
     """Finds all the shortest paths between two nodes.
 
     A recursive function that uses the deep-first-search (DFS) strategy to
