@@ -32,7 +32,6 @@ PATHS AND GRAPH DISTANCE FUNCTIONS
 FloydWarshall_Numba
     Computes the pathlength between all pairs of nodes in a network.
 
-
 ...moduleauthor:: Gorka Zamora-López <gorka@zamora-lopez.xyz>
 
 """
