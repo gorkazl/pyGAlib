@@ -125,29 +125,29 @@ def MatchingIndex_Numba(adjmatrix, normed=True):
 def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
     """Computes the pathlength between all pairs of nodes in a network.
 
-    This version returns the same output as `FloydWarshall()` function in main
+    This version returns the same output as `FloydWarshall()` function in the
     metrics.py module, but runs much faster (specially for networks of N > 100)
     due to the Numba precompilation of the main loop.
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
+    adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     weighted_dist : boolean, optional
-        If True, if the graph distances are computed considering the weights
-        of the links. False, otherwise. If 'adjmatrix' is a weighted
-        network but'weighted_dist = False', the weights of the links are
-        ignored.
+        If False, computes the binary graph distance between the nodes in the
+        graph. If True, it will compute the weighted graph distance but ...
+
+    ... WARNING !! Calculation of weighted graph distance ONLY MAKES SENSE
+    WHEN the weights in `adjmatrix` represent a spatial distance between
+    the nodes. For example, if `adjmatrix` is the graph of a transportation
+    network and its weights encode the kilometers between the cities or
+    stations (nodes) in the network.
 
     Returns
     -------
-    distmatrix : ndarray of rank-2
-        The pairwise distance matrix dij of the shortest pathlength between
+    distmatrix : ndarray of shape (N,N)
+        The pairwise distance matrix dij of the shortest path between
         nodes i and j.
-
-    See Also
-    --------
-    FloydWarshall : Computes the pathlength between all pairs of nodes.
     """
     # 0) DEFINE THE CORE OF THE FW ALGORITHM, ACCELARATED BY 'Numba'
     @jit

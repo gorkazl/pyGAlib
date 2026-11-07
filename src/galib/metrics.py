@@ -1267,15 +1267,21 @@ def PathsAllinOne(adjmatrix):
     return distmatrix, betweenness, allpaths, allcycles
 
 def FloydWarshall(adjmatrix, weighted_dist = False):
-    """Computes the pathlength between all pairs of nodes in a network..
+    """Computes the pathlength between all pairs of nodes in a network.
 
     Parameters
     ----------
     adjmatrix : ndarray of shape (N,N)
         The adjacency matrix of the network.
     weighted_dist : boolean, optional
-        ``True`` if the path distance shall be computed considering the weights
-        of the links, ``False``, otherwise.
+        If False, computes the binary graph distance between the nodes in the
+        graph. If True, it will compute the weighted graph distance but ...
+
+    ... WARNING !! Calculation of weighted graph distance ONLY MAKES SENSE
+    WHEN the weights in `adjmatrix` represent a spatial distance between
+    the nodes. For example, if `adjmatrix` is the graph of a transportation
+    network and its weights encode the kilometers between the cities or
+    stations (nodes) in the network.
 
     Returns
     -------
