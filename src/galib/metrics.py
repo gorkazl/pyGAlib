@@ -1184,10 +1184,10 @@ def PathsAllinOne(adjmatrix):
     where n is the number of nodes in the cycle, e.g., [1,3,4], [4,1,3] and
     [3,1,4]. If `adjmatrix` is directed, cycles might appear an unpredictable
     number of times or only once. Use function ``CleanCycles()`` in
-    ``galib.tools`` module to remove repeated cycles.
+    ``galib.utils`` module to remove repeated cycles.
     2. If adjmatrix is undirected every path is saved twice, in the opposite
-    direction, e.g. [1,3,4] and [4,3,1]. Use ``CleanPaths()`` in ``galib.tools`` module
-    to remove duplicated paths from undirected graphs.
+    direction, e.g. [1,3,4] and [4,3,1]. Use ``CleanPaths()`` in ``galib.utils``
+    module to remove duplicated paths from undirected graphs.
     """
     # 0) PREPARE FOR THE CALCULATIONS
     N = len(adjmatrix)
