@@ -22,8 +22,10 @@ metrics
     Basic graph metrics (degrees, clustering, graph distance, etc)
 models
     Generation of synthetic networks and randomization.
-tools
+utils
     Miscelaneous helper functions.
+io
+    Functions to load and save datasets
 
 The rest of modules provide additional functionalities:
 
