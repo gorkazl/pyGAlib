@@ -125,7 +125,7 @@ from . import utils
 
 ## TODO: avoid errors in implicit comparisons like `if directed:`
 ## TODO: Revise description of optional parameters and default values.
-
+## TODO: Add metrics to compare partitions.
 ################################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
 def has_self_loops(adjmatrix):
@@ -1510,6 +1510,7 @@ def AssortativityMatrix(adjmatrix, partition, weighted=False, normed=False, self
 def ConnectedComponents(distmatrix, directed=False, showall=True):
     ## TODO: Revise and modernise (if anything useful)
     ## TODO: Set default directed=None, and automatically check?
+    ## TODO: Check if it is worth using sets, rather than lists.
     """Finds all the connected components in a network out of a distance matrix.
 
     A strongly connected component is a set of nodes for which there is
@@ -1611,6 +1612,7 @@ def K_Core(adjmatrix, kmin):
     K_Shells : Returns the k-shells of a network for all k.
     """
     # Prepare for calculations
+    # Try adjmatrix = adjmatrix.astype(bool)
     adjmatrix = adjmatrix.copy()
     N = len(adjmatrix)
     nodelist = set(np.arange(N))
@@ -1621,7 +1623,7 @@ def K_Core(adjmatrix, kmin):
     while not done:
         # 1) Select nodes with degree <= kmin and include them in the shell
         nodes = np.where(degree < kmin)[0]
-        nodes = list(set(nodes) & nodelist)
+        nodes = list(set(nodes) & nodelist)  # Shall I sort them?
 
         # 2) Remove the selected nodes from the network and from 'nodelist'
         adjmatrix[nodes] = 0
