@@ -225,7 +225,8 @@ limitations under the License.
 
 This version is a major polishing and extension of the *galib.metrics* module. Many silent improvements have been made that have no input / output consequences for the user. However, several other changes resulted in incompatibilities with the previous versions and thus, we are jumping from GAlib 2.1 to GAlib 3.0. These were necessary revisions to pave for future updates, which should bring novel functionalities rather than core alterations.
 
-* Created *galib.io.py* module and moved there all read-in / read-out functions previously in *galib.tools.py* module. (TO BE DONE YET!!)
+* Module *galib.io* was created, with some of the functions previously found in *galib.tools* module.
+* *galib.tools* module has been renamed as *galib.utils*
 
 * Property checks added:
     * `is_binary()`: Checks whether an adjmatrix represents a binary graph (or a weighted).
