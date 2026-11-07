@@ -39,7 +39,8 @@ import numpy.random
 from numba import jit
 # Local imports
 
-
+## TODO: Check what to do about these functions, after the generation of weighted
+## random graphs were added to models.py module.
 ############################################################################
 """RANDOM NETWORK GENERATORS"""
 @jit
