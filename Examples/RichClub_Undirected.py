@@ -32,7 +32,7 @@ dataroot = 'Data/'
 if netcase == 'Zachary':
     net = np.loadtxt(dataroot + 'Zachary.txt', dtype=np.uint8)
 elif netcase == 'Miserables':
-    net = galib.tools.LoadFromPajek(dataroot + 'LesMiserables.net')
+    net = galib.io.LoadFromPajek(dataroot + 'LesMiserables.net')
 elif netcase == 'CatCortex':
     net = np.loadtxt(dataroot + 'Cat53_cortex_sym.txt').astype(np.uint8)
 

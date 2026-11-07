@@ -42,7 +42,8 @@ The library is organised in the following modules:
 
 - *metrics.py*: Common graph metrics (degrees, clustering, graph distance, etc)
 - *models.py*: Generation of synthetic networks and randomization.
-- *tools.py*: Miscelaneous helper functions.
+- *utils.py*: Miscelaneous helper functions.
+- *io.py*: Functions to load and save datasets.
 - *metrics_numba.py*: Uses the Numba package to accelerate calculation of some
 metrics.
 - *models_numba.py*: Uses the Numba package to accelerate generation of some
@@ -167,7 +168,7 @@ Since GAlib is based on NumPy arrays, saving and reading of adjacency matrices,
 as well as any other output of GAlib functions, can be performed using the usual
 data I/O functionalities of NumPy. See for example the documentation for
 functions: ``loadtxt()``, ``savetxt()``, ``load()``, ``save()`` and ``savez()``.
-The *tools.py* module in pyGAlib provides also some data conversion
+The *utils.py* module in pyGAlib provides also some data conversion
 functionalities.
 
 How to find further documentation

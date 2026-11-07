@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 # Personal libraries
 from galib import*
-from galib.tools import SymmetriseMatrix
+from galib.utils import SymmetriseMatrix
 
 def MaxDispersionCurve(d, M):
     """This function is defined only to be plotted in the dispersion vs

@@ -21,7 +21,7 @@ import numpy as np
 from galib import k_Density
 import galib.models
 from galib.models import RewireNetwork
-from galib.tools import SymmetriseMatrix, LoadFromPajek
+from galib.utils import SymmetriseMatrix, LoadFromPajek
 
 
 ##################################################################
