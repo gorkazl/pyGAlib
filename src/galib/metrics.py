@@ -2070,6 +2070,7 @@ def ParticipationMatrix(adjmatrix, partition):
     return pmatrix
 
 def ParticipationVectors(adjmatrix, partition):
+    ## TODO: Double-check behaviour when communities of one node happen.
     """
     Probability of nodes to belong to each module, given a partition of the network.
 
