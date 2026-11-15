@@ -225,7 +225,7 @@ from .io import*
 
 
 # Some metadata
-__version__ = "2.2.dev2"
+__version__ = "2.2.dev3"
 
 
 
