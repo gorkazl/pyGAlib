@@ -143,7 +143,7 @@ We compute the pair-wise graph distance between all the nodes using the Floyd-Wa
 	>>> avlen
 	2.248080808080808
 
-> **NOTE:** For calculating the distance matrix of larger networks please use the version of the function located in the module *metrics_numba.py*. Here, the function `FloydWarshall_Numba()` works the same but makes use of the Numba library to significantly speed the calculation.
+> **NOTE:** For calculating the distance matrix of larger networks please use the version of the function located in the module *metrics_numba.py*. Here, the function `FloydWarshall()` works the same but makes use of the Numba library to significantly speed the calculation.
 
 Most network generators and graph metrics in pyGAlib work with directed graphs as well. Check for the optional parameter `directed`. Following the example above, we generate a directed Erdos-Renyi graph and calculate its input and output degrees for every node:
 
@@ -248,6 +248,9 @@ This version is a major polishing and extension of the *galib.metrics* module. M
     * Function `ParticipationIndex_GA()` revised. Incompatible with previous version, input parameters were changed. It now requires `adjmatrix` and `partition` as input arguments.
     * Function `Hubness_GA()` revised. Incompatible with previous version since input `participmatrix` was replaced by `adjmatrix`.
     * Optional parameter `directed` was added to function `MatchingIndex()`, to properly account for graphs and digraphs.
+* Internal changes to *galib.metrics_numba* module:
+    * Ending `_Numba` removed from function names `MatchingIndex_Numba()` and `FloydWarshall_Numba()`.
+    * Optional parameter `directed` was added to function `MatchingIndex()`, to properly account for graphs and digraphs, following the new function in the `galib.metrics` module.
 
 
 ##### June 26, 2026 (Release of Version 2.1)
