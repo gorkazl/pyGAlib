@@ -45,79 +45,117 @@ from .metrics import is_directed
 
 ############################################################################
 """CONNECTIVITY AND DEGREE STATISTICS"""
-@jit
-def MatchingIndex_Numba(adjmatrix, normed=True):
-    ## TODO: Update this function, following new version in metrics.py.
-    ## The new function includes optional parameter `directed`
-    """Computes the number of common neighbours of every pair of nodes.
+def MatchingIndex(adjmatrix, directed=None, normed=False):
+    """Computes the number of common neighbours for every pair of nodes.
 
     The matching index of two nodes i and j is the number of common
-    neighbours they are linked with.
-
-    Returns same result as MatchingIndex() in metrics.py but uses an ndarray-based
-    algorithm and the Numba package to accelerate the calculations. Recommended
-    only for networks of size N > 250 nodes.
+    neighbours they are connected to.
 
     Parameters
     ----------
-    adjmatrix : ndarray of rank-2
-        The adjacency matrix of the network.
-
-    normed : Boolean, optional
-        If 'normed=False', returns the number of common neighbours
-        of two nodes i and j. If 'normed=True', the number of common
-        neighbours is divided by the total number of different nodes they
-        are linked with, so values range from 0 (no common neighbours)
-        to 1 (all neighbours are common to i and j). Explicit links i-->j
-        and j-->i are excluded because they do not contribute to the
-        matching. For example:
-            1 --> [2,3,4,5]
-            2 --> [4,5,6]
-            MI(1,2) = len([4,5])/len([3,4,5,6]) = 0.5
+    adjmatrix : ndarray of shape (N,N)
+        The adjacency matrix of the network. If weighted, link weights are ignored.
+    directed: None or Boolean. Optional, default: None
+        If ``None``, automatically checks whether `adjmatrix` is a directed or
+        an undirected graph, and continues accordingly. If ``True`` computes the
+        results for both the the input and output neighbours shared by two nodes.
+        If ``False``, computes the results for undirected graphs.
+    normed : Boolean, optional. Default: False
+        Determines whether the number or the fraction of common neighbours is
+        returned. If ``False``, it computes the number of common neighbours of
+        two nodes i and j. If ``True``, this is divided by the total number of
+        distinct neighbours that i and j share. Thus, values range from 0 (i and
+        j have no common neighbours) to 1 (i and j are connected to the same
+        nodes).
+        Note that explicit links i-->j and j-->i are excluded. For example:
+            1 -- [2,3,4,5]
+            2 -- [1,4,5,6]
+            MI(1,2) = len({4,5}) / len({3,4,5,6}) = 0.5
 
     Returns
     -------
-    MImatrix : ndarray of rank-2 of ndtype 'float64'
-        A matrix containing the matching index for all pairs of nodes.
+    mindices : ndarray of shape (N,N), or tuple with two ndarrays of shape ((N,N), (N,N)).
+        The matching indices for all pairs of nodes. If ``directed = False``
+        returns a single matrix and, if ``directed = True`` a tuple is returned
+        containing two matrices. ``mindices[0]`` is the matrix of input pair-wise
+        matching indices (the common neighbours nodes i and j receive connections
+        from) and ``mindices[1]`` is the matrix for the output neighbours (number
+        of common neighbours i and j project to).
+        If ``directed = None``, automatically checks whether `adjmatrix` is
+        directed or undirected, and return the corresponding result.
 
-    Notes
+    Usage
     -----
-    - The function accepts weighted networks but it ignores the weights.
-    - If adjmatrix is directed, calling MatchingIndex(adjmatrix) computes the
-    matching of the output neighbours. Passing the transpose adjmatrix.T to
-    the function computes the matching of the input neighbours.
+    Except for the default ``directed=None`` case, the function does not check
+    whether the input `adjmatrix` is directed or not. Therefore, for the cases
+    ``directed=True`` and ``directed=False`` the function behaves as described
+    above, returning either one or two matrices.
+    If `adjmatrix` is a directed graph but user enters ``directed = False``,
+    then the function returns a single matrix with the matching indices of the
+    output neighbours (inputing the transpose would return the result for the
+    input neighbours). When `adjmatrix` is an undirected graph but user enters
+    ``directed = True``, then two identical matrices are returned because in a
+    graph the input and output neighbours are the same.
     """
-    N = len(adjmatrix)
-    # Convert the adjacency matrix into a boolean matrix
-    adjmatrix = adjmatrix.astype(np.bool)
+    @jit
+    def _MatchingIndex_Base(boolmatrix, _normed):
+        """Performs the calculation directly on the boolean matrix.
+        """
+        # Initialise the pair-wise matching index matrix
+        N = len(boolmatrix)
+        mimatrix = np.zeros((N,N), np.float64)
 
-    MImatrix = np.identity(N, np.float64)
+        for i in range(N):
+            ineighbours = boolmatrix[i]
+            if _normed: mimatrix[i,i] = 1.0
+            else: mimatrix[i,i] = ineighbours.sum()
 
-    for i in range(N):
-        for j in range(i,N):
-
-            # Number of common neighbours (intersection of neighbourhoods)
-            mi = (adjmatrix[i] * adjmatrix[j]).sum()
-
-            if normed:
-                # Size of the union of the neighbourhoods
-                norm = (adjmatrix[i] + adjmatrix[j]).sum()
-                # Avoid counting the explicit links i-->j and j-->i
-                if adjmatrix[i,j]: norm -= 1
-                if adjmatrix[j,i]: norm -= 1
-
-                # Normalize and save the value avoiding ZeroDivision errors
-                if norm > 0:
-                    mi = np.float64(mi) / norm
-                    MImatrix[i,j] = mi
-                    MImatrix[j,i] = mi
-            else:
-                # Save the value
+            for j in range(i+1,N):
+                jneighbours = boolmatrix[j]
+                # Intersection and union of the neighbourhoods
+                mi = (ineighbours * jneighbours).sum()
+                if mi == 0: continue
                 mi = np.float64(mi)
-                MImatrix[i,j] = mi
-                MImatrix[j,i] = mi
+                if _normed:
+                    union = ineighbours + jneighbours
+                    norm = union.sum()
+                    # Avoid counting the explicit links i-->j and j-->i
+                    if union[i] == True: norm -= 1
+                    if union[j] == True: norm -= 1
+                    # Normalize and save the value avoiding ZeroDivision errors
+                    mi /= norm
 
-    return MImatrix
+                mimatrix[i,j] = mi
+                mimatrix[j,i] = mi
+
+        return mimatrix
+
+    #______________________________________________________________________
+    # SECURITY CHECKS AND PREPARATION
+    if directed not in (None, True, False):
+        raise ValueError( f"Optional parameter `directed` shall be one of (``None``, ``True``, ``False``), ``{directed}`` entered." )
+
+    if normed not in (True, False):
+        raise ValueError( f"Optional parameter `normed` must be ``True`` or ``False``, got `{normed}`" )
+
+    # Convert to boolean and make sure self-loops are ignored
+    adjmatrix = adjmatrix.astype(bool)
+    np.fill_diagonal(adjmatrix, False)
+
+    # COMPUTE THE PAIR-WISE MATRIX OF MATCHING INDICES
+    if directed == None:
+        directed = is_directed(adjmatrix)
+
+    if directed == True:
+        mindices_outputs = _MatchingIndex_Base(adjmatrix, normed)
+        adjmatrixT = np.transpose(adjmatrix).copy()
+        mindices_inputs = _MatchingIndex_Base(adjmatrixT, normed)
+        mindices = (mindices_inputs, mindices_outputs)
+    else:
+        mindices = _MatchingIndex_Base(adjmatrix, normed)
+
+    return mindices
+
 
 
 ###############################################################################

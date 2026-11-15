@@ -217,6 +217,7 @@ or see the LICENSE.txt file.
 # Local imports
 from . import metrics
 from .metrics import*
+from . import metrics_numba
 from . import models
 from .models import*
 from . import io
