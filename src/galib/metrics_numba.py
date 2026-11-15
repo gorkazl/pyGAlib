@@ -160,7 +160,7 @@ def MatchingIndex(adjmatrix, directed=None, normed=False):
 
 ###############################################################################
 """PATHS, CYCLES AND DISTANCE FUNCTIONS"""
-def FloydWarshall_Numba(adjmatrix, weighted_dist=False):
+def FloydWarshall(adjmatrix, weighted_dist=False):
     """Computes the pathlength between all pairs of nodes in a network.
 
     This version returns the same output as `FloydWarshall()` function in the
