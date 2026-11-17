@@ -1106,6 +1106,7 @@ def ModularGraph(comsizes, pintlist, pext, directed=False, selfloops=False):
     return adjmatrix, partition
 
 def HMpartition(HMshape):
+    ## TODO: Revise, this returns the partition matrix, not the partition
     """Returns a partition of nodes for a hierarchical and modular network.
 
     Parameters
@@ -1124,7 +1125,7 @@ def HMpartition(HMshape):
 
     See Also
     --------
-    HMRNetwork : Generates random modular and hierarchical networks.
+    HMRandomGraph : Generates random modular and hierarchical networks.
     """
     N = np.multiply.reduce(HMshape)
     nlevels = len(HMshape)
@@ -1314,6 +1315,7 @@ def HMRandomGraph(HMshape, avklist, directed=False):
     return adjmatrix
 
 def HMCentralisedGraph(HMshape, avklist, gammalist, directed=False):
+    ## TODO: Add option for self-loops ?
     """Generates random hierarchical and modular networks of desired number
     of hierarchical levels and modules, with centralised inter-modular
     connectivity through local hubs.
